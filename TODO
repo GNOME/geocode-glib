@@ -1,0 +1,11 @@
+- XEP-0080 to Place Finder helper:
+http://xmpp.org/extensions/xep-0080.html
+http://developer.yahoo.com/geo/placefinder/guide/requests.html
+
+- More test cases
+- Add GI annotations
+- Finish API docs
+- Write examples
+
+- Sort potential problems with Terms of Service
+- Eventually use another service (more coverage? better TOS?)
