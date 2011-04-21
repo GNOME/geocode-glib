@@ -20,9 +20,8 @@ libgeocode_glib_la_LIBADD = $(GEOCODE_LIBS)
 libgeocode_glib_la_LDFLAGS =				\
 	-version-info $(GCLIB_LT_VERSION)		\
 	-no-undefined					\
-	$(AM_LDFLAGS)
-# FIXME
-#	-export-symbols $(srcdir)/geocode-glib.symbols
+	$(AM_LDFLAGS)					\
+	-export-symbols $(srcdir)/geocode-glib.symbols
 
 gcglibdir = $(pkgincludedir)
 gcglib_HEADERS = geocode-glib.h

@@ -1,1 +1,10 @@
-
+geocode_error_quark
+geocode_object_get_type
+geocode_object_new
+geocode_object_new_for_params
+geocode_object_new_for_coords
+geocode_object_add
+geocode_object_resolve_async
+geocode_object_resolve_finish
+geocode_object_resolve
+_geocode_parse_json
