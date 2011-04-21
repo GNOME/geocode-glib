@@ -27,8 +27,6 @@
 #include <geocode-error.h>
 #include <geocode-glib-private.h>
 
-typedef struct GeocodeObjectPrivate GeocodeObjectPrivate;
-
 struct GeocodeObjectPrivate {
 	GHashTable *ht;
 	guint reverse : 1;
