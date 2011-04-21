@@ -150,13 +150,13 @@ _geocode_parse_json (const char *contents,
 
 		switch (err_code) {
 		case 1:
-			g_set_error (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Query not supported");
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Query not supported");
 			break;
 		default:
 			if (msg == NULL)
 				g_set_error (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, "Unknown error code %"G_GINT64_FORMAT, err_code);
 			else
-				g_set_error (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, msg);
+				g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, msg);
 			break;
 		}
 		g_object_unref (parser);
@@ -207,7 +207,7 @@ parse:
 	if (ret != NULL)
 		g_hash_table_destroy (ret);
 	err = json_reader_get_error (reader);
-	g_set_error (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, err->message);
+	g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, err->message);
 	g_object_unref (parser);
 	g_object_unref (reader);
 	return NULL;
