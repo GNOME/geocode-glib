@@ -103,6 +103,7 @@ geocode_object_add (GeocodeObject *object,
 {
 	g_return_if_fail (GEOCODE_IS_OBJECT (object));
 	g_return_if_fail (key != NULL);
+	g_return_if_fail (value == NULL || g_utf8_validate (value, -1, NULL));
 
 	g_hash_table_insert (object->priv->ht,
 			     g_strdup (key),
@@ -154,6 +155,24 @@ _geocode_parse_json (const char *contents,
 		switch (err_code) {
 		case 1:
 			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Query not supported");
+			break;
+		case 100:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "No input parameters");
+			break;
+		case 102:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Address data not recognized as valid UTF-8");
+			break;
+		case 103:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Insufficient address data");
+			break;
+		case 104:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Unknown language");
+			break;
+		case 105:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "No country detected");
+			break;
+		case 106:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Country not supported");
 			break;
 		default:
 			if (msg == NULL)
