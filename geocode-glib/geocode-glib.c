@@ -83,6 +83,9 @@ geocode_object_new_for_coords (gdouble     latitude,
 {
 	GeocodeObject *object;
 
+	g_return_val_if_fail (longitude >= -180.0 && longitude <= 180.0, NULL);
+	g_return_val_if_fail (latitude >= -90.0 && latitude <= 90.0, NULL);
+
 	object = geocode_object_new ();
 	object->priv->reverse = TRUE;
 
