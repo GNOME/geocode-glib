@@ -2,6 +2,7 @@
 #include "config.h"
 #include <glib/gi18n.h>
 #include <glib.h>
+#include <stdlib.h>
 #include <gio/gio.h>
 #include <geocode-glib.h>
 #include <geocode-glib-private.h>
