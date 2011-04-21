@@ -54,7 +54,7 @@ AC_DEFINE_UNQUOTED(LOCALEDIR, "${prefix}/share/locale", [Directory for the local
 dnl Requires for the library
 PKG_CHECK_MODULES(GEOCODE,
 		  gio-2.0
-		  json-glib-1.0
+		  json-glib-1.0 >= 0.13.1
 		  libsoup-2.4)
 
 GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal glib-2.0`
