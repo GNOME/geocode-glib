@@ -105,7 +105,7 @@ struct {
  *
  * Creates a new #GeocodeObject to perform geocoding with. The
  * #GHashTable is in the format used by Telepathy, and documented
- * at http://telepathy.freedesktop.org/spec/Connection_Interface_Location.html#Mapping:Location
+ * on <ulink url="http://telepathy.freedesktop.org/spec/Connection_Interface_Location.html#Mapping:Location">Telepathy's specification site</ulink>.
  *
  * Returns: a new #GeocodeObject. Use g_object_unref() when done.
  **/
