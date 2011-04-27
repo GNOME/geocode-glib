@@ -79,6 +79,26 @@ geocode_object_new (void)
 	return g_object_new (GEOCODE_TYPE_OBJECT, NULL);
 }
 
+struct {
+	const char *tp_attr;
+	const char *gc_attr; /* NULL to ignore */
+} attrs_map[] = {
+	{ "countrycode", NULL },
+	{ "country", "country" },
+	{ "region", "state" },
+	{ "locality", "city" },
+	{ "area", "neighborhood" },
+	{ "postalcode", "postal" },
+	{ "street", "street" },
+	{ "building", "house" },
+	{ "floor", "" },
+	{ "room", "unit" },
+	{ "text", NULL },
+	{ "description", NULL },
+	{ "uri", NULL },
+	{ "language", NULL }, /* FIXME: Should we ignore this? */
+};
+
 /**
  * geocode_object_new_for_params:
  * @params: a #GHashTable with string keys, and #GValue values.
@@ -92,8 +112,35 @@ geocode_object_new (void)
 GeocodeObject *
 geocode_object_new_for_params (GHashTable *params)
 {
-	/* FIXME */
-	return NULL;
+	GeocodeObject *object;
+	guint i;
+
+	g_return_val_if_fail (params != NULL, NULL);
+
+	if (g_hash_table_lookup (params, "lat") != NULL &&
+	    g_hash_table_lookup (params, "long") != NULL) {
+		g_warning ("You already have longitude and latitude in those parameters");
+		return NULL;
+	}
+
+	object = geocode_object_new ();
+
+	for (i = 0; i < G_N_ELEMENTS (attrs_map); i++) {
+		GValue *value;
+
+		if (attrs_map[i].gc_attr == NULL)
+			continue;
+
+		value = g_hash_table_lookup (params, attrs_map[i].tp_attr);
+		if (value == NULL)
+			continue;
+
+		geocode_object_add (object,
+				    attrs_map[i].gc_attr,
+				    g_value_get_string (value));
+	}
+
+	return object;
 }
 
 /**
