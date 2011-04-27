@@ -38,7 +38,7 @@ G_DEFINE_TYPE (GeocodeObject, geocode_object, G_TYPE_OBJECT)
 static void
 geocode_object_finalize (GObject *gobject)
 {
-	GeocodeObject *object = (GeocodeObject *) object;
+	GeocodeObject *object = (GeocodeObject *) gobject;
 
 	g_hash_table_destroy (object->priv->ht);
 	object->priv->ht = NULL;
