@@ -64,12 +64,31 @@ geocode_object_init (GeocodeObject *object)
 						  g_free, g_free);
 }
 
+/**
+ * geocode_object_new:
+ *
+ * Creates a new #GeocodeObject to perform geocoding with. Use
+ * geocode_object_add() to add new parameters, and
+ * geocode_object_resolve_async() to perform the resolution.
+ *
+ * Returns: a new #GeocodeObject. Use g_object_unref() when done.
+ **/
 GeocodeObject *
 geocode_object_new (void)
 {
 	return g_object_new (GEOCODE_TYPE_OBJECT, NULL);
 }
 
+/**
+ * geocode_object_new_for_params:
+ * @params: a #GHashTable with string keys, and #GValue values.
+ *
+ * Creates a new #GeocodeObject to perform geocoding with. The
+ * #GHashTable is in the format used by Telepathy, and documented
+ * at http://telepathy.freedesktop.org/spec/Connection_Interface_Location.html#Mapping:Location
+ *
+ * Returns: a new #GeocodeObject. Use g_object_unref() when done.
+ **/
 GeocodeObject *
 geocode_object_new_for_params (GHashTable *params)
 {
@@ -77,6 +96,16 @@ geocode_object_new_for_params (GHashTable *params)
 	return NULL;
 }
 
+/**
+ * geocode_object_new_for_coords:
+ * @latitude: a valid latitude
+ * @longitude: a valid longitude
+ *
+ * Creates a new #GeocodeObject to perform reverse geocoding with.
+ * Use geocode_object_resolve_async() to perform the resolution.
+ *
+ * Returns: a new #GeocodeObject. Use g_object_unref() when done.
+ **/
 GeocodeObject *
 geocode_object_new_for_coords (gdouble     latitude,
 			       gdouble     longitude)
@@ -96,6 +125,15 @@ geocode_object_new_for_coords (gdouble     latitude,
 	return object;
 }
 
+/**
+ * geocode_object_add:
+ * @object: a #GeocodeObject
+ * @key: a string representing a parameter to the web service
+ * @value: a string representing the value of a parameter
+ *
+ * Adds parameters to pass to the web service. A copy of the key
+ * and value parameters are kept internally.
+ **/
 void
 geocode_object_add (GeocodeObject *object,
 		    const char    *key,
@@ -309,7 +347,8 @@ get_query_for_params (GeocodeObject *object)
  * @user_data: the data to pass to callback function
  *
  * Asynchronously gets the result of a geocoding or reverse geocoding
- * query using a web service.
+ * query using a web service. Use geocode_object_resolve() to do the same
+ * thing synchronously.
  *
  * When the operation is finished, @callback will be called. You can then call
  * geocode_object_resolve_finish() to get the result of the operation.
@@ -374,7 +413,7 @@ out:
 }
 
 /**
- * geocode_get_geocode:
+ * geocode_object_resolve:
  * @object: a #GeocodeObject representing a query
  * @error: a #GError
  *
