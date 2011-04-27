@@ -59,8 +59,34 @@ test_rev (void)
 		g_error_free (error);
 	}
 	g_assert (ht != NULL);
+	g_object_unref (object);
 
 	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "neighborhood"), "Onslow Village") == 0);
+
+	g_print ("Got geocode answer:\n");
+	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
+	g_hash_table_destroy (ht);
+}
+
+static void
+test_pub (void)
+{
+	GeocodeObject *object;
+	GError *error = NULL;
+	GHashTable *ht;
+
+	object = geocode_object_new ();
+	geocode_object_add (object, "location", "9, old palace road, guildford, surrey");
+	ht = geocode_object_resolve (object, &error);
+	if (ht == NULL) {
+		g_warning ("Failed at geocoding: %s", error->message);
+		g_error_free (error);
+	}
+	g_assert (ht != NULL);
+
+	g_object_unref (object);
+	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "longitude"), "-0.589669") == 0);
+	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "latitude"), "51.237070") == 0);
 
 	g_print ("Got geocode answer:\n");
 	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
@@ -110,8 +136,6 @@ int main (int argc, char **argv)
 	GOptionContext *context;
 	GeocodeObject *object;
 	const GOptionEntry entries[] = {
-//		{ "async", 'a', 0, G_OPTION_ARG_NONE, &option_async, "Use the async API", NULL },
-//		{ "file-list", 'f', 0, G_OPTION_ARG_NONE, &option_file_list, "Show the file list instead of the GTIN", NULL },
 		{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &params, NULL, "[KEY=VALUE...]" },
 		{ NULL }
 	};
@@ -134,7 +158,7 @@ int main (int argc, char **argv)
 	if (params == NULL) {
 		g_test_add_func ("/geocode/json", test_json);
 		g_test_add_func ("/geocode/reverse", test_rev);
-//		g_test_add_func ("/geocode/pub", test_pub);
+		g_test_add_func ("/geocode/pub", test_pub);
 		return g_test_run ();
 	}
 
