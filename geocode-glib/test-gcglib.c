@@ -69,6 +69,56 @@ test_rev (void)
 }
 
 static void
+add_attr (GHashTable *ht,
+	  const char *key,
+	  const char *s)
+{
+	GValue *value;
+	value = g_new0 (GValue, 1);
+	g_value_init (value, G_TYPE_STRING);
+	g_value_set_static_string (value, s);
+	g_hash_table_insert (ht, g_strdup (key), value);
+}
+
+static void
+test_xep (void)
+{
+	GHashTable *tp;
+	GeocodeObject *object;
+	GHashTable *ht;
+	GError *error = NULL;
+
+	tp = g_hash_table_new_full (g_str_hash, g_str_equal,
+				    g_free, g_free);
+	add_attr (tp, "country", "UK");
+	add_attr (tp, "region", "Surrey");
+	add_attr (tp, "locality", "Guildford");
+	add_attr (tp, "postalcode", "GU2 7");
+	add_attr (tp, "street", "Old Palace Rd");
+	add_attr (tp, "building", "9");
+	add_attr (tp, "description", "My local pub");
+
+	object = geocode_object_new_for_params (tp);
+	g_assert (object != NULL);
+	g_hash_table_destroy (tp);
+
+	ht = geocode_object_resolve (object, &error);
+	if (ht == NULL) {
+		g_warning ("Failed at geocoding: %s", error->message);
+		g_error_free (error);
+	}
+	g_assert (ht != NULL);
+
+	g_object_unref (object);
+	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "longitude"), "-0.589669") == 0);
+	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "latitude"), "51.237070") == 0);
+
+	g_print ("Got geocode answer:\n");
+	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
+	g_hash_table_destroy (ht);
+}
+
+static void
 test_pub (void)
 {
 	GeocodeObject *object;
@@ -159,6 +209,7 @@ int main (int argc, char **argv)
 		g_test_add_func ("/geocode/json", test_json);
 		g_test_add_func ("/geocode/reverse", test_rev);
 		g_test_add_func ("/geocode/pub", test_pub);
+		g_test_add_func ("/geocode/xep-0080", test_xep);
 		return g_test_run ();
 	}
 
