@@ -1,8 +1,3 @@
-- XEP-0080 or TP location spec to Place Finder helper:
-http://xmpp.org/extensions/xep-0080.html
-http://telepathy.freedesktop.org/spec/Connection_Interface_Location.html#Mapping:Location
-http://developer.yahoo.com/geo/placefinder/guide/requests.html
-
 - More test cases
 - Add GI annotations
 - Finish API docs
@@ -10,3 +5,5 @@ http://developer.yahoo.com/geo/placefinder/guide/requests.html
 
 - Sort potential problems with Terms of Service
 - Eventually use another service (more coverage? better TOS?)
+  Nominatim: http://wiki.openstreetmap.org/wiki/Nominatim
+  http://open.mapquestapi.com/nominatim/
