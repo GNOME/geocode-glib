@@ -27,12 +27,27 @@
 
 G_BEGIN_DECLS
 
+/**
+ * G_IO_ERROR:
+ *
+ * Error domain for geocode-glib. Errors from this domain will be from
+ * the #GeocodeError enumeration.
+ * See #GError for more information on error domains.
+ **/
+#define GEOCODE_ERROR (geocode_error_quark ())
+
+/**
+ * GeocodeError:
+ * @GEOCODE_ERROR_PARSE: An error occured parsing the response from the web service.
+ * @GEOCODE_ERROR_NOT_SUPPORTED: The request made was not supported.
+ *
+ * Error codes returned by geocode-glib functions.
+ **/
 typedef enum {
 	GEOCODE_ERROR_PARSE,
 	GEOCODE_ERROR_NOT_SUPPORTED
 } GeocodeError;
 
-#define GEOCODE_ERROR (geocode_error_quark ())
 
 GQuark geocode_error_quark (void);
 

@@ -22,6 +22,21 @@
 
 #include "geocode-error.h"
 
+/**
+ * SECTION:geocode-error
+ * @short_description: Error helper functions
+ * @include: geocode-glib/geocode-glib.h
+ *
+ * Contains helper functions for reporting errors to the user.
+ **/
+
+/**
+ * geocode_error_quark:
+ *
+ * Gets the geocode-glib error quark.
+ *
+ * Return value: a #GQuark.
+ **/
 GQuark
 geocode_error_quark (void)
 {

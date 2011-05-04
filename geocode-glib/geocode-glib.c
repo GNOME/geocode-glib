@@ -27,6 +27,15 @@
 #include <geocode-error.h>
 #include <geocode-glib-private.h>
 
+/**
+ * SECTION:geocode-glib
+ * @short_description: Geocode glib main functions
+ * @include: geocode-glib/geocode-glib.h
+ *
+ * Contains functions for geocoding and reverse geocoding using the
+ * <ulink url="http://developer.yahoo.com/geo/placefinder/guide/requests.html">Yahoo! Place Finder APIs</ulink>.
+ **/
+
 struct GeocodeObjectPrivate {
 	GHashTable *ht;
 	guint reverse : 1;
@@ -106,6 +115,8 @@ struct {
  * Creates a new #GeocodeObject to perform geocoding with. The
  * #GHashTable is in the format used by Telepathy, and documented
  * on <ulink url="http://telepathy.freedesktop.org/spec/Connection_Interface_Location.html#Mapping:Location">Telepathy's specification site</ulink>.
+ *
+ * See also: <ulink url="http://xmpp.org/extensions/xep-0080.html">XEP-0080 specification</ulink>.
  *
  * Returns: a new #GeocodeObject. Use g_object_unref() when done.
  **/
