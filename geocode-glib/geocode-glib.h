@@ -71,6 +71,10 @@ GHashTable *geocode_object_resolve_finish (GeocodeObject  *object,
 GHashTable * geocode_object_resolve (GeocodeObject  *object,
 				     GError        **error);
 
+gboolean geocode_object_get_coords (GHashTable *results,
+				    gdouble    *longitude,
+				    gdouble    *latitude);
+
 G_END_DECLS
 
 #endif /* GEOCODE_GLIB_H */

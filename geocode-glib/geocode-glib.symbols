@@ -7,4 +7,5 @@ geocode_object_add
 geocode_object_resolve_async
 geocode_object_resolve_finish
 geocode_object_resolve
+geocode_object_get_coords
 _geocode_parse_json
