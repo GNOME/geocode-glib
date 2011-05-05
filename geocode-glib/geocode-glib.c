@@ -169,6 +169,7 @@ geocode_object_new_for_coords (gdouble     latitude,
 			       gdouble     longitude)
 {
 	GeocodeObject *object;
+	char buf[16], buf2[16];
 
 	g_return_val_if_fail (longitude >= -180.0 && longitude <= 180.0, NULL);
 	g_return_val_if_fail (latitude >= -90.0 && latitude <= 90.0, NULL);
@@ -178,7 +179,9 @@ geocode_object_new_for_coords (gdouble     latitude,
 
 	g_hash_table_insert (object->priv->ht,
 			     g_strdup ("location"),
-			     g_strdup_printf ("%g, %g", latitude, longitude));
+			     g_strdup_printf ("%s, %s",
+					      g_ascii_formatd (buf, sizeof (buf), "%g", latitude),
+					      g_ascii_formatd (buf2, sizeof (buf2), "%g", longitude)));
 
 	return object;
 }
