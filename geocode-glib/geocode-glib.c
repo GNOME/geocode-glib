@@ -217,7 +217,7 @@ _geocode_parse_json (const char *contents,
 	JsonParser *parser;
 	JsonNode *root;
 	JsonReader *reader;
-	gint64 err_code;
+	gint64 err_code, found;
 	guint i;
 	const GError *err = NULL;
 	char **members;
@@ -280,6 +280,20 @@ _geocode_parse_json (const char *contents,
 				g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, msg);
 			break;
 		}
+		g_object_unref (parser);
+		g_object_unref (reader);
+		return NULL;
+	}
+
+	/* Check for the number of results */
+	if (json_reader_read_member (reader, "Found") == FALSE)
+		goto parse;
+
+	found = json_reader_get_int_value (reader);
+	json_reader_end_member (reader);
+
+	if (!found) {
+		g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NO_MATCHES, "No matches found for request");
 		g_object_unref (parser);
 		g_object_unref (reader);
 		return NULL;
