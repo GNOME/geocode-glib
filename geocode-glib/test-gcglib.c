@@ -124,6 +124,7 @@ test_pub (void)
 	GeocodeObject *object;
 	GError *error = NULL;
 	GHashTable *ht;
+	gdouble longitude, latitude;
 
 	object = geocode_object_new ();
 	geocode_object_add (object, "location", "9, old palace road, guildford, surrey");
@@ -137,6 +138,9 @@ test_pub (void)
 	g_object_unref (object);
 	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "longitude"), "-0.589669") == 0);
 	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "latitude"), "51.237070") == 0);
+	g_assert (geocode_object_get_coords (ht, &longitude, &latitude) != FALSE);
+	g_assert (longitude == -0.589669);
+	g_assert (latitude == 51.237070);
 
 	g_print ("Got geocode answer:\n");
 	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
