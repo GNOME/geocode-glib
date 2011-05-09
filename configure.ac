@@ -68,6 +68,16 @@ GNOME_COMPILE_WARNINGS([maximum])
 GNOME_CXX_WARNINGS
 GNOME_MAINTAINER_MODE_DEFINES
 
+if test "$GCC" = "yes" ; then
+	CFLAGS="\
+	-Wall \
+	-Wchar-subscripts -Wmissing-declarations -Wmissing-prototypes \
+	-Wnested-externs -Wpointer-arith \
+	-Wcast-align -Wsign-compare -Wredundant-decls \
+	-fno-strict-aliasing \
+	$CFLAGS"
+fi
+
 GNOME_DOC_INIT
 
 AC_OUTPUT(Makefile
