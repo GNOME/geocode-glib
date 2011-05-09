@@ -20,6 +20,8 @@
 
  */
 
+#include <string.h>
+#include <errno.h>
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
@@ -71,6 +73,72 @@ geocode_object_init (GeocodeObject *object)
 	object->priv = G_TYPE_INSTANCE_GET_PRIVATE ((object), GEOCODE_TYPE_OBJECT, GeocodeObjectPrivate);
 	object->priv->ht = g_hash_table_new_full (g_str_hash, g_str_equal,
 						  g_free, g_free);
+}
+
+static char *
+geocode_object_cache_path_for_query (GFile *query)
+{
+	const char *filename;
+	char *path;
+	char *uri;
+	GChecksum *sum;
+
+	/* Create cache directory */
+	path = g_build_filename (g_get_user_cache_dir (),
+				 "geocode-glib",
+				 NULL);
+	if (g_mkdir_with_parents (path, 0700) < 0) {
+		g_warning ("Failed to mkdir path '%s': %s", path, g_strerror (errno));
+		g_free (path);
+		return NULL;
+	}
+	g_free (path);
+
+	/* Create path for query */
+	uri = g_file_get_uri (query);
+
+	sum = g_checksum_new (G_CHECKSUM_SHA256);
+	g_checksum_update (sum, (const guchar *) uri, strlen (uri));
+
+	filename = g_checksum_get_string (sum);
+
+	path = g_build_filename (g_get_user_cache_dir (),
+				 "geocode-glib",
+				 filename,
+				 NULL);
+
+	g_checksum_free (sum);
+	g_free (uri);
+
+	return path;
+}
+
+static gboolean
+geocode_object_cache_save (GFile      *query,
+			   const char *contents)
+{
+	char *path;
+	gboolean ret;
+
+	path = geocode_object_cache_path_for_query (query);
+	ret = g_file_set_contents (path, contents, -1, NULL);
+
+	g_free (path);
+	return ret;
+}
+
+static gboolean
+geocode_object_cache_load (GFile  *query,
+			   char  **contents)
+{
+	char *path;
+	gboolean ret;
+
+	path = geocode_object_cache_path_for_query (query);
+	ret = g_file_get_contents (path, contents, NULL, NULL);
+
+	g_free (path);
+	return ret;
 }
 
 /**
@@ -374,6 +442,56 @@ on_query_data_loaded (GObject      *source_object,
 	}
 
 	ret = _geocode_parse_json (contents, &error);
+
+	if (ret == NULL) {
+		g_simple_async_result_set_from_error (simple, error);
+		g_simple_async_result_complete_in_idle (simple);
+		g_object_unref (simple);
+		g_error_free (error);
+		g_free (contents);
+		return;
+	}
+
+	/* Now that we can parse the result, save it to cache */
+	geocode_object_cache_save (query, contents);
+	g_free (contents);
+
+	g_simple_async_result_set_op_res_gpointer (simple, ret, NULL);
+	g_simple_async_result_complete_in_idle (simple);
+	g_object_unref (simple);
+}
+
+static void
+on_cache_data_loaded (GObject      *source_object,
+		      GAsyncResult *res,
+		      gpointer      user_data)
+{
+	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (user_data);
+	GCancellable *cancellable;
+	GFile *cache;
+	GError *error = NULL;
+	char *contents;
+	GHashTable *ret;
+
+	cache = G_FILE (source_object);
+	cancellable = g_object_get_data (G_OBJECT (cache), "cancellable");
+	if (g_file_load_contents_finish (cache,
+					 res,
+					 &contents,
+					 NULL,
+					 NULL,
+					 NULL) == FALSE) {
+		GFile *query;
+
+		query = g_object_get_data (G_OBJECT (cache), "query");
+		g_file_load_contents_async (query,
+					    cancellable,
+					    on_query_data_loaded,
+					    simple);
+		return;
+	}
+
+	ret = _geocode_parse_json (contents, &error);
 	g_free (contents);
 
 	if (ret == NULL) {
@@ -436,6 +554,7 @@ geocode_object_resolve_async (GeocodeObject       *object,
 {
 	GSimpleAsyncResult *simple;
 	GFile *query;
+	char *cache_path;
 
 	g_return_if_fail (GEOCODE_IS_OBJECT (object));
 
@@ -445,11 +564,25 @@ geocode_object_resolve_async (GeocodeObject       *object,
 					    geocode_object_resolve_async);
 
 	query = get_query_for_params (object);
-	g_file_load_contents_async (query,
-				    cancellable,
-				    on_query_data_loaded,
-				    simple);
-	g_object_unref (query);
+	cache_path = geocode_object_cache_path_for_query (query);
+	if (cache_path == NULL) {
+		g_file_load_contents_async (query,
+					    cancellable,
+					    on_query_data_loaded,
+					    simple);
+		g_object_unref (query);
+	} else {
+		GFile *cache;
+
+		cache = g_file_new_for_path (cache_path);
+		g_object_set_data_full (G_OBJECT (cache), "query", query, (GDestroyNotify) g_object_unref);
+		g_object_set_data (G_OBJECT (cache), "cancellable", cancellable);
+		g_file_load_contents_async (cache,
+					    cancellable,
+					    on_cache_data_loaded,
+					    simple);
+		g_object_unref (cache);
+	}
 }
 
 /**
@@ -506,23 +639,30 @@ geocode_object_resolve (GeocodeObject       *object,
 	GFile *query;
 	char *contents;
 	GHashTable *ret;
+	gboolean to_cache = FALSE;
 
 	g_return_val_if_fail (GEOCODE_IS_OBJECT (object), NULL);
 
 	query = get_query_for_params (object);
-	if (g_file_load_contents (query,
-				  NULL,
-				  &contents,
-				  NULL,
-				  NULL,
-				  error) == FALSE) {
-		return NULL;
+	if (geocode_object_cache_load (query, &contents) == FALSE) {
+		if (g_file_load_contents (query,
+					  NULL,
+					  &contents,
+					  NULL,
+					  NULL,
+					  error) == FALSE) {
+			g_object_unref (query);
+			return NULL;
+		}
+		to_cache = TRUE;
 	}
-	g_object_unref (query);
 
 	ret = _geocode_parse_json (contents, error);
+	if (to_cache)
+		geocode_object_cache_save (query, contents);
 
 	g_free (contents);
+	g_object_unref (query);
 
 	return ret;
 }

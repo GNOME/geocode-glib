@@ -2,7 +2,6 @@
 - Add GI annotations
 - Finish API docs
 - Write examples
-- Add simple caching, on by default (SHA1 of the query URI would be easiest)
 
 - Sort potential problems with Terms of Service
 - Eventually use another service (more coverage? better TOS?)
