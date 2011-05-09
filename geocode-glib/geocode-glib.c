@@ -593,7 +593,8 @@ geocode_object_resolve_async (GeocodeObject       *object,
  *
  * Finishes a query operation. See geocode_object_resolve_async().
  *
- * Returns: a #GHashTable containing the results of the query
+ * Returns: (element-type utf8 utf8) (transfer full):
+ * a #GHashTable containing the results of the query
  * or %NULL in case of errors.
  * Free the returned string with g_hash_table_destroy() when done.
  **/
@@ -628,7 +629,8 @@ out:
  * Gets the result of a geocoding or reverse geocoding
  * query using a web service.
  *
- * Returns: a #GHashTable containing the results of the query
+ * Returns: (element-type utf8 utf8) (transfer full):
+ * a #GHashTable containing the results of the query
  * or %NULL in case of errors.
  * Free the returned string with g_hash_table_destroy() when done.
  **/
