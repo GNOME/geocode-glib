@@ -38,7 +38,7 @@
  * <ulink url="http://developer.yahoo.com/geo/placefinder/guide/requests.html">Yahoo! Place Finder APIs</ulink>.
  **/
 
-struct GeocodeObjectPrivate {
+struct _GeocodeObjectPrivate {
 	GHashTable *ht;
 	guint reverse : 1;
 	guint flags_added : 1;

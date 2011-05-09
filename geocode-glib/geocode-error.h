@@ -28,7 +28,7 @@
 G_BEGIN_DECLS
 
 /**
- * G_IO_ERROR:
+ * GEOCODE_ERROR:
  *
  * Error domain for geocode-glib. Errors from this domain will be from
  * the #GeocodeError enumeration.

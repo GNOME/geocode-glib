@@ -37,16 +37,21 @@ GType geocode_object_get_type (void) G_GNUC_CONST;
 #define GEOCODE_IS_OBJECT_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), GEOCODE_TYPE_OBJECT))
 #define GEOCODE_OBJECT_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), GEOCODE_TYPE_OBJECT, GeocodeObjectClass))
 
-typedef struct GeocodeObject        GeocodeObject;
-typedef struct GeocodeObjectClass   GeocodeObjectClass;
-typedef struct GeocodeObjectPrivate GeocodeObjectPrivate;
+/**
+ * GeocodeObject:
+ *
+ * All the fields in the #GeocodeObject structure are private and should never be accessed directly.
+**/
+typedef struct _GeocodeObject        GeocodeObject;
+typedef struct _GeocodeObjectClass   GeocodeObjectClass;
+typedef struct _GeocodeObjectPrivate GeocodeObjectPrivate;
 
-struct GeocodeObject {
+struct _GeocodeObject {
 	GObject parent_instance;
 	GeocodeObjectPrivate *priv;
 };
 
-struct GeocodeObjectClass {
+struct _GeocodeObjectClass {
 	GObjectClass parent_class;
 };
 
