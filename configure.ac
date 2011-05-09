@@ -1,11 +1,11 @@
 AC_PREREQ(2.52)
 
-m4_define(diglib_version_major, 0)
-m4_define(diglib_version_minor, 9)
-m4_define(diglib_version_micro, 9)
+m4_define(gclib_version_major, 0)
+m4_define(gclib_version_minor, 9)
+m4_define(gclib_version_micro, 9)
 
 AC_INIT([geocode-glib],
-        [diglib_version_major.diglib_version_minor.diglib_version_micro],
+        [gclib_version_major.gclib_version_minor.gclib_version_micro],
         [http://bugzilla.gnome.org/enter_bug.cgi?product=geocode-glib])
 
 AC_CONFIG_SRCDIR([geocode-glib/test-gcglib.c])
