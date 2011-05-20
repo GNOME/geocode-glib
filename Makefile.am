@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
+
 SUBDIRS = geocode-glib po docs
 
 EXTRA_DIST = intltool-extract.in intltool-update.in intltool-merge.in gtk-doc.make
