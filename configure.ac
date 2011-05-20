@@ -41,18 +41,19 @@ dnl Initialize libtool
 LT_PREREQ([2.2])
 LT_INIT([disable-static])
 
+# i18n support
+IT_PROG_INTLTOOL([0.41.0])
+
+AM_GNU_GETTEXT_VERSION([0.17])
+AM_GNU_GETTEXT([external])
+
 GETTEXT_PACKAGE=geocode-glib
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE",
 					[The name of the gettext domain])
 
-AM_GLIB_GNU_GETTEXT
-IT_PROG_INTLTOOL([0.35.0])
-
 dnl gtk-doc checks
 GTK_DOC_CHECK([1.13],[--flavour no-tmpl])
-
-AC_DEFINE_UNQUOTED(LOCALEDIR, "${prefix}/share/locale", [Directory for the localization files])
 
 dnl Requires for the library
 PKG_CHECK_MODULES(GEOCODE,
