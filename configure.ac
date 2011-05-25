@@ -81,7 +81,7 @@ if test "$GCC" = "yes" ; then
 	$CFLAGS"
 fi
 
-GNOME_DOC_INIT([2.20])
+GNOME_DOC_INIT([0.20])
 
 AC_CONFIG_FILES([
           Makefile
