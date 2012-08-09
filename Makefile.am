@@ -6,7 +6,7 @@ EXTRA_DIST = intltool-extract.in intltool-update.in intltool-merge.in gtk-doc.ma
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc=yes --enable-introspection=yes
 
-DISTCLEANFILES = intltool-extract intltool-update intltool-merge gnome-doc-utils.make
+DISTCLEANFILES = intltool-extract intltool-update intltool-merge
 
 MAINTAINERCLEANFILES = Makefile.in \
 	aclocal.m4 configure config.h.in config.sub config.guess \
