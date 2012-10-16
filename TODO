@@ -2,7 +2,6 @@
 - Finish API docs
 - Write examples
 
-- Sort potential problems with Terms of Service
-- Eventually use another service (more coverage? better TOS?)
-  Nominatim: http://wiki.openstreetmap.org/wiki/Nominatim
-  http://open.mapquestapi.com/nominatim/
+- Make geocode_object_new_for_params() and geocode_object_add() output warnings if a key is unknown to us
+- Translate the parameter names from the search
+- Only cache successes and not errors
