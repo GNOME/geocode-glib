@@ -255,6 +255,28 @@ geocode_object_new_for_coords (gdouble     latitude,
 }
 
 /**
+ * geocode_object_new_for_location:
+ * @location: a string containing a free-form description of the location
+ *
+ * Creates a new #GeocodeObject to perform geocoding with. The
+ * string is in free-form format.
+ *
+ * Returns: a new #GeocodeObject. Use g_object_unref() when done.
+ **/
+GeocodeObject *
+geocode_object_new_for_location (const char *location)
+{
+	GeocodeObject *object;
+
+	g_return_val_if_fail (location != NULL, NULL);
+
+	object = geocode_object_new ();
+	geocode_object_add (object, "location", location);
+
+	return object;
+}
+
+/**
  * geocode_object_add:
  * @object: a #GeocodeObject
  * @key: a string representing a parameter to the web service

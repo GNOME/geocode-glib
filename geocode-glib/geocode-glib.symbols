@@ -3,6 +3,7 @@ geocode_object_get_type
 geocode_object_new
 geocode_object_new_for_params
 geocode_object_new_for_coords
+geocode_object_new_for_location
 geocode_object_add
 geocode_object_resolve_async
 geocode_object_resolve_finish
