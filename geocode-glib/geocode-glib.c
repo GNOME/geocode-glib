@@ -36,6 +36,7 @@
  *
  * Contains functions for geocoding and reverse geocoding using the
  * <ulink url="http://developer.yahoo.com/geo/placefinder/guide/requests.html">Yahoo! Place Finder APIs</ulink>.
+ * Lookups will only ever return one result, or an error if the lookup failed.
  **/
 
 struct _GeocodeObjectPrivate {
