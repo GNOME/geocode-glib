@@ -126,8 +126,7 @@ test_pub (void)
 	GHashTable *ht;
 	gdouble longitude, latitude;
 
-	object = geocode_object_new ();
-	geocode_object_add (object, "location", "9, old palace road, guildford, surrey");
+	object = geocode_object_new_for_location ("9, old palace road, guildford, surrey");
 	ht = geocode_object_resolve (object, &error);
 	if (ht == NULL) {
 		g_warning ("Failed at geocoding: %s", error->message);
