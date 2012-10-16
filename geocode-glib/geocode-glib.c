@@ -141,21 +141,6 @@ geocode_object_cache_load (GFile  *query,
 	return ret;
 }
 
-/**
- * geocode_object_new:
- *
- * Creates a new #GeocodeObject to perform geocoding with. Use
- * geocode_object_add() to add new parameters, and
- * geocode_object_resolve_async() to perform the resolution.
- *
- * Returns: a new #GeocodeObject. Use g_object_unref() when done.
- **/
-GeocodeObject *
-geocode_object_new (void)
-{
-	return g_object_new (GEOCODE_TYPE_OBJECT, NULL);
-}
-
 struct {
 	const char *tp_attr;
 	const char *gc_attr; /* NULL to ignore */
@@ -202,7 +187,7 @@ geocode_object_new_for_params (GHashTable *params)
 		return NULL;
 	}
 
-	object = geocode_object_new ();
+	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
 
 	for (i = 0; i < G_N_ELEMENTS (attrs_map); i++) {
 		GValue *value;
@@ -242,7 +227,7 @@ geocode_object_new_for_coords (gdouble     latitude,
 	g_return_val_if_fail (longitude >= -180.0 && longitude <= 180.0, NULL);
 	g_return_val_if_fail (latitude >= -90.0 && latitude <= 90.0, NULL);
 
-	object = geocode_object_new ();
+	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
 	object->priv->reverse = TRUE;
 
 	g_hash_table_insert (object->priv->ht,
@@ -270,7 +255,7 @@ geocode_object_new_for_location (const char *location)
 
 	g_return_val_if_fail (location != NULL, NULL);
 
-	object = geocode_object_new ();
+	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
 	geocode_object_add (object, "location", location);
 
 	return object;

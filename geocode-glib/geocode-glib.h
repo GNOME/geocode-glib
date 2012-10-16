@@ -259,7 +259,6 @@ struct _GeocodeObjectClass {
 **/
 #define GEOCODE_OBJECT_FIELD_OFFSETLON		"offsetlon"
 
-GeocodeObject *geocode_object_new (void);
 GeocodeObject *geocode_object_new_for_params   (GHashTable *params);
 GeocodeObject *geocode_object_new_for_location (const char *location);
 GeocodeObject *geocode_object_new_for_coords   (gdouble     latitude,

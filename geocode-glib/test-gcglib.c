@@ -217,7 +217,7 @@ int main (int argc, char **argv)
 		return g_test_run ();
 	}
 
-	object = geocode_object_new ();
+	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
 
 	for (i = 0; params[i] != NULL; i++) {
 		char **items;
