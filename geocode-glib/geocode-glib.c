@@ -268,8 +268,10 @@ geocode_object_new_for_location (const char *location)
  * @key: a string representing a parameter to the web service
  * @value: a string representing the value of a parameter
  *
- * Adds parameters to pass to the web service. A copy of the key
- * and value parameters are kept internally.
+ * Adds parameters to the geocoding or reverse geocoding request.
+ * A copy of the key and value parameters are kept internally.
+ *
+ * This function is mainly intended for language bindings.
  **/
 void
 geocode_object_add (GeocodeObject *object,
