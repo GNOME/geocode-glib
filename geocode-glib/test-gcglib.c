@@ -147,6 +147,51 @@ test_pub (void)
 }
 
 static void
+test_locale (void)
+{
+	GeocodeObject *object;
+	GError *error = NULL;
+	GHashTable *ht;
+	char *old_locale;
+
+	old_locale = g_strdup (setlocale(LC_MESSAGES, NULL));
+
+	/* Check Moscow's name in Czech */
+	setlocale (LC_MESSAGES, "cs_CZ");
+	object = geocode_object_new_for_location ("moscow");
+	ht = geocode_object_resolve (object, &error);
+	if (ht == NULL) {
+		g_warning ("Failed at geocoding: %s", error->message);
+		g_error_free (error);
+	}
+	g_assert (ht != NULL);
+	g_object_unref (object);
+	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "line4"), "Россия") == 0);
+	g_print ("Got geocode answer:\n");
+	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
+	g_hash_table_destroy (ht);
+
+	/* Check Lyon's region in French */
+	setlocale (LC_MESSAGES, "fr_FR");
+	object = geocode_object_new_for_location ("lyon");
+	ht = geocode_object_resolve (object, &error);
+	if (ht == NULL) {
+		g_warning ("Failed at geocoding: %s", error->message);
+		g_error_free (error);
+	}
+	g_assert (ht != NULL);
+	g_object_unref (object);
+	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "state"), "Rhône-Alpes") == 0);
+	g_print ("Got geocode answer:\n");
+	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
+	g_hash_table_destroy (ht);
+
+	/* And reset the locale */
+	setlocale (LC_MESSAGES, old_locale);
+	g_free (old_locale);
+}
+
+static void
 test_json (void)
 {
 	GHashTable *ht;
@@ -214,6 +259,7 @@ int main (int argc, char **argv)
 		g_test_add_func ("/geocode/reverse", test_rev);
 		g_test_add_func ("/geocode/pub", test_pub);
 		g_test_add_func ("/geocode/xep-0080", test_xep);
+		g_test_add_func ("/geocode/locale", test_locale);
 		return g_test_run ();
 	}
 
