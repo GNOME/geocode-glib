@@ -42,7 +42,6 @@
 struct _GeocodeObjectPrivate {
 	GHashTable *ht;
 	GeocodeLookupType type;
-	guint flags_added : 1;
 };
 
 G_DEFINE_TYPE (GeocodeObject, geocode_object, G_TYPE_OBJECT)
@@ -518,27 +517,55 @@ on_cache_data_loaded (GObject      *source_object,
 	g_object_unref (simple);
 }
 
+static void
+copy_item (char       *key,
+	   char       *value,
+	   GHashTable *ret)
+{
+	g_hash_table_insert (ret, key, value);
+}
+
+static GHashTable *
+dup_ht (GHashTable *ht)
+{
+	GHashTable *ret;
+
+	ret = g_hash_table_new (g_str_hash, g_str_equal);
+	g_hash_table_foreach (ht, (GHFunc) copy_item, ret);
+
+	return ret;
+}
+
 static GFile *
 get_query_for_params (GeocodeObject *object)
 {
 	GFile *ret;
-	char *params, *uri;
 
-	if (!object->priv->flags_added) {
-		geocode_object_add (object, "appid", YAHOO_APPID);
-		geocode_object_add (object, "flags", "QJT");
-		object->priv->flags_added = TRUE;
+	if (object->priv->type == GEOCODE_GLIB_LOOKUP_FORWARD ||
+	    object->priv->type == GEOCODE_GLIB_LOOKUP_REVERSE) {
+		GHashTable *ht;
+		char *params, *uri;
+
+		ht = dup_ht (object->priv->ht);
+
+		g_hash_table_insert (ht, "appid", YAHOO_APPID);
+		g_hash_table_insert (ht, "flags", "QJT");
+
+		if (object->priv->type == GEOCODE_GLIB_LOOKUP_REVERSE)
+			g_hash_table_insert (ht, "gflags", "R");
+
+		params = soup_form_encode_hash (ht);
+		g_hash_table_destroy (ht);
+
+		uri = g_strdup_printf ("http://where.yahooapis.com/geocode?%s", params);
+		g_free (params);
+
+		ret = g_file_new_for_uri (uri);
+		g_free (uri);
+	} else {
+		g_warning ("Lookup type (%d) not supported", object->priv->type);
+		ret = NULL;
 	}
-	if (object->priv->type == GEOCODE_GLIB_LOOKUP_REVERSE)
-		geocode_object_add (object, "gflags", "R");
-
-	params = soup_form_encode_hash (object->priv->ht);
-
-	uri = g_strdup_printf ("http://where.yahooapis.com/geocode?%s", params);
-	g_free (params);
-
-	ret = g_file_new_for_uri (uri);
-	g_free (uri);
 
 	return ret;
 }
@@ -717,4 +744,3 @@ geocode_object_get_coords (GHashTable *results,
 
 	return ret;
 }
-
