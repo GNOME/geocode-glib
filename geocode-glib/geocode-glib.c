@@ -72,7 +72,7 @@ static void
 geocode_object_init (GeocodeObject *object)
 {
 	object->priv = G_TYPE_INSTANCE_GET_PRIVATE ((object), GEOCODE_TYPE_OBJECT, GeocodeObjectPrivate);
-	object->priv->type = GEOCODE_GLIB_LOOKUP_FORWARD;
+	object->priv->type = GEOCODE_GLIB_RESOLVE_FORWARD;
 	object->priv->ht = g_hash_table_new_full (g_str_hash, g_str_equal,
 						  g_free, g_free);
 }
@@ -307,7 +307,7 @@ geocode_object_new_for_coords (gdouble     latitude,
 	g_return_val_if_fail (latitude >= -90.0 && latitude <= 90.0, NULL);
 
 	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
-	object->priv->type = GEOCODE_GLIB_LOOKUP_REVERSE;
+	object->priv->type = GEOCODE_GLIB_RESOLVE_REVERSE;
 
 	g_hash_table_insert (object->priv->ht,
 			     g_strdup ("location"),
@@ -619,8 +619,8 @@ get_query_for_params (GeocodeObject *object)
 {
 	GFile *ret;
 
-	if (object->priv->type == GEOCODE_GLIB_LOOKUP_FORWARD ||
-	    object->priv->type == GEOCODE_GLIB_LOOKUP_REVERSE) {
+	if (object->priv->type == GEOCODE_GLIB_RESOLVE_FORWARD ||
+	    object->priv->type == GEOCODE_GLIB_RESOLVE_REVERSE) {
 		GHashTable *ht;
 		char *locale;
 		char *params, *uri;
@@ -630,7 +630,7 @@ get_query_for_params (GeocodeObject *object)
 		g_hash_table_insert (ht, "appid", YAHOO_APPID);
 		g_hash_table_insert (ht, "flags", "QJT");
 
-		if (object->priv->type == GEOCODE_GLIB_LOOKUP_REVERSE)
+		if (object->priv->type == GEOCODE_GLIB_RESOLVE_REVERSE)
 			g_hash_table_insert (ht, "gflags", "R");
 
 		locale = geocode_object_get_lang ();
