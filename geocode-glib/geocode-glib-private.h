@@ -29,6 +29,11 @@ G_BEGIN_DECLS
 
 #define YAHOO_APPID "zznSbDjV34HRU5CXQc4D3qE1DzCsJTaKvWTLhNJxbvI_JTp1hIncJ4xTSJFRgjE-"
 
+typedef enum {
+	GEOCODE_GLIB_LOOKUP_FORWARD,
+	GEOCODE_GLIB_LOOKUP_REVERSE
+} GeocodeLookupType;
+
 GHashTable *_geocode_parse_json (const char *contents,
 				 GError    **error);
 

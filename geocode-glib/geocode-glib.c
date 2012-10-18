@@ -41,7 +41,7 @@
 
 struct _GeocodeObjectPrivate {
 	GHashTable *ht;
-	guint reverse : 1;
+	GeocodeLookupType type;
 	guint flags_added : 1;
 };
 
@@ -72,6 +72,7 @@ static void
 geocode_object_init (GeocodeObject *object)
 {
 	object->priv = G_TYPE_INSTANCE_GET_PRIVATE ((object), GEOCODE_TYPE_OBJECT, GeocodeObjectPrivate);
+	object->priv->type = GEOCODE_GLIB_LOOKUP_FORWARD;
 	object->priv->ht = g_hash_table_new_full (g_str_hash, g_str_equal,
 						  g_free, g_free);
 }
@@ -229,7 +230,7 @@ geocode_object_new_for_coords (gdouble     latitude,
 	g_return_val_if_fail (latitude >= -90.0 && latitude <= 90.0, NULL);
 
 	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
-	object->priv->reverse = TRUE;
+	object->priv->type = GEOCODE_GLIB_LOOKUP_REVERSE;
 
 	g_hash_table_insert (object->priv->ht,
 			     g_strdup ("location"),
@@ -528,7 +529,7 @@ get_query_for_params (GeocodeObject *object)
 		geocode_object_add (object, "flags", "QJT");
 		object->priv->flags_added = TRUE;
 	}
-	if (object->priv->reverse)
+	if (object->priv->type == GEOCODE_GLIB_LOOKUP_REVERSE)
 		geocode_object_add (object, "gflags", "R");
 
 	params = soup_form_encode_hash (object->priv->ht);
