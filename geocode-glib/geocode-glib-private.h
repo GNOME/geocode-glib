@@ -27,6 +27,8 @@
 
 G_BEGIN_DECLS
 
+#define YAHOO_APPID "zznSbDjV34HRU5CXQc4D3qE1DzCsJTaKvWTLhNJxbvI_JTp1hIncJ4xTSJFRgjE-"
+
 GHashTable *_geocode_parse_json (const char *contents,
 				 GError    **error);
 

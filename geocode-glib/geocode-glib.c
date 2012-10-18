@@ -522,7 +522,7 @@ get_query_for_params (GeocodeObject *object)
 	char *params, *uri;
 
 	if (!object->priv->flags_added) {
-		geocode_object_add (object, "appid", "zznSbDjV34HRU5CXQc4D3qE1DzCsJTaKvWTLhNJxbvI_JTp1hIncJ4xTSJFRgjE-");
+		geocode_object_add (object, "appid", YAHOO_APPID);
 		geocode_object_add (object, "flags", "QJT");
 		object->priv->flags_added = TRUE;
 	}
