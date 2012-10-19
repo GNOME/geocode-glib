@@ -46,6 +46,36 @@ got_geocode_cb (GObject *source_object,
 }
 
 static void
+got_geocode_search_cb (GObject *source_object,
+		       GAsyncResult *res,
+		       gpointer user_data)
+{
+	GeocodeObject *object = (GeocodeObject *) source_object;
+	GList *results, *l;
+	GError *error = NULL;
+
+	results = geocode_object_search_finish (object, res, &error);
+	if (results == NULL) {
+		g_message ("Failed to search geocode: %s", error->message);
+		g_error_free (error);
+		exit (1);
+	}
+
+	for (l = results; l != NULL; l = l->next) {
+		GHashTable *ht = l->data;
+
+		g_print ("Got geocode search answer:\n");
+		g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
+		g_hash_table_destroy (ht);
+	}
+	g_list_free (results);
+
+	g_object_unref (object);
+
+	exit (0);
+}
+
+static void
 test_rev (void)
 {
 	GeocodeObject *object;
@@ -288,7 +318,9 @@ int main (int argc, char **argv)
 	GError *error = NULL;
 	GOptionContext *context;
 	GeocodeObject *object;
+	gboolean do_search = FALSE;
 	const GOptionEntry entries[] = {
+		{ "search", 0, 0, G_OPTION_ARG_NONE, &do_search, "Whether to search for the given parameters", NULL },
 		{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &params, NULL, "[KEY=VALUE...]" },
 		{ NULL }
 	};
@@ -320,20 +352,25 @@ int main (int argc, char **argv)
 
 	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
 
-	for (i = 0; params[i] != NULL; i++) {
-		char **items;
+	if (do_search) {
+		geocode_object_add (object, "location", params[0]);
+		geocode_object_search_async (object, NULL, got_geocode_search_cb, NULL);
+	} else {
+		for (i = 0; params[i] != NULL; i++) {
+			char **items;
 
-		items = g_strsplit (params[i], "=", 2);
-		if (items[0] == NULL || *items[0] == '\0' ||
-		    items[1] == NULL || *items[1] == '\0') {
-			g_warning ("Failed to parse parameter: '%s'", params[i]);
-			return 1;
+			items = g_strsplit (params[i], "=", 2);
+			if (items[0] == NULL || *items[0] == '\0' ||
+			    items[1] == NULL || *items[1] == '\0') {
+				g_warning ("Failed to parse parameter: '%s'", params[i]);
+				return 1;
+			}
+
+			geocode_object_add (object, items[0], items[1]);
+			g_strfreev (items);
 		}
-
-		geocode_object_add (object, items[0], items[1]);
-		g_strfreev (items);
+		geocode_object_resolve_async (object, NULL, got_geocode_cb, NULL);
 	}
-	geocode_object_resolve_async (object, NULL, got_geocode_cb, NULL);
 
 	loop = g_main_loop_new (NULL, FALSE);
 	g_main_loop_run (loop);
