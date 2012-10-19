@@ -784,7 +784,7 @@ geocode_object_resolve (GeocodeObject       *object,
 	}
 
 	ret = _geocode_parse_resolve_json (contents, error);
-	if (to_cache)
+	if (to_cache && ret != NULL)
 		geocode_object_cache_save (query, contents);
 
 	g_free (contents);
