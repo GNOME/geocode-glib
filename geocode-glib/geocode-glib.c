@@ -36,8 +36,10 @@
  * @include: geocode-glib/geocode-glib.h
  *
  * Contains functions for geocoding and reverse geocoding using the
- * <ulink url="http://developer.yahoo.com/geo/placefinder/guide/requests.html">Yahoo! Place Finder APIs</ulink>.
- * Lookups will only ever return one result, or an error if the lookup failed.
+ * <ulink url="http://developer.yahoo.com/geo/placefinder/guide/requests.html">Yahoo! Place Finder APIs</ulink>
+ * for geocoding and reverse geocoding, and the
+ * <ulink url="http://developer.yahoo.com/geo/geoplanet/">Yahoo! GeoPlanet APIs</ulink>
+ * for forward geocoding searches.
  **/
 
 struct _GeocodeObjectPrivate {
@@ -366,8 +368,8 @@ geocode_object_add (GeocodeObject *object,
 }
 
 GHashTable *
-_geocode_parse_json (const char *contents,
-		     GError    **error)
+_geocode_parse_resolve_json (const char *contents,
+			     GError    **error)
 {
 	GHashTable *ret;
 	JsonParser *parser;
@@ -529,7 +531,7 @@ on_query_data_loaded (GObject      *source_object,
 		return;
 	}
 
-	ret = _geocode_parse_json (contents, &error);
+	ret = _geocode_parse_resolve_json (contents, &error);
 
 	if (ret == NULL) {
 		g_simple_async_result_set_from_error (simple, error);
@@ -579,7 +581,7 @@ on_cache_data_loaded (GObject      *source_object,
 		return;
 	}
 
-	ret = _geocode_parse_json (contents, &error);
+	ret = _geocode_parse_resolve_json (contents, &error);
 	g_free (contents);
 
 	if (ret == NULL) {
@@ -615,41 +617,38 @@ dup_ht (GHashTable *ht)
 }
 
 static GFile *
-get_query_for_params (GeocodeObject *object)
+get_resolve_query_for_params (GeocodeObject *object)
 {
 	GFile *ret;
+	GHashTable *ht;
+	char *locale;
+	char *params, *uri;
 
-	if (object->priv->type == GEOCODE_GLIB_RESOLVE_FORWARD ||
-	    object->priv->type == GEOCODE_GLIB_RESOLVE_REVERSE) {
-		GHashTable *ht;
-		char *locale;
-		char *params, *uri;
+	g_return_val_if_fail (object->priv->type == GEOCODE_GLIB_RESOLVE_FORWARD ||
+			      object->priv->type == GEOCODE_GLIB_RESOLVE_REVERSE,
+			      NULL);
 
-		ht = dup_ht (object->priv->ht);
+	ht = dup_ht (object->priv->ht);
 
-		g_hash_table_insert (ht, "appid", YAHOO_APPID);
-		g_hash_table_insert (ht, "flags", "QJT");
+	g_hash_table_insert (ht, "appid", YAHOO_APPID);
+	g_hash_table_insert (ht, "flags", "QJT");
 
-		if (object->priv->type == GEOCODE_GLIB_RESOLVE_REVERSE)
-			g_hash_table_insert (ht, "gflags", "R");
+	if (object->priv->type == GEOCODE_GLIB_RESOLVE_REVERSE)
+		g_hash_table_insert (ht, "gflags", "R");
 
-		locale = geocode_object_get_lang ();
-		if (locale)
-			g_hash_table_insert (ht, "locale", locale);
+	locale = geocode_object_get_lang ();
+	if (locale)
+		g_hash_table_insert (ht, "locale", locale);
 
-		params = soup_form_encode_hash (ht);
-		g_hash_table_destroy (ht);
-		g_free (locale);
+	params = soup_form_encode_hash (ht);
+	g_hash_table_destroy (ht);
+	g_free (locale);
 
-		uri = g_strdup_printf ("http://where.yahooapis.com/geocode?%s", params);
-		g_free (params);
+	uri = g_strdup_printf ("http://where.yahooapis.com/geocode?%s", params);
+	g_free (params);
 
-		ret = g_file_new_for_uri (uri);
-		g_free (uri);
-	} else {
-		g_warning ("Lookup type (%d) not supported", object->priv->type);
-		ret = NULL;
-	}
+	ret = g_file_new_for_uri (uri);
+	g_free (uri);
 
 	return ret;
 }
@@ -685,7 +684,7 @@ geocode_object_resolve_async (GeocodeObject       *object,
 					    user_data,
 					    geocode_object_resolve_async);
 
-	query = get_query_for_params (object);
+	query = get_resolve_query_for_params (object);
 	cache_path = geocode_object_cache_path_for_query (query);
 	if (cache_path == NULL) {
 		g_file_load_contents_async (query,
@@ -767,7 +766,7 @@ geocode_object_resolve (GeocodeObject       *object,
 
 	g_return_val_if_fail (GEOCODE_IS_OBJECT (object), NULL);
 
-	query = get_query_for_params (object);
+	query = get_resolve_query_for_params (object);
 	if (geocode_object_cache_load (query, &contents) == FALSE) {
 		if (g_file_load_contents (query,
 					  NULL,
@@ -781,8 +780,315 @@ geocode_object_resolve (GeocodeObject       *object,
 		to_cache = TRUE;
 	}
 
-	ret = _geocode_parse_json (contents, error);
+	ret = _geocode_parse_resolve_json (contents, error);
 	if (to_cache)
+		geocode_object_cache_save (query, contents);
+
+	g_free (contents);
+	g_object_unref (query);
+
+	return ret;
+}
+
+static GFile *
+get_search_query_for_params (GeocodeObject *object)
+{
+	GFile *ret;
+	GHashTable *ht;
+	char *lang;
+	char *params;
+	char *search_term;
+	char *uri;
+	const char *location;
+
+	g_return_val_if_fail (object->priv->type == GEOCODE_GLIB_RESOLVE_FORWARD, NULL);
+	location = g_hash_table_lookup (object->priv->ht, "location");
+	g_return_val_if_fail (location != NULL, NULL);
+
+	/* Prepare the search term */
+	search_term = soup_uri_encode (location, NULL);
+
+	/* Prepare the query parameters */
+	ht = g_hash_table_new (g_str_hash, g_str_equal);
+	g_hash_table_insert (ht, "appid", YAHOO_APPID);
+	g_hash_table_insert (ht, "format", "json");
+	lang = geocode_object_get_lang ();
+	if (lang)
+		g_hash_table_insert (ht, "lang", lang);
+
+	params = soup_form_encode_hash (ht);
+	g_hash_table_destroy (ht);
+	g_free (lang);
+
+	/* XXX: Make count a property? */
+	uri = g_strdup_printf ("http://where.yahooapis.com/v1/places.q('%s');start=0;count=10?%s", search_term, params);
+	g_free (params);
+	g_free (search_term);
+
+	ret = g_file_new_for_uri (uri);
+	g_free (uri);
+
+	return ret;
+}
+
+/**
+ * geocode_object_search_async:
+ * @object: a #GeocodeObject representing a query
+ * @cancellable: optional #GCancellable object, %NULL to ignore.
+ * @callback: a #GAsyncReadyCallback to call when the request is satisfied
+ * @user_data: the data to pass to callback function
+ *
+ * Asynchronously gets a list of a geocoding
+ * query using a web service. Use geocode_object_search() to do the same
+ * thing synchronously.
+ *
+ * When the operation is finished, @callback will be called. You can then call
+ * geocode_object_search_finish() to get the result of the operation.
+ **/
+void
+geocode_object_search_async (GeocodeObject       *object,
+			     GCancellable        *cancellable,
+			     GAsyncReadyCallback  callback,
+			     gpointer             user_data)
+{
+	GSimpleAsyncResult *simple;
+	GFile *query;
+	char *cache_path;
+
+	g_return_if_fail (GEOCODE_IS_OBJECT (object));
+
+	simple = g_simple_async_result_new (G_OBJECT (object),
+					    callback,
+					    user_data,
+					    geocode_object_search_async);
+
+	g_simple_async_result_set_error (simple,
+					 GEOCODE_ERROR,
+					 GEOCODE_ERROR_NOT_SUPPORTED,
+					 "XXX NOT IMPLEMENTED XXX");
+	g_simple_async_result_complete_in_idle (simple);
+
+#if 0
+	query = get_search_query_for_params (object);
+	cache_path = geocode_object_cache_path_for_query (query);
+	if (cache_path == NULL) {
+		g_file_load_contents_async (query,
+					    cancellable,
+					    on_query_data_loaded,
+					    simple);
+		g_object_unref (query);
+	} else {
+		GFile *cache;
+
+		cache = g_file_new_for_path (cache_path);
+		g_object_set_data_full (G_OBJECT (cache), "query", query, (GDestroyNotify) g_object_unref);
+		g_object_set_data (G_OBJECT (cache), "cancellable", cancellable);
+		g_file_load_contents_async (cache,
+					    cancellable,
+					    on_cache_data_loaded,
+					    simple);
+		g_object_unref (cache);
+	}
+#endif
+}
+
+/**
+ * geocode_object_search_finish:
+ * @object: a #GeocodeObject representing a query
+ * @res: a #GAsyncResult.
+ * @error: a #GError.
+ *
+ * Finishes a query operation. See geocode_object_search_async().
+ *
+ * Returns: (element-type GHashTable) (transfer full):
+ * a #GHashTable containing the results of the query
+ * or %NULL in case of errors.
+ * Free the returned string with g_hash_table_destroy() when done.
+ **/
+GList *
+geocode_object_search_finish (GeocodeObject       *object,
+			       GAsyncResult        *res,
+			       GError             **error)
+{
+	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
+	GHashTable *ret;
+
+	g_return_val_if_fail (GEOCODE_IS_OBJECT (object), NULL);
+
+	g_warn_if_fail (g_simple_async_result_get_source_tag (simple) == geocode_object_search_async);
+
+	ret = NULL;
+
+	if (g_simple_async_result_propagate_error (simple, error))
+		goto out;
+
+	ret = g_simple_async_result_get_op_res_gpointer (simple);
+
+out:
+	return ret;
+}
+
+#define IS_EL(x) (g_str_equal (element_name, x))
+
+static void
+insert_place_attr (GHashTable *ht,
+		   JsonReader *reader,
+		   const char *element_name)
+{
+	char *value;
+
+	if (json_reader_read_member (reader, element_name) == FALSE) {
+		json_reader_end_member (reader);
+		return;
+	}
+
+	/* FIXME: check all the member names against what Place Finder outputs */
+
+	if (IS_EL("woeid") ||
+	    IS_EL("popRank") ||
+	    IS_EL("areaRank")) {
+		value = g_strdup_printf ("%"G_GINT64_FORMAT, json_reader_get_int_value (reader));
+	} else if (IS_EL("centroid")) {
+		json_reader_read_member (reader, "longitude");
+		g_hash_table_insert (ht, g_strdup ("longitude"),
+				     g_strdup_printf ("%lf", json_reader_get_double_value (reader)));
+		json_reader_end_member (reader);
+		json_reader_read_member (reader, "latitude");
+		g_hash_table_insert (ht, g_strdup ("latitude"),
+				     g_strdup_printf ("%lf", json_reader_get_double_value (reader)));
+		json_reader_end_member (reader);
+		goto end;
+	} else if (g_str_has_suffix (element_name, " attrs")) {
+		g_debug ("Ignoring attributes element '%s'", element_name);
+		value = g_strdup (""); /* So that they're ignored */
+	} else if (IS_EL("boundingBox")) {
+		g_debug ("Ignoring element '%s'", element_name);
+		value = g_strdup (""); /* So that they're ignored */
+	} else {
+		value = g_strdup (json_reader_get_string_value (reader));
+	}
+
+	if (value != NULL && *value == '\0') {
+		g_clear_pointer (&value, g_free);
+		goto end;
+	}
+
+	if (value != NULL)
+		g_hash_table_insert (ht, g_strdup (element_name), value);
+	else
+		g_warning ("Ignoring element %s, don't know how to parse it", element_name);
+
+end:
+	json_reader_end_member (reader);
+}
+
+GList *
+_geocode_parse_search_json (const char *contents,
+			    GError    **error)
+{
+	GList *ret;
+	JsonParser *parser;
+	JsonNode *root;
+	JsonReader *reader;
+	const GError *err = NULL;
+	int num_places, i;
+
+	ret = NULL;
+
+	parser = json_parser_new ();
+	if (json_parser_load_from_data (parser, contents, -1, error) == FALSE) {
+		g_object_unref (parser);
+		return ret;
+	}
+
+	root = json_parser_get_root (parser);
+	reader = json_reader_new (root);
+
+	if (json_reader_read_member (reader, "places") == FALSE)
+		goto parse;
+	if (json_reader_read_member (reader, "place") == FALSE)
+		goto parse;
+
+	num_places = json_reader_count_elements (reader);
+	if (num_places < 0)
+		goto parse;
+
+	for (i = 0; i < num_places; i++) {
+		GHashTable *ht;
+		char **members;
+		int j;
+
+		json_reader_read_element (reader, i);
+
+		ht = g_hash_table_new_full (g_str_hash, g_str_equal,
+					    g_free, g_free);
+
+		members = json_reader_list_members (reader);
+		for (j = 0; members != NULL && members[j] != NULL; j++)
+			insert_place_attr (ht, reader, members[j]);
+		g_strfreev (members);
+
+		json_reader_end_element (reader);
+
+		ret = g_list_prepend (ret, ht);
+	}
+
+	g_object_unref (parser);
+	g_object_unref (reader);
+	ret = g_list_reverse (ret);
+
+	return ret;
+parse:
+	err = json_reader_get_error (reader);
+	g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, err->message);
+	g_object_unref (parser);
+	g_object_unref (reader);
+	return NULL;
+}
+
+/**
+ * geocode_object_search:
+ * @object: a #GeocodeObject representing a query
+ * @error: a #GError
+ *
+ * Gets the result of a geocoding or reverse geocoding
+ * query using a web service.
+ *
+ * Returns: (element-type GHashTable) (transfer full):
+ * a #GHashTable containing the results of the query
+ * or %NULL in case of errors.
+ * Free the returned string with g_hash_table_destroy() when done.
+ **/
+GList *
+geocode_object_search (GeocodeObject       *object,
+		       GError             **error)
+{
+	GFile *query;
+	char *contents;
+	GList *ret;
+	gboolean to_cache = FALSE;
+
+	g_return_val_if_fail (GEOCODE_IS_OBJECT (object), NULL);
+
+	query = get_search_query_for_params (object);
+	if (geocode_object_cache_load (query, &contents) == FALSE) {
+		if (g_file_load_contents (query,
+					  NULL,
+					  &contents,
+					  NULL,
+					  NULL,
+					  error) == FALSE) {
+			/* FIXME check error value and match against
+			 * web service errors:
+			 * http://developer.yahoo.com/geo/geoplanet/guide/api_docs.html#response-errors */
+			g_object_unref (query);
+			return NULL;
+		}
+		to_cache = TRUE;
+	}
+
+	ret = _geocode_parse_search_json (contents, error);
+	if (to_cache && ret != NULL)
 		geocode_object_cache_save (query, contents);
 
 	g_free (contents);

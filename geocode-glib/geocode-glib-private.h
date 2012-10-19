@@ -34,8 +34,10 @@ typedef enum {
 	GEOCODE_GLIB_RESOLVE_REVERSE
 } GeocodeLookupType;
 
-GHashTable *_geocode_parse_json (const char *contents,
-				 GError    **error);
+GHashTable *_geocode_parse_resolve_json (const char *contents,
+					 GError    **error);
+GList *     _geocode_parse_search_json  (const char *contents,
+					 GError    **error);
 
 G_END_DECLS
 

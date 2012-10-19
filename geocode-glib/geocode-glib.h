@@ -280,6 +280,18 @@ GHashTable *geocode_object_resolve_finish (GeocodeObject  *object,
 GHashTable * geocode_object_resolve (GeocodeObject  *object,
 				     GError        **error);
 
+void  geocode_object_search_async  (GeocodeObject       *object,
+				    GCancellable        *cancellable,
+				    GAsyncReadyCallback  callback,
+				    gpointer             user_data);
+
+GList *geocode_object_search_finish (GeocodeObject  *object,
+				     GAsyncResult   *res,
+				     GError        **error);
+
+GList * geocode_object_search (GeocodeObject  *object,
+			       GError        **error);
+
 gboolean geocode_object_get_coords (GHashTable *results,
 				    gdouble    *longitude,
 				    gdouble    *latitude);

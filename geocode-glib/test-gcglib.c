@@ -209,7 +209,7 @@ test_json (void)
 	};
 
 	for (i = 0; i < G_N_ELEMENTS (tests); i++) {
-		ht = _geocode_parse_json (tests[i].test, &error);
+		ht = _geocode_parse_resolve_json (tests[i].test, &error);
 
 		if (tests[i].error) {
 			g_assert (ht == NULL);
