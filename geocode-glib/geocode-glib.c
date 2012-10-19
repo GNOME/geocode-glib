@@ -494,6 +494,9 @@ _geocode_parse_resolve_json (const char *contents,
 	}
 	g_strfreev (members);
 
+	g_object_unref (parser);
+	g_object_unref (reader);
+
 	return ret;
 
 parse:
