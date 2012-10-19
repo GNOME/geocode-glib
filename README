@@ -11,11 +11,20 @@ Requirements
 
 geocode-glib requires json-glib, gio and libsoup to compile and run.
 
+Applications using geocode-glib
+-------------------------------
+
+- Empathy
+- Evolution
+
 Links
 -----
 
 Place Finder APIs:
 http://developer.yahoo.com/geo/placefinder/
+
+GeoPlanet APIs:
+http://developer.yahoo.com/geo/geoplanet/
 
 Geocoding:
 http://en.wikipedia.org/wiki/Geocoding
