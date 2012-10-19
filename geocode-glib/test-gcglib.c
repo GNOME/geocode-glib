@@ -276,7 +276,7 @@ test_locale (void)
 }
 
 static void
-test_json (void)
+test_resolve_json (void)
 {
 	GHashTable *ht;
 	GError *error = NULL;
@@ -313,6 +313,12 @@ test_json (void)
 	}
 }
 
+static void
+test_search_json (void)
+{
+	/* FIXME: Implement */
+}
+
 int main (int argc, char **argv)
 {
 	GError *error = NULL;
@@ -341,7 +347,8 @@ int main (int argc, char **argv)
 	}
 
 	if (params == NULL) {
-		g_test_add_func ("/geocode/json", test_json);
+		g_test_add_func ("/geocode/resolve_json", test_resolve_json);
+		g_test_add_func ("/geocode/search_json", test_search_json);
 		g_test_add_func ("/geocode/reverse", test_rev);
 		g_test_add_func ("/geocode/pub", test_pub);
 		g_test_add_func ("/geocode/xep-0080", test_xep);
