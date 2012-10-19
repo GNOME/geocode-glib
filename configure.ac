@@ -58,7 +58,7 @@ GTK_DOC_CHECK([1.13],[--flavour no-tmpl])
 dnl Requires for the library
 PKG_CHECK_MODULES(GEOCODE,
 		  gio-2.0
-		  json-glib-1.0 >= 0.13.1
+		  json-glib-1.0 >= 0.14
 		  libsoup-2.4)
 
 GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal glib-2.0`
