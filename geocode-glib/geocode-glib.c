@@ -241,7 +241,7 @@ struct {
 	{ "text", NULL },
 	{ "description", NULL },
 	{ "uri", NULL },
-	{ "language", NULL }, /* FIXME: Should we ignore this? */
+	{ "language", "locale" },
 };
 
 static void
@@ -704,9 +704,11 @@ get_resolve_query_for_params (GeocodeObject *object)
 	if (object->priv->type == GEOCODE_GLIB_RESOLVE_REVERSE)
 		g_hash_table_insert (ht, "gflags", "R");
 
-	locale = geocode_object_get_lang ();
-	if (locale)
-		g_hash_table_insert (ht, "locale", locale);
+	if (g_hash_table_lookup (ht, "locale") == NULL) {
+		locale = geocode_object_get_lang ();
+		if (locale)
+			g_hash_table_insert (ht, "locale", locale);
+	}
 
 	params = soup_form_encode_hash (ht);
 	g_hash_table_destroy (ht);
