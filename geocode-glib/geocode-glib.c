@@ -528,7 +528,7 @@ on_query_data_loaded (GObject      *source_object,
 	GFile *query;
 	GError *error = NULL;
 	char *contents;
-	GHashTable *ret;
+	gpointer ret;
 
 	query = G_FILE (source_object);
 	if (g_file_load_contents_finish (query,
@@ -544,7 +544,10 @@ on_query_data_loaded (GObject      *source_object,
 		return;
 	}
 
-	ret = _geocode_parse_resolve_json (contents, &error);
+	if (query_is_search (query) == FALSE)
+		ret = _geocode_parse_resolve_json (contents, &error);
+	else
+		ret = _geocode_parse_search_json (contents, &error);
 
 	if (ret == NULL) {
 		g_simple_async_result_set_from_error (simple, error);
@@ -574,7 +577,7 @@ on_cache_data_loaded (GObject      *source_object,
 	GFile *cache;
 	GError *error = NULL;
 	char *contents;
-	GHashTable *ret;
+	gpointer ret;
 
 	cache = G_FILE (source_object);
 	cancellable = g_object_get_data (G_OBJECT (cache), "cancellable");
@@ -594,7 +597,10 @@ on_cache_data_loaded (GObject      *source_object,
 		return;
 	}
 
-	ret = _geocode_parse_resolve_json (contents, &error);
+	if (query_is_search (cache) == FALSE)
+		ret = _geocode_parse_resolve_json (contents, &error);
+	else
+		ret = _geocode_parse_search_json (contents, &error);
 	g_free (contents);
 
 	if (ret == NULL) {
@@ -876,14 +882,18 @@ geocode_object_search_async (GeocodeObject       *object,
 					    user_data,
 					    geocode_object_search_async);
 
-	g_simple_async_result_set_error (simple,
-					 GEOCODE_ERROR,
-					 GEOCODE_ERROR_NOT_SUPPORTED,
-					 "XXX NOT IMPLEMENTED XXX");
-	g_simple_async_result_complete_in_idle (simple);
-
-#if 0
 	query = get_search_query_for_params (object);
+	if (!query) {
+		//FIXME better error output
+		g_simple_async_result_set_error (simple,
+						 GEOCODE_ERROR,
+						 GEOCODE_ERROR_NOT_SUPPORTED,
+						 "Invalid parameters");
+		g_simple_async_result_complete_in_idle (simple);
+		g_object_unref (simple);
+		return;
+	}
+
 	cache_path = geocode_object_cache_path_for_query (query);
 	if (cache_path == NULL) {
 		g_file_load_contents_async (query,
@@ -904,7 +914,6 @@ geocode_object_search_async (GeocodeObject       *object,
 					    simple);
 		g_object_unref (cache);
 	}
-#endif
 }
 
 /**
