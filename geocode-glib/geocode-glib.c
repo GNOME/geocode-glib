@@ -926,7 +926,7 @@ geocode_object_search_finish (GeocodeObject       *object,
 			       GError             **error)
 {
 	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
-	GHashTable *ret;
+	GList *ret;
 
 	g_return_val_if_fail (GEOCODE_IS_OBJECT (object), NULL);
 
