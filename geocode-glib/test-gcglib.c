@@ -325,8 +325,10 @@ int main (int argc, char **argv)
 	GOptionContext *context;
 	GeocodeObject *object;
 	gboolean do_search = FALSE;
+	gboolean do_rev_geocoding = FALSE;
 	const GOptionEntry entries[] = {
 		{ "search", 0, 0, G_OPTION_ARG_NONE, &do_search, "Whether to search for the given parameters", NULL },
+		{ "reverse", 0, 0, G_OPTION_ARG_NONE, &do_rev_geocoding, "Whether to do reverse geocoding for the given parameters", NULL },
 		{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &params, NULL, "[KEY=VALUE...]" },
 		{ NULL }
 	};
@@ -363,6 +365,8 @@ int main (int argc, char **argv)
 		geocode_object_add (object, "location", params[0]);
 		geocode_object_search_async (object, NULL, got_geocode_search_cb, NULL);
 	} else {
+		if (do_rev_geocoding)
+			_geocode_object_set_lookup_type (object, GEOCODE_GLIB_RESOLVE_REVERSE);
 		for (i = 0; params[i] != NULL; i++) {
 			char **items;
 
