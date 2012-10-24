@@ -41,13 +41,15 @@ G_BEGIN_DECLS
  * @GEOCODE_ERROR_PARSE: An error occured parsing the response from the web service.
  * @GEOCODE_ERROR_NOT_SUPPORTED: The request made was not supported.
  * @GEOCODE_ERROR_NO_MATCHES: The requests made didn't have any matches.
+ * @GEOCODE_ERROR_INVALID_ARGUMENTS: The request made contained invalid arguments.
  *
  * Error codes returned by geocode-glib functions.
  **/
 typedef enum {
 	GEOCODE_ERROR_PARSE,
 	GEOCODE_ERROR_NOT_SUPPORTED,
-	GEOCODE_ERROR_NO_MATCHES
+	GEOCODE_ERROR_NO_MATCHES,
+	GEOCODE_ERROR_INVALID_ARGUMENTS
 } GeocodeError;
 
 
