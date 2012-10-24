@@ -30,6 +30,8 @@
 #include <geocode-error.h>
 #include <geocode-glib-private.h>
 
+#define IS_SEARCH "is-search"
+
 /**
  * SECTION:geocode-glib
  * @short_description: Geocode glib main functions
@@ -507,6 +509,14 @@ parse:
 	g_object_unref (parser);
 	g_object_unref (reader);
 	return NULL;
+}
+
+static gboolean
+query_is_search (GFile *query)
+{
+	g_return_val_if_fail (query != NULL, FALSE);
+
+	return GPOINTER_TO_INT (g_object_get_data (G_OBJECT (query), IS_SEARCH));
 }
 
 static void
