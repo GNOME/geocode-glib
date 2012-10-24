@@ -2,6 +2,7 @@ geocode_error_quark
 geocode_object_get_type
 geocode_object_new
 geocode_object_new_for_params
+geocode_object_new_for_params_str
 geocode_object_new_for_coords
 geocode_object_new_for_location
 geocode_object_add

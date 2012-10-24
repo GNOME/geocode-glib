@@ -244,6 +244,40 @@ struct {
 	{ "language", NULL }, /* FIXME: Should we ignore this? */
 };
 
+static void
+geocode_object_fill_params (GeocodeObject *object,
+			    GHashTable    *params,
+			    gboolean       value_is_str)
+{
+	guint i;
+
+	for (i = 0; i < G_N_ELEMENTS (attrs_map); i++) {
+		const char *str;
+
+		if (attrs_map[i].gc_attr == NULL)
+			continue;
+
+		if (value_is_str == FALSE) {
+			GValue *value;
+
+			value = g_hash_table_lookup (params, attrs_map[i].tp_attr);
+			if (value == NULL)
+				continue;
+
+			str = g_value_get_string (value);
+		} else {
+			str = g_hash_table_lookup (params, attrs_map[i].tp_attr);
+		}
+
+		if (str == NULL)
+			continue;
+
+		geocode_object_add (object,
+				    attrs_map[i].gc_attr,
+				    str);
+	}
+}
+
 /**
  * geocode_object_new_for_params:
  * @params: (transfer none) (element-type utf8 GValue): a #GHashTable with string keys, and #GValue values.
@@ -260,7 +294,6 @@ GeocodeObject *
 geocode_object_new_for_params (GHashTable *params)
 {
 	GeocodeObject *object;
-	guint i;
 
 	g_return_val_if_fail (params != NULL, NULL);
 
@@ -271,21 +304,37 @@ geocode_object_new_for_params (GHashTable *params)
 	}
 
 	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
+	geocode_object_fill_params (object, params, FALSE);
 
-	for (i = 0; i < G_N_ELEMENTS (attrs_map); i++) {
-		GValue *value;
+	return object;
+}
 
-		if (attrs_map[i].gc_attr == NULL)
-			continue;
+/**
+ * geocode_object_new_for_params_str:
+ * @params_str: (transfer none) (element-type utf8 utf8): a #GHashTable with string keys, and string values.
+ *
+ * Creates a new #GeocodeObject to perform geocoding with. The
+ * #GHashTable uses the same keys used by Telepathy, and documented
+ * on <ulink url="http://telepathy.freedesktop.org/spec/Connection_Interface_Location.html#Mapping:Location">Telepathy's specification site</ulink>,
+ * with the difference that all the values are passed as strings.
+ *
+ * Returns: a new #GeocodeObject. Use g_object_unref() when done.
+ **/
+GeocodeObject *
+geocode_object_new_for_params_str (GHashTable *params_str)
+{
+	GeocodeObject *object;
 
-		value = g_hash_table_lookup (params, attrs_map[i].tp_attr);
-		if (value == NULL)
-			continue;
+	g_return_val_if_fail (params_str != NULL, NULL);
 
-		geocode_object_add (object,
-				    attrs_map[i].gc_attr,
-				    g_value_get_string (value));
+	if (g_hash_table_lookup (params_str, "lat") != NULL &&
+	    g_hash_table_lookup (params_str, "long") != NULL) {
+		g_warning ("You already have longitude and latitude in those parameters");
+		return NULL;
 	}
+
+	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
+	geocode_object_fill_params (object, params_str, TRUE);
 
 	return object;
 }
