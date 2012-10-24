@@ -246,7 +246,7 @@ struct {
 
 /**
  * geocode_object_new_for_params:
- * @params: a #GHashTable with string keys, and #GValue values.
+ * @params: (transfer none) (element-type utf8 GValue): a #GHashTable with string keys, and #GValue values.
  *
  * Creates a new #GeocodeObject to perform geocoding with. The
  * #GHashTable is in the format used by Telepathy, and documented
