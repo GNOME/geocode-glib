@@ -15,3 +15,4 @@ geocode_object_search
 geocode_object_get_coords
 _geocode_parse_search_json
 _geocode_parse_resolve_json
+_geocode_object_set_lookup_type

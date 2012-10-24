@@ -38,6 +38,8 @@ GHashTable *_geocode_parse_resolve_json (const char *contents,
 					 GError    **error);
 GList *     _geocode_parse_search_json  (const char *contents,
 					 GError    **error);
+void        _geocode_object_set_lookup_type (GeocodeObject     *object,
+					     GeocodeLookupType  type);
 
 G_END_DECLS
 
