@@ -689,16 +689,20 @@ dup_ht (GHashTable *ht)
 }
 
 static GFile *
-get_resolve_query_for_params (GeocodeObject *object)
+get_resolve_query_for_params (GeocodeObject *object,
+			      GError       **error)
 {
 	GFile *ret;
 	GHashTable *ht;
 	char *locale;
 	char *params, *uri;
 
-	g_return_val_if_fail (object->priv->type == GEOCODE_GLIB_RESOLVE_FORWARD ||
-			      object->priv->type == GEOCODE_GLIB_RESOLVE_REVERSE,
-			      NULL);
+	if (object->priv->type != GEOCODE_GLIB_RESOLVE_FORWARD &&
+	    object->priv->type != GEOCODE_GLIB_RESOLVE_REVERSE) {
+		g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_INVALID_ARGUMENTS,
+				     "Arguments not setup for geocoding or reverse geocoding");
+		return NULL;
+	}
 
 	ht = dup_ht (object->priv->ht);
 
@@ -750,6 +754,7 @@ geocode_object_resolve_async (GeocodeObject       *object,
 	GSimpleAsyncResult *simple;
 	GFile *query;
 	char *cache_path;
+	GError *error = NULL;
 
 	g_return_if_fail (GEOCODE_IS_OBJECT (object));
 
@@ -758,7 +763,14 @@ geocode_object_resolve_async (GeocodeObject       *object,
 					    user_data,
 					    geocode_object_resolve_async);
 
-	query = get_resolve_query_for_params (object);
+	query = get_resolve_query_for_params (object, &error);
+	if (query == NULL) {
+		g_simple_async_result_take_error (simple, error);
+		g_simple_async_result_complete_in_idle (simple);
+		g_object_unref (simple);
+		return;
+	}
+
 	cache_path = geocode_object_cache_path_for_query (query);
 	if (cache_path == NULL) {
 		g_file_load_contents_async (query,
@@ -840,7 +852,10 @@ geocode_object_resolve (GeocodeObject       *object,
 
 	g_return_val_if_fail (GEOCODE_IS_OBJECT (object), NULL);
 
-	query = get_resolve_query_for_params (object);
+	query = get_resolve_query_for_params (object, error);
+	if (query == NULL)
+		return NULL;
+
 	if (geocode_object_cache_load (query, &contents) == FALSE) {
 		if (g_file_load_contents (query,
 					  NULL,
@@ -865,7 +880,8 @@ geocode_object_resolve (GeocodeObject       *object,
 }
 
 static GFile *
-get_search_query_for_params (GeocodeObject *object)
+get_search_query_for_params (GeocodeObject *object,
+			     GError       **error)
 {
 	GFile *ret;
 	GHashTable *ht;
@@ -877,7 +893,11 @@ get_search_query_for_params (GeocodeObject *object)
 
 	g_return_val_if_fail (object->priv->type == GEOCODE_GLIB_RESOLVE_FORWARD, NULL);
 	location = g_hash_table_lookup (object->priv->ht, "location");
-	g_return_val_if_fail (location != NULL, NULL);
+	if (location == NULL) {
+		g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_INVALID_ARGUMENTS,
+				     "No location argument set");
+		return NULL;
+	}
 
 	/* Prepare the search term */
 	search_term = soup_uri_encode (location, NULL);
@@ -929,6 +949,7 @@ geocode_object_search_async (GeocodeObject       *object,
 	GSimpleAsyncResult *simple;
 	GFile *query;
 	char *cache_path;
+	GError *error = NULL;
 
 	g_return_if_fail (GEOCODE_IS_OBJECT (object));
 
@@ -937,13 +958,9 @@ geocode_object_search_async (GeocodeObject       *object,
 					    user_data,
 					    geocode_object_search_async);
 
-	query = get_search_query_for_params (object);
+	query = get_search_query_for_params (object, &error);
 	if (!query) {
-		//FIXME better error output
-		g_simple_async_result_set_error (simple,
-						 GEOCODE_ERROR,
-						 GEOCODE_ERROR_NOT_SUPPORTED,
-						 "Invalid parameters");
+		g_simple_async_result_take_error (simple, error);
 		g_simple_async_result_complete_in_idle (simple);
 		g_object_unref (simple);
 		return;
@@ -1149,7 +1166,10 @@ geocode_object_search (GeocodeObject       *object,
 
 	g_return_val_if_fail (GEOCODE_IS_OBJECT (object), NULL);
 
-	query = get_search_query_for_params (object);
+	query = get_search_query_for_params (object, error);
+	if (!query)
+		return NULL;
+
 	if (geocode_object_cache_load (query, &contents) == FALSE) {
 		if (g_file_load_contents (query,
 					  NULL,
