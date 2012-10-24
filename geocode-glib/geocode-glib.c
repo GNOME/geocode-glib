@@ -839,6 +839,7 @@ get_search_query_for_params (GeocodeObject *object)
 	g_free (search_term);
 
 	ret = g_file_new_for_uri (uri);
+	g_object_set_data (G_OBJECT (ret), IS_SEARCH, GINT_TO_POINTER (TRUE));
 	g_free (uri);
 
 	return ret;
@@ -894,6 +895,7 @@ geocode_object_search_async (GeocodeObject       *object,
 		GFile *cache;
 
 		cache = g_file_new_for_path (cache_path);
+		g_object_set_data (G_OBJECT (cache), IS_SEARCH, GINT_TO_POINTER (TRUE));
 		g_object_set_data_full (G_OBJECT (cache), "query", query, (GDestroyNotify) g_object_unref);
 		g_object_set_data (G_OBJECT (cache), "cancellable", cancellable);
 		g_file_load_contents_async (cache,
