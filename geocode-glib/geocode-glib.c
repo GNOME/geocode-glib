@@ -300,7 +300,6 @@ geocode_object_new_for_params (GHashTable *params)
 	if (g_hash_table_lookup (params, "lat") != NULL &&
 	    g_hash_table_lookup (params, "long") != NULL) {
 		g_warning ("You already have longitude and latitude in those parameters");
-		return NULL;
 	}
 
 	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
@@ -330,7 +329,6 @@ geocode_object_new_for_params_str (GHashTable *params_str)
 	if (g_hash_table_lookup (params_str, "lat") != NULL &&
 	    g_hash_table_lookup (params_str, "long") != NULL) {
 		g_warning ("You already have longitude and latitude in those parameters");
-		return NULL;
 	}
 
 	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
@@ -356,8 +354,14 @@ geocode_object_new_for_coords (gdouble     latitude,
 	GeocodeObject *object;
 	char buf[16], buf2[16];
 
-	g_return_val_if_fail (longitude >= -180.0 && longitude <= 180.0, NULL);
-	g_return_val_if_fail (latitude >= -90.0 && latitude <= 90.0, NULL);
+	if (longitude < -180.0 || longitude > 180.0) {
+		g_warning ("Invalid longitude %lf passed, using 0.0 instead", longitude);
+		longitude = 0.0;
+	}
+	if (latitude < -90.0 || latitude > 90.0) {
+		g_warning ("Invalid latitude %lf passed, using 0.0 instead", latitude);
+		latitude = 0.0;
+	}
 
 	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
 	object->priv->type = GEOCODE_GLIB_RESOLVE_REVERSE;
