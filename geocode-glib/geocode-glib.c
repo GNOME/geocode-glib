@@ -721,6 +721,7 @@ get_resolve_query_for_params (GeocodeObject *object,
 	if (object->priv->type == GEOCODE_GLIB_RESOLVE_REVERSE)
 		g_hash_table_insert (ht, "gflags", "R");
 
+	locale = NULL;
 	if (g_hash_table_lookup (ht, "locale") == NULL) {
 		locale = geocode_object_get_lang ();
 		if (locale)
