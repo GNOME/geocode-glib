@@ -25,6 +25,7 @@
 
 #include <glib.h>
 #include <gio/gio.h>
+#include <geocode-glib/geocode-location.h>
 #include <geocode-glib/geocode-error.h>
 
 G_BEGIN_DECLS

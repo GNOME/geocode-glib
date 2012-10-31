@@ -1,3 +1,6 @@
+geocode_location_get_type
+geocode_location_new
+geocode_location_new_with_description
 geocode_error_quark
 geocode_object_get_type
 geocode_object_new
