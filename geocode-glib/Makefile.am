@@ -26,12 +26,12 @@ libgeocode_glib_la_LDFLAGS =				\
 gcglibdir = $(pkgincludedir)
 gcglib_HEADERS = geocode-glib.h
 
-AM_CFLAGS = -I$(srcdir) $(GEOCODE_CFLAGS) $(COMMON_CFLAGS) $(WARN_CFLAGS) $(DISABLE_DEPRECATED)
+AM_CFLAGS = -I$(top_srcdir) $(GEOCODE_CFLAGS) $(COMMON_CFLAGS) $(WARN_CFLAGS) $(DISABLE_DEPRECATED)
 
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =
-INTROSPECTION_SCANNER_ARGS = --warn-all --add-include-path=$(srcdir)
-INTROSPECTION_COMPILER_ARGS = --includedir=$(srcdir)
+INTROSPECTION_SCANNER_ARGS = --warn-all --add-include-path=$(top_srcdir)
+INTROSPECTION_COMPILER_ARGS = --includedir=$(top_srcdir)
 CLEANFILES =
 
 if HAVE_INTROSPECTION
@@ -40,7 +40,7 @@ introspection_files = $(public_files)
 GeocodeGlib-1.0.gir: libgeocode-glib.la
 GeocodeGlib_1_0_gir_INCLUDES = GObject-2.0 Gio-2.0 Json-1.0 SoupGNOME-2.4
 GeocodeGlib_1_0_gir_PACKAGES = gobject-2.0 gmodule-2.0 glib-2.0 gio-2.0 libsoup-gnome-2.4 json-glib-1.0
-GeocodeGlib_1_0_gir_CFLAGS = -I$(srcdir)
+GeocodeGlib_1_0_gir_CFLAGS = -I$(top_srcdir)
 GeocodeGlib_1_0_gir_LIBS = libgeocode-glib.la
 GeocodeGlib_1_0_gir_SCANNERFLAGS = --symbol-prefix=geocode_ --identifier-prefix=Geocode --pkg-export=geocode-glib-1.0
 GeocodeGlib_1_0_gir_FILES = $(introspection_files)
