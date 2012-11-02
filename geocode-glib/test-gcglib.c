@@ -365,8 +365,10 @@ int main (int argc, char **argv)
 		geocode_object_add (object, "location", params[0]);
 		geocode_object_search_async (object, NULL, got_geocode_search_cb, NULL);
 	} else {
-		if (do_rev_geocoding)
-			_geocode_object_set_lookup_type (object, GEOCODE_GLIB_RESOLVE_REVERSE);
+		if (do_rev_geocoding) {
+			/* FIXME */
+			/* _geocode_object_set_lookup_type (object, GEOCODE_GLIB_RESOLVE_REVERSE); */
+		}
 		for (i = 0; params[i] != NULL; i++) {
 			char **items;
 

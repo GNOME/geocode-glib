@@ -81,15 +81,6 @@ geocode_object_init (GeocodeObject *object)
 						  g_free, g_free);
 }
 
-void
-_geocode_object_set_lookup_type (GeocodeObject     *object,
-				 GeocodeLookupType  type)
-{
-	g_return_if_fail (GEOCODE_IS_OBJECT (object));
-
-	object->priv->type = type;
-}
-
 static char *
 geocode_object_cache_path_for_query (GFile *query)
 {
