@@ -39,6 +39,13 @@ GHashTable *_geocode_parse_resolve_json (const char *contents,
 GList *     _geocode_parse_search_json  (const char *contents,
 					 GError    **error);
 
+char *_geocode_glib_cache_path_for_query (GFile *query);
+gboolean _geocode_glib_cache_save (GFile      *query,
+				  const char *contents);
+gboolean _geocode_glib_cache_load (GFile  *query,
+				  char  **contents);
+
+
 G_END_DECLS
 
 #endif /* GEOCODE_GLIB_PRIVATE_H */

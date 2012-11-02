@@ -81,8 +81,8 @@ geocode_object_init (GeocodeObject *object)
 						  g_free, g_free);
 }
 
-static char *
-geocode_object_cache_path_for_query (GFile *query)
+char *
+_geocode_glib_cache_path_for_query (GFile *query)
 {
 	const char *filename;
 	char *path;
@@ -119,28 +119,28 @@ geocode_object_cache_path_for_query (GFile *query)
 	return path;
 }
 
-static gboolean
-geocode_object_cache_save (GFile      *query,
-			   const char *contents)
+gboolean
+_geocode_glib_cache_save (GFile      *query,
+			  const char *contents)
 {
 	char *path;
 	gboolean ret;
 
-	path = geocode_object_cache_path_for_query (query);
+	path = _geocode_glib_cache_path_for_query (query);
 	ret = g_file_set_contents (path, contents, -1, NULL);
 
 	g_free (path);
 	return ret;
 }
 
-static gboolean
-geocode_object_cache_load (GFile  *query,
-			   char  **contents)
+gboolean
+_geocode_glib_cache_load (GFile  *query,
+			  char  **contents)
 {
 	char *path;
 	gboolean ret;
 
-	path = geocode_object_cache_path_for_query (query);
+	path = _geocode_glib_cache_path_for_query (query);
 	ret = g_file_get_contents (path, contents, NULL, NULL);
 
 	g_free (path);
@@ -612,7 +612,7 @@ on_query_data_loaded (GObject      *source_object,
 	}
 
 	/* Now that we can parse the result, save it to cache */
-	geocode_object_cache_save (query, contents);
+	_geocode_glib_cache_save (query, contents);
 	g_free (contents);
 
 	g_simple_async_result_set_op_res_gpointer (simple, ret, NULL);
@@ -772,7 +772,7 @@ geocode_object_resolve_async (GeocodeObject       *object,
 		return;
 	}
 
-	cache_path = geocode_object_cache_path_for_query (query);
+	cache_path = _geocode_glib_cache_path_for_query (query);
 	if (cache_path == NULL) {
 		g_file_load_contents_async (query,
 					    cancellable,
@@ -857,7 +857,7 @@ geocode_object_resolve (GeocodeObject       *object,
 	if (query == NULL)
 		return NULL;
 
-	if (geocode_object_cache_load (query, &contents) == FALSE) {
+	if (_geocode_glib_cache_load (query, &contents) == FALSE) {
 		if (g_file_load_contents (query,
 					  NULL,
 					  &contents,
@@ -872,7 +872,7 @@ geocode_object_resolve (GeocodeObject       *object,
 
 	ret = _geocode_parse_resolve_json (contents, error);
 	if (to_cache && ret != NULL)
-		geocode_object_cache_save (query, contents);
+		_geocode_glib_cache_save (query, contents);
 
 	g_free (contents);
 	g_object_unref (query);
@@ -967,7 +967,7 @@ geocode_object_search_async (GeocodeObject       *object,
 		return;
 	}
 
-	cache_path = geocode_object_cache_path_for_query (query);
+	cache_path = _geocode_glib_cache_path_for_query (query);
 	if (cache_path == NULL) {
 		g_file_load_contents_async (query,
 					    cancellable,
@@ -1171,7 +1171,7 @@ geocode_object_search (GeocodeObject       *object,
 	if (!query)
 		return NULL;
 
-	if (geocode_object_cache_load (query, &contents) == FALSE) {
+	if (_geocode_glib_cache_load (query, &contents) == FALSE) {
 		if (g_file_load_contents (query,
 					  NULL,
 					  &contents,
@@ -1189,7 +1189,7 @@ geocode_object_search (GeocodeObject       *object,
 
 	ret = _geocode_parse_search_json (contents, error);
 	if (to_cache && ret != NULL)
-		geocode_object_cache_save (query, contents);
+		_geocode_glib_cache_save (query, contents);
 
 	g_free (contents);
 	g_object_unref (query);
