@@ -10,6 +10,8 @@ public_files =						\
 	geocode-location.h				\
 	geocode-forward.c				\
 	geocode-forward.h				\
+	geocode-reverse.c				\
+	geocode-reverse.h				\
 	geocode-glib.c					\
 	geocode-glib.h					\
 	geocode-error.c					\
