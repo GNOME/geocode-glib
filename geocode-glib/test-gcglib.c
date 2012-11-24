@@ -118,8 +118,9 @@ static void
 test_xep (void)
 {
 	GHashTable *tp;
-	GeocodeObject *object;
-	GHashTable *ht;
+	GeocodeForward *object;
+	GList *res;
+	GeocodeLocation *loc;
 	GError *error = NULL;
 
 	tp = g_hash_table_new_full (g_str_hash, g_str_equal,
@@ -132,24 +133,25 @@ test_xep (void)
 	add_attr (tp, "building", "9");
 	add_attr (tp, "description", "My local pub");
 
-	object = geocode_object_new_for_params (tp);
+	object = geocode_forward_new_for_params (tp);
 	g_assert (object != NULL);
 	g_hash_table_destroy (tp);
 
-	ht = geocode_object_resolve (object, &error);
-	if (ht == NULL) {
+	res = geocode_forward_search (object, &error);
+	if (res == NULL) {
 		g_warning ("Failed at geocoding: %s", error->message);
 		g_error_free (error);
 	}
-	g_assert (ht != NULL);
+	g_assert (res != NULL);
 
 	g_object_unref (object);
-	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "longitude"), "-0.589669") == 0);
-	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "latitude"), "51.237070") == 0);
 
-	g_print ("Got geocode answer:\n");
-	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
-	g_hash_table_destroy (ht);
+	loc = res->data;
+	g_assert_cmpfloat (loc->latitude, ==, -0.589669);
+	g_assert_cmpfloat (loc->longitude, ==, 51.237070);
+
+	geocode_location_free (loc);
+	g_list_free (res);
 }
 
 static void
