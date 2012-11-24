@@ -51,8 +51,6 @@ G_DEFINE_TYPE (GeocodeForward, geocode_forward, G_TYPE_OBJECT)
 static void geocode_forward_add (GeocodeForward *forward,
 				 const char     *key,
 				 const char     *value);
-static GList *__geocode_parse_search_json (const char *contents,
-					  GError    **error);
 
 static void
 geocode_forward_finalize (GObject *gforward)
@@ -316,7 +314,7 @@ on_query_data_loaded (GObject      *source_forward,
 		return;
 	}
 
-	ret = __geocode_parse_search_json (contents, &error);
+	ret = _geocode_parse_search_json (contents, &error);
 
 	if (ret == NULL) {
 		g_simple_async_result_set_from_error (simple, error);
@@ -366,7 +364,7 @@ on_cache_data_loaded (GObject      *source_forward,
 		return;
 	}
 
-	ret = __geocode_parse_search_json (contents, &error);
+	ret = _geocode_parse_search_json (contents, &error);
 	g_free (contents);
 
 	if (ret == NULL) {
@@ -606,8 +604,8 @@ new_location_from_result (GHashTable *ht)
 	return loc;
 }
 
-static GList *
-__geocode_parse_search_json (const char *contents,
+GList *
+_geocode_parse_search_json (const char *contents,
 			     GError    **error)
 {
 	GList *ret;
@@ -717,7 +715,7 @@ geocode_forward_search (GeocodeForward      *forward,
 		to_cache = TRUE;
 	}
 
-	ret = __geocode_parse_search_json (contents, error);
+	ret = _geocode_parse_search_json (contents, error);
 	if (to_cache && ret != NULL)
 		_geocode_glib_cache_save (query, contents);
 

@@ -191,8 +191,8 @@ geocode_reverse_new_for_location (GeocodeLocation *location)
 	return object;
 }
 
-static GHashTable *
-__geocode_parse_resolve_json (const char *contents,
+GHashTable *
+_geocode_parse_resolve_json (const char *contents,
 			     GError    **error)
 {
 	GHashTable *ret;
@@ -358,7 +358,7 @@ on_query_data_loaded (GObject      *source_object,
 		return;
 	}
 
-	ret = __geocode_parse_resolve_json (contents, &error);
+	ret = _geocode_parse_resolve_json (contents, &error);
 
 	if (ret == NULL) {
 		g_simple_async_result_set_from_error (simple, error);
@@ -408,7 +408,7 @@ on_cache_data_loaded (GObject      *source_object,
 		return;
 	}
 
-	ret = __geocode_parse_resolve_json (contents, &error);
+	ret = _geocode_parse_resolve_json (contents, &error);
 	g_free (contents);
 
 	if (ret == NULL) {
