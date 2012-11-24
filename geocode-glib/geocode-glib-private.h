@@ -38,6 +38,8 @@ GHashTable *_geocode_parse_resolve_json (const char *contents,
 					 GError    **error);
 GList      *_geocode_parse_search_json  (const char *contents,
 					 GError    **error);
+GFile      *_get_resolve_query_for_params (GHashTable  *orig_ht,
+					   gboolean     reverse);
 
 char *_geocode_glib_cache_path_for_query (GFile *query);
 gboolean _geocode_glib_cache_save (GFile      *query,

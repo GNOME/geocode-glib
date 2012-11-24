@@ -443,20 +443,21 @@ dup_ht (GHashTable *ht)
 	return ret;
 }
 
-static GFile *
-get_resolve_query_for_params (GeocodeReverse *object,
-			      GError       **error)
+GFile *
+_get_resolve_query_for_params (GHashTable  *orig_ht,
+			      gboolean     reverse)
 {
 	GFile *ret;
 	GHashTable *ht;
 	char *locale;
 	char *params, *uri;
 
-	ht = dup_ht (object->priv->ht);
+	ht = dup_ht (orig_ht);
 
 	g_hash_table_insert (ht, "appid", YAHOO_APPID);
 	g_hash_table_insert (ht, "flags", "QJT");
-	g_hash_table_insert (ht, "gflags", "R");
+	if (reverse)
+		g_hash_table_insert (ht, "gflags", "R");
 
 	locale = NULL;
 	if (g_hash_table_lookup (ht, "locale") == NULL) {
@@ -510,7 +511,7 @@ geocode_reverse_resolve_async (GeocodeReverse       *object,
 					    user_data,
 					    geocode_reverse_resolve_async);
 
-	query = get_resolve_query_for_params (object, &error);
+	query = _get_resolve_query_for_params (object->priv->ht, TRUE);
 	if (query == NULL) {
 		g_simple_async_result_take_error (simple, error);
 		g_simple_async_result_complete_in_idle (simple);
@@ -599,7 +600,7 @@ geocode_reverse_resolve (GeocodeReverse       *object,
 
 	g_return_val_if_fail (GEOCODE_IS_REVERSE (object), NULL);
 
-	query = get_resolve_query_for_params (object, error);
+	query = _get_resolve_query_for_params (object->priv->ht, TRUE);
 	if (query == NULL)
 		return NULL;
 
