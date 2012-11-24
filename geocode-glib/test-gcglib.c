@@ -78,18 +78,22 @@ got_geocode_search_cb (GObject *source_object,
 static void
 test_rev (void)
 {
-	GeocodeObject *object;
+	GeocodeLocation *loc;
+	GeocodeReverse *rev;
 	GError *error = NULL;
 	GHashTable *ht;
 
-	object = geocode_object_new_for_coords (51.237070, -0.589669);
-	ht = geocode_object_resolve (object, &error);
+	loc = geocode_location_new (51.237070, -0.589669);
+	rev = geocode_reverse_new_for_location (loc);
+	geocode_location_free (loc);
+
+	ht = geocode_reverse_resolve (rev, &error);
 	if (ht == NULL) {
 		g_warning ("Failed at reverse geocoding: %s", error->message);
 		g_error_free (error);
 	}
 	g_assert (ht != NULL);
-	g_object_unref (object);
+	g_object_unref (rev);
 
 	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "neighborhood"), "Onslow Village") == 0);
 
