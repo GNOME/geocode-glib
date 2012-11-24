@@ -13,6 +13,12 @@ static GMainLoop *loop = NULL;
 static char **params = NULL;
 
 static void
+print_loc (GeocodeLocation *loc)
+{
+	g_print ("\t%s @ %lf, %lf\n", loc->description, loc->latitude, loc->longitude);
+}
+
+static void
 print_res (const char *key,
 	   const char *value,
 	   gpointer    data)
@@ -25,11 +31,11 @@ got_geocode_cb (GObject *source_object,
 		GAsyncResult *res,
 		gpointer user_data)
 {
-	GeocodeObject *object = (GeocodeObject *) source_object;
+	GeocodeReverse *object = (GeocodeReverse *) source_object;
 	GHashTable *ht;
 	GError *error = NULL;
 
-	ht = geocode_object_resolve_finish (object, res, &error);
+	ht = geocode_reverse_resolve_finish (object, res, &error);
 	if (ht == NULL) {
 		g_message ("Failed to get geocode: %s", error->message);
 		g_error_free (error);
@@ -50,11 +56,11 @@ got_geocode_search_cb (GObject *source_object,
 		       GAsyncResult *res,
 		       gpointer user_data)
 {
-	GeocodeObject *object = (GeocodeObject *) source_object;
+	GeocodeForward *object = (GeocodeForward *) source_object;
 	GList *results, *l;
 	GError *error = NULL;
 
-	results = geocode_object_search_finish (object, res, &error);
+	results = geocode_forward_search_finish (object, res, &error);
 	if (results == NULL) {
 		g_message ("Failed to search geocode: %s", error->message);
 		g_error_free (error);
@@ -62,11 +68,11 @@ got_geocode_search_cb (GObject *source_object,
 	}
 
 	for (l = results; l != NULL; l = l->next) {
-		GHashTable *ht = l->data;
+		GeocodeLocation *loc = l->data;
 
 		g_print ("Got geocode search answer:\n");
-		g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
-		g_hash_table_destroy (ht);
+		print_loc (loc);
+		geocode_location_free (loc);
 	}
 	g_list_free (results);
 
@@ -320,20 +326,31 @@ test_search_json (void)
 	/* FIXME: Implement */
 }
 
+static GeocodeLocation *
+new_loc (void)
+{
+	gdouble latitude, longitude;
+
+	if (params[0] == NULL ||
+	    *params[0] == '\0' ||
+	    params[1] == NULL ||
+	    *params[1] == '\0')
+		return NULL;
+	latitude = strtod (params[0], NULL);
+	longitude = strtod (params[1], NULL);
+	return geocode_location_new (latitude, longitude);
+}
+
 int main (int argc, char **argv)
 {
 	GError *error = NULL;
 	GOptionContext *context;
-	GeocodeObject *object;
-	gboolean do_search = FALSE;
 	gboolean do_rev_geocoding = FALSE;
 	const GOptionEntry entries[] = {
-		{ "search", 0, 0, G_OPTION_ARG_NONE, &do_search, "Whether to search for the given parameters", NULL },
 		{ "reverse", 0, 0, G_OPTION_ARG_NONE, &do_rev_geocoding, "Whether to do reverse geocoding for the given parameters", NULL },
 		{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &params, NULL, "[KEY=VALUE...]" },
 		{ NULL }
 	};
-	guint i;
 
 	setlocale (LC_ALL, "");
 	g_type_init ();
@@ -360,30 +377,25 @@ int main (int argc, char **argv)
 		return g_test_run ();
 	}
 
-	object = g_object_new (GEOCODE_TYPE_OBJECT, NULL);
+	if (do_rev_geocoding == FALSE) {
+		GeocodeForward *forward;
 
-	if (do_search) {
-		geocode_object_add (object, "location", params[0]);
-		geocode_object_search_async (object, NULL, got_geocode_search_cb, NULL);
+		forward = geocode_forward_new_for_string (params[0]);
+		geocode_forward_search_async (forward, NULL, got_geocode_search_cb, NULL);
 	} else {
-		if (do_rev_geocoding) {
-			/* FIXME */
-			/* _geocode_object_set_lookup_type (object, GEOCODE_GLIB_RESOLVE_REVERSE); */
-		}
-		for (i = 0; params[i] != NULL; i++) {
-			char **items;
+		GeocodeReverse *reverse;
+		GeocodeLocation *loc;
 
-			items = g_strsplit (params[i], "=", 2);
-			if (items[0] == NULL || *items[0] == '\0' ||
-			    items[1] == NULL || *items[1] == '\0') {
-				g_warning ("Failed to parse parameter: '%s'", params[i]);
-				return 1;
-			}
-
-			geocode_object_add (object, items[0], items[1]);
-			g_strfreev (items);
+		loc = new_loc ();
+		if (loc == NULL) {
+			g_print ("Options parsing failed: Use for example\n"
+				 "test-gcglib --reverse -- 51.237070 -0.589669\n");
+			return 1;
 		}
-		geocode_object_resolve_async (object, NULL, got_geocode_cb, NULL);
+		print_loc (loc);
+		reverse = geocode_reverse_new_for_location (loc);
+		geocode_location_free (loc);
+		geocode_reverse_resolve_async (reverse, NULL, got_geocode_cb, NULL);
 	}
 
 	loop = g_main_loop_new (NULL, FALSE);
