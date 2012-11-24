@@ -37,12 +37,9 @@ geocode_location_copy (gpointer boxed)
 	return to;
 }
 
-static void
-geocode_location_free (gpointer boxed)
+void
+geocode_location_free (GeocodeLocation *loc)
 {
-	GeocodeLocation *loc;
-
-	loc = (GeocodeLocation *) boxed;
 	g_free (loc->description);
 	g_free (loc);
 }

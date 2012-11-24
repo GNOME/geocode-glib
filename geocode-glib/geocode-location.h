@@ -45,6 +45,8 @@ GeocodeLocation *geocode_location_new_with_description (gdouble     latitude,
 							gdouble     longitude,
 							const char *description);
 
+void geocode_location_free (GeocodeLocation *loc);
+
 G_END_DECLS
 
 #endif /* GEOCODE_LOCATION_H */
