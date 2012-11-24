@@ -81,6 +81,43 @@ geocode_forward_init (GeocodeForward *forward)
 	forward->priv->answer_count = DEFAULT_ANSWER_COUNT;
 }
 
+static void
+set_is_search (GeocodeForward *forward,
+	       GObject        *object)
+{
+	if (forward->priv->answer_count > 1)
+		g_object_set_data (object, "is-search", GINT_TO_POINTER (1));
+}
+
+static gboolean
+is_search (GObject *object)
+{
+	return GPOINTER_TO_INT (g_object_get_data (G_OBJECT (object), "is-search"));
+}
+
+static GList *
+_geocode_parse_single_result_json (const char  *contents,
+				   GError     **error)
+{
+	GList *ret;
+	GHashTable *ht;
+	GeocodeLocation *loc;
+	gdouble longitude;
+	gdouble latitude;
+
+	ht = _geocode_parse_resolve_json (contents, error);
+	if (ht == NULL)
+		return NULL;
+
+	longitude = strtod (g_hash_table_lookup (ht, "longitude"), NULL);
+	latitude = strtod (g_hash_table_lookup (ht, "latitude"), NULL);
+	loc = geocode_location_new (longitude, latitude);
+
+	ret = g_list_append (NULL, loc);
+
+	return ret;
+}
+
 static gboolean
 parse_lang (const char *locale,
 	    char      **language_codep,
@@ -222,6 +259,8 @@ geocode_forward_fill_params (GeocodeForward *forward,
  *
  * See also: <ulink url="http://xmpp.org/extensions/xep-0080.html">XEP-0080 specification</ulink>.
  *
+ * Note that you will get exactly one result when doing the search.
+ *
  * Returns: a new #GeocodeForward. Use g_object_unref() when done.
  **/
 GeocodeForward *
@@ -238,6 +277,7 @@ geocode_forward_new_for_params (GHashTable *params)
 
 	forward = g_object_new (GEOCODE_TYPE_FORWARD, NULL);
 	geocode_forward_fill_params (forward, params, FALSE);
+	geocode_forward_set_answer_count (forward, 1);
 
 	return forward;
 }
@@ -314,7 +354,10 @@ on_query_data_loaded (GObject      *source_forward,
 		return;
 	}
 
-	ret = _geocode_parse_search_json (contents, &error);
+	if (is_search (G_OBJECT (query)))
+		ret = _geocode_parse_search_json (contents, &error);
+	else
+		ret = _geocode_parse_single_result_json (contents, &error);
 
 	if (ret == NULL) {
 		g_simple_async_result_set_from_error (simple, error);
@@ -357,6 +400,8 @@ on_cache_data_loaded (GObject      *source_forward,
 		GFile *query;
 
 		query = g_object_get_data (G_OBJECT (cache), "query");
+		g_object_set_data (G_OBJECT (query), "is-search",
+				   g_object_get_data (G_OBJECT (cache), "is-search"));
 		g_file_load_contents_async (query,
 					    cancellable,
 					    on_query_data_loaded,
@@ -364,7 +409,10 @@ on_cache_data_loaded (GObject      *source_forward,
 		return;
 	}
 
-	ret = _geocode_parse_search_json (contents, &error);
+	if (is_search (G_OBJECT (cache)))
+		ret = _geocode_parse_search_json (contents, &error);
+	else
+		ret = _geocode_parse_single_result_json (contents, &error);
 	g_free (contents);
 
 	if (ret == NULL) {
@@ -457,7 +505,10 @@ geocode_forward_search_async (GeocodeForward       *forward,
 					    user_data,
 					    geocode_forward_search_async);
 
-	query = get_search_query_for_params (forward, &error);
+	if (forward->priv->answer_count > 1)
+		query = get_search_query_for_params (forward, &error);
+	else
+		query = _get_resolve_query_for_params (forward->priv->ht, FALSE);
 	if (!query) {
 		g_simple_async_result_take_error (simple, error);
 		g_simple_async_result_complete_in_idle (simple);
@@ -467,6 +518,7 @@ geocode_forward_search_async (GeocodeForward       *forward,
 
 	cache_path = _geocode_glib_cache_path_for_query (query);
 	if (cache_path == NULL) {
+		set_is_search (forward, G_OBJECT (query));
 		g_file_load_contents_async (query,
 					    cancellable,
 					    on_query_data_loaded,
@@ -476,6 +528,7 @@ geocode_forward_search_async (GeocodeForward       *forward,
 		GFile *cache;
 
 		cache = g_file_new_for_path (cache_path);
+		set_is_search (forward, G_OBJECT (cache));
 		g_object_set_data_full (G_OBJECT (cache), "query", query, (GDestroyNotify) g_object_unref);
 		g_object_set_data (G_OBJECT (cache), "cancellable", cancellable);
 		g_file_load_contents_async (cache,
@@ -695,7 +748,11 @@ geocode_forward_search (GeocodeForward      *forward,
 
 	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), NULL);
 
-	query = get_search_query_for_params (forward, error);
+	if (forward->priv->answer_count > 1)
+		query = get_search_query_for_params (forward, error);
+	else
+		query = _get_resolve_query_for_params (forward->priv->ht, FALSE);
+
 	if (!query)
 		return NULL;
 
@@ -715,7 +772,10 @@ geocode_forward_search (GeocodeForward      *forward,
 		to_cache = TRUE;
 	}
 
-	ret = _geocode_parse_search_json (contents, error);
+	if (forward->priv->answer_count > 1)
+		ret = _geocode_parse_search_json (contents, error);
+	else
+		ret = _geocode_parse_single_result_json (contents, error);
 	if (to_cache && ret != NULL)
 		_geocode_glib_cache_save (query, contents);
 
