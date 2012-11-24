@@ -157,29 +157,30 @@ test_xep (void)
 static void
 test_pub (void)
 {
-	GeocodeObject *object;
+	GeocodeForward *object;
 	GError *error = NULL;
-	GHashTable *ht;
-	gdouble longitude, latitude;
+	GList *res;
+	GeocodeLocation *loc;
 
-	object = geocode_object_new_for_location ("9, old palace road, guildford, surrey");
-	ht = geocode_object_resolve (object, &error);
-	if (ht == NULL) {
+	object = geocode_forward_new_for_string ("9, old palace road, guildford, surrey");
+	geocode_forward_set_answer_count (object, 1);
+	res = geocode_forward_search (object, &error);
+	if (res == NULL) {
 		g_warning ("Failed at geocoding: %s", error->message);
 		g_error_free (error);
 	}
-	g_assert (ht != NULL);
+	g_assert (res != NULL);
 
 	g_object_unref (object);
-	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "longitude"), "-0.589669") == 0);
-	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "latitude"), "51.237070") == 0);
-	g_assert (geocode_object_get_coords (ht, &longitude, &latitude) != FALSE);
-	g_assert (longitude == -0.589669);
-	g_assert (latitude == 51.237070);
 
-	g_print ("Got geocode answer:\n");
-	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
-	g_hash_table_destroy (ht);
+	g_assert_cmpint (g_list_length (res), ==, 1);
+	loc = res->data;
+
+	g_assert_cmpfloat (loc->latitude, ==, -0.589669);
+	g_assert_cmpfloat (loc->longitude, ==, 51.237070);
+
+	geocode_location_free (loc);
+	g_list_free (res);
 }
 
 static void
