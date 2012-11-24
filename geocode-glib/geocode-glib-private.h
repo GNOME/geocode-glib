@@ -36,7 +36,7 @@ typedef enum {
 
 GHashTable *_geocode_parse_resolve_json (const char *contents,
 					 GError    **error);
-GList *     _geocode_parse_search_json  (const char *contents,
+GList      *_geocode_parse_search_json  (const char *contents,
 					 GError    **error);
 
 char *_geocode_glib_cache_path_for_query (GFile *query);
