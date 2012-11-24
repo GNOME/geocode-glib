@@ -8,6 +8,8 @@ lib_LTLIBRARIES = libgeocode-glib.la
 public_files =						\
 	geocode-location.c				\
 	geocode-location.h				\
+	geocode-forward.c				\
+	geocode-forward.h				\
 	geocode-glib.c					\
 	geocode-glib.h					\
 	geocode-error.c					\
@@ -26,7 +28,7 @@ libgeocode_glib_la_LDFLAGS =				\
 	-export-symbols $(srcdir)/geocode-glib.symbols
 
 gcglibdir = $(pkgincludedir)
-gcglib_HEADERS = geocode-glib.h geocode-location.h
+gcglib_HEADERS = geocode-glib.h geocode-location.h geocode-forward.h
 
 AM_CFLAGS = -I$(top_srcdir) $(GEOCODE_CFLAGS) $(COMMON_CFLAGS) $(WARN_CFLAGS) $(DISABLE_DEPRECATED)
 
