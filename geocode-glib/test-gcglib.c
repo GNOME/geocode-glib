@@ -336,8 +336,8 @@ new_loc (void)
 	    params[1] == NULL ||
 	    *params[1] == '\0')
 		return NULL;
-	latitude = strtod (params[0], NULL);
-	longitude = strtod (params[1], NULL);
+	latitude = g_ascii_strtod (params[0], NULL);
+	longitude = g_ascii_strtod (params[1], NULL);
 	return geocode_location_new (latitude, longitude);
 }
 
