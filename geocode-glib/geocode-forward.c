@@ -186,7 +186,7 @@ geocode_forward_get_lang_for_locale (const char *locale)
 
 	return g_strdup_printf ("%s%s%s",
 				lang,
-				territory ? "_" : "",
+				territory ? "-" : "",
 				territory ? territory : "");
 }
 
