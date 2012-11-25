@@ -346,7 +346,9 @@ int main (int argc, char **argv)
 	GError *error = NULL;
 	GOptionContext *context;
 	gboolean do_rev_geocoding = FALSE;
+	int answer_count = 10;
 	const GOptionEntry entries[] = {
+		{ "count", 0, 0, G_OPTION_ARG_INT, &answer_count, "Number of answers to get for forward searches", NULL },
 		{ "reverse", 0, 0, G_OPTION_ARG_NONE, &do_rev_geocoding, "Whether to do reverse geocoding for the given parameters", NULL },
 		{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &params, NULL, "[KEY=VALUE...]" },
 		{ NULL }
@@ -381,6 +383,7 @@ int main (int argc, char **argv)
 		GeocodeForward *forward;
 
 		forward = geocode_forward_new_for_string (params[0]);
+		geocode_forward_set_answer_count (forward, answer_count);
 		geocode_forward_search_async (forward, NULL, got_geocode_search_cb, NULL);
 	} else {
 		GeocodeReverse *reverse;
