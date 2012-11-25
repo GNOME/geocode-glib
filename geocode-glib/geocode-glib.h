@@ -32,33 +32,6 @@
 
 G_BEGIN_DECLS
 
-GType geocode_object_get_type (void) G_GNUC_CONST;
-
-#define GEOCODE_TYPE_OBJECT                  (geocode_object_get_type ())
-#define GEOCODE_OBJECT(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), GEOCODE_TYPE_OBJECT, GeocodeObject))
-#define GEOCODE_IS_OBJECT(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GEOCODE_TYPE_OBJECT))
-#define GEOCODE_OBJECT_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), GEOCODE_TYPE_OBJECT, GeocodeObjectClass))
-#define GEOCODE_IS_OBJECT_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), GEOCODE_TYPE_OBJECT))
-#define GEOCODE_OBJECT_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), GEOCODE_TYPE_OBJECT, GeocodeObjectClass))
-
-/**
- * GeocodeObject:
- *
- * All the fields in the #GeocodeObject structure are private and should never be accessed directly.
-**/
-typedef struct _GeocodeObject        GeocodeObject;
-typedef struct _GeocodeObjectClass   GeocodeObjectClass;
-typedef struct _GeocodeObjectPrivate GeocodeObjectPrivate;
-
-struct _GeocodeObject {
-	GObject parent_instance;
-	GeocodeObjectPrivate *priv;
-};
-
-struct _GeocodeObjectClass {
-	GObjectClass parent_class;
-};
-
 /* Known metadata fields */
 
 /**
@@ -262,44 +235,6 @@ struct _GeocodeObjectClass {
  * setback from road center-line for the matched area.
 **/
 #define GEOCODE_OBJECT_FIELD_OFFSETLON		"offsetlon"
-
-GeocodeObject *geocode_object_new_for_params     (GHashTable *params);
-GeocodeObject *geocode_object_new_for_params_str (GHashTable *params_str);
-GeocodeObject *geocode_object_new_for_location   (const char *location);
-GeocodeObject *geocode_object_new_for_coords     (gdouble     latitude,
-					          gdouble     longitude);
-
-void geocode_object_add (GeocodeObject *object,
-			 const char    *key,
-			 const char    *value);
-
-void  geocode_object_resolve_async  (GeocodeObject       *object,
-				     GCancellable        *cancellable,
-				     GAsyncReadyCallback  callback,
-				     gpointer             user_data);
-
-GHashTable *geocode_object_resolve_finish (GeocodeObject  *object,
-					   GAsyncResult   *res,
-					   GError        **error);
-
-GHashTable * geocode_object_resolve (GeocodeObject  *object,
-				     GError        **error);
-
-void  geocode_object_search_async  (GeocodeObject       *object,
-				    GCancellable        *cancellable,
-				    GAsyncReadyCallback  callback,
-				    gpointer             user_data);
-
-GList *geocode_object_search_finish (GeocodeObject  *object,
-				     GAsyncResult   *res,
-				     GError        **error);
-
-GList * geocode_object_search (GeocodeObject  *object,
-			       GError        **error);
-
-gboolean geocode_object_get_coords (GHashTable *results,
-				    gdouble    *longitude,
-				    gdouble    *latitude);
 
 G_END_DECLS
 
