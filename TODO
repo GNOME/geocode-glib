@@ -1,7 +1,6 @@
 - More test cases
 - Write examples
 
-- Make geocode_foward_new_for_params() output warnings if a key is unknown to us
 - Create better descriptions from the search results, and fix Paris test case for it
 - Add test case for search json parsing
 - Make answer count a property and immutable if XEP params are passed

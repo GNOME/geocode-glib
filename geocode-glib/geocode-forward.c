@@ -131,7 +131,7 @@ static struct {
 	{ "postalcode", "postal" },
 	{ "street", "street" },
 	{ "building", "house" },
-	{ "floor", "" },
+	{ "floor", NULL },
 	{ "room", "unit" },
 	{ "text", NULL },
 	{ "description", NULL },
@@ -139,30 +139,49 @@ static struct {
 	{ "language", "locale" },
 };
 
+static const char *
+tp_attr_to_gc_attr (const char *attr,
+		    gboolean   *found)
+{
+	guint i;
+
+	*found = FALSE;
+
+	for (i = 0; i < G_N_ELEMENTS (attrs_map); i++) {
+		if (g_str_equal (attr, attrs_map[i].tp_attr)){
+			*found = TRUE;
+			return attrs_map[i].gc_attr;
+		}
+	}
+
+	return NULL;
+}
+
 static void
 geocode_forward_fill_params (GeocodeForward *forward,
 			     GHashTable    *params)
 {
-	guint i;
+	GHashTableIter iter;
+	GValue *value;
+	const char *key;
 
-	for (i = 0; i < G_N_ELEMENTS (attrs_map); i++) {
+	g_hash_table_iter_init (&iter, params);
+	while (g_hash_table_iter_next (&iter, (gpointer *) &key, (gpointer *) &value)) {
+		gboolean found;
+		const char *gc_attr;
 		const char *str;
-		GValue *value;
 
-		if (attrs_map[i].gc_attr == NULL)
+		gc_attr = tp_attr_to_gc_attr (key, &found);
+		if (found == FALSE) {
+			g_warning ("XEP attribute '%s' unhandled", key);
 			continue;
-
-		value = g_hash_table_lookup (params, attrs_map[i].tp_attr);
-		if (value == NULL)
-			continue;
+		}
 
 		str = g_value_get_string (value);
 		if (str == NULL)
 			continue;
 
-		geocode_forward_add (forward,
-				    attrs_map[i].gc_attr,
-				    str);
+		geocode_forward_add (forward, gc_attr, str);
 	}
 }
 
