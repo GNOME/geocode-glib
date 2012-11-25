@@ -141,29 +141,22 @@ static struct {
 
 static void
 geocode_forward_fill_params (GeocodeForward *forward,
-			    GHashTable    *params,
-			    gboolean       value_is_str)
+			     GHashTable    *params)
 {
 	guint i;
 
 	for (i = 0; i < G_N_ELEMENTS (attrs_map); i++) {
 		const char *str;
+		GValue *value;
 
 		if (attrs_map[i].gc_attr == NULL)
 			continue;
 
-		if (value_is_str == FALSE) {
-			GValue *value;
+		value = g_hash_table_lookup (params, attrs_map[i].tp_attr);
+		if (value == NULL)
+			continue;
 
-			value = g_hash_table_lookup (params, attrs_map[i].tp_attr);
-			if (value == NULL)
-				continue;
-
-			str = g_value_get_string (value);
-		} else {
-			str = g_hash_table_lookup (params, attrs_map[i].tp_attr);
-		}
-
+		str = g_value_get_string (value);
 		if (str == NULL)
 			continue;
 
@@ -200,7 +193,7 @@ geocode_forward_new_for_params (GHashTable *params)
 	}
 
 	forward = g_object_new (GEOCODE_TYPE_FORWARD, NULL);
-	geocode_forward_fill_params (forward, params, FALSE);
+	geocode_forward_fill_params (forward, params);
 	geocode_forward_set_answer_count (forward, 1);
 
 	return forward;
