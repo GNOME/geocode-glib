@@ -33,14 +33,11 @@
 
 /**
  * SECTION:geocode-reverse
- * @short_description: Geocode glib main functions
+ * @short_description: Geocode reverse geocoding object
  * @include: geocode-glib/geocode-glib.h
  *
- * Contains functions for geocoding and reverse geocoding using the
- * <ulink url="http://developer.yahoo.com/geo/placefinder/guide/requests.html">Yahoo! Place Finder APIs</ulink>
- * for geocoding and reverse geocoding, and the
- * <ulink url="http://developer.yahoo.com/geo/geoplanet/">Yahoo! GeoPlanet APIs</ulink>
- * for forward geocoding searches.
+ * Contains functions for reverse geocoding using the
+ * <ulink url="http://developer.yahoo.com/geo/placefinder/guide/requests.html">Yahoo! Place Finder APIs</ulink>.
  **/
 
 struct _GeocodeReversePrivate {
@@ -79,9 +76,8 @@ geocode_reverse_init (GeocodeReverse *object)
 }
 
 /**
- * geocode_reverse_new_for_coords:
- * @latitude: a valid latitude
- * @longitude: a valid longitude
+ * geocode_reverse_new_for_location:
+ * @location: a #GeocodeLocation object
  *
  * Creates a new #GeocodeReverse to perform reverse geocoding with.
  * Use geocode_reverse_resolve_async() to perform the resolution.
@@ -409,7 +405,7 @@ _get_resolve_query_for_params (GHashTable  *orig_ht,
  * @callback: a #GAsyncReadyCallback to call when the request is satisfied
  * @user_data: the data to pass to callback function
  *
- * Asynchronously gets the result of a geocoding or reverse geocoding
+ * Asynchronously gets the result of a reverse geocoding
  * query using a web service. Use geocode_reverse_resolve() to do the same
  * thing synchronously.
  *
@@ -418,9 +414,9 @@ _get_resolve_query_for_params (GHashTable  *orig_ht,
  **/
 void
 geocode_reverse_resolve_async (GeocodeReverse       *object,
-			      GCancellable        *cancellable,
-			      GAsyncReadyCallback  callback,
-			      gpointer             user_data)
+			       GCancellable        *cancellable,
+			       GAsyncReadyCallback  callback,
+			       gpointer             user_data)
 {
 	GSimpleAsyncResult *simple;
 	GFile *query;
@@ -469,7 +465,7 @@ geocode_reverse_resolve_async (GeocodeReverse       *object,
  * @res: a #GAsyncResult.
  * @error: a #GError.
  *
- * Finishes a query operation. See geocode_reverse_resolve_async().
+ * Finishes a reverse geocoding operation. See geocode_reverse_resolve_async().
  *
  * Returns: (element-type utf8 utf8) (transfer full):
  * a #GHashTable containing the results of the query
@@ -478,8 +474,8 @@ geocode_reverse_resolve_async (GeocodeReverse       *object,
  **/
 GHashTable *
 geocode_reverse_resolve_finish (GeocodeReverse       *object,
-			       GAsyncResult        *res,
-			       GError             **error)
+				GAsyncResult        *res,
+				GError             **error)
 {
 	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
 	GHashTable *ret;
@@ -504,7 +500,7 @@ out:
  * @object: a #GeocodeReverse representing a query
  * @error: a #GError
  *
- * Gets the result of a geocoding or reverse geocoding
+ * Gets the result of a reverse geocoding
  * query using a web service.
  *
  * Returns: (element-type utf8 utf8) (transfer full):
@@ -513,7 +509,7 @@ out:
  * Free the returned string with g_hash_table_destroy() when done.
  **/
 GHashTable *
-geocode_reverse_resolve (GeocodeReverse       *object,
+geocode_reverse_resolve (GeocodeReverse      *object,
 			 GError             **error)
 {
 	GFile *query;

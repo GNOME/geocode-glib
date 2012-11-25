@@ -27,12 +27,24 @@
 
 G_BEGIN_DECLS
 
-typedef struct {
+typedef struct _GeocodeLocation GeocodeLocation;
+
+/**
+ * GeocodeLocation:
+ * @longitude: a longitude, in degrees
+ * @latitude: a latitude, in degrees
+ * @timestamp: a timestamp in seconds since Epoch.
+ * @description: a description for display
+ *
+ * The #GeocodeLocation structure represents a location
+ * on earth, with an optional description.
+ **/
+struct _GeocodeLocation {
 	gdouble longitude;
 	gdouble latitude;
 	gint64  timestamp;
 	char   *description;
-} GeocodeLocation;
+};
 
 #define GEOCODE_TYPE_LOCATION (geocode_location_get_type ())
 

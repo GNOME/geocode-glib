@@ -210,7 +210,7 @@ geocode_forward_new_for_params (GHashTable *params)
  * geocode_forward_new_for_string:
  * @str: a string containing a free-form description of the location
  *
- * Creates a new #GeocodeForward to perform geocoding with. The
+ * Creates a new #GeocodeForward to perform forward geocoding with. The
  * string is in free-form format.
  *
  * Returns: a new #GeocodeForward. Use g_object_unref() when done.
@@ -228,17 +228,6 @@ geocode_forward_new_for_string (const char *location)
 	return forward;
 }
 
-/**
- * geocode_forward_add:
- * @forward: a #GeocodeForward
- * @key: a string representing a parameter to the web service
- * @value: a string representing the value of a parameter
- *
- * Adds parameters to the geocoding or reverse geocoding request.
- * A copy of the key and value parameters are kept internally.
- *
- * This function is mainly intended for language bindings.
- **/
 static void
 geocode_forward_add (GeocodeForward *forward,
 		     const char    *key,
@@ -404,7 +393,7 @@ get_search_query_for_params (GeocodeForward *forward,
  * @callback: a #GAsyncReadyCallback to call when the request is satisfied
  * @user_data: the data to pass to callback function
  *
- * Asynchronously gets a list of a geocoding
+ * Asynchronously performs a forward geocoding
  * query using a web service. Use geocode_forward_search() to do the same
  * thing synchronously.
  *
@@ -412,7 +401,7 @@ get_search_query_for_params (GeocodeForward *forward,
  * geocode_forward_search_finish() to get the result of the operation.
  **/
 void
-geocode_forward_search_async (GeocodeForward       *forward,
+geocode_forward_search_async (GeocodeForward      *forward,
 			      GCancellable        *cancellable,
 			      GAsyncReadyCallback  callback,
 			      gpointer             user_data)
@@ -469,7 +458,7 @@ geocode_forward_search_async (GeocodeForward       *forward,
  * @res: a #GAsyncResult.
  * @error: a #GError.
  *
- * Finishes a query operation. See geocode_forward_search_async().
+ * Finishes a forward geocoding operation. See geocode_forward_search_async().
  *
  * Returns: (element-type GHashTable) (transfer full):
  * a #GHashTable containing the results of the query
@@ -656,7 +645,7 @@ parse:
  * @forward: a #GeocodeForward representing a query
  * @error: a #GError
  *
- * Gets the result of a geocoding or reverse geocoding
+ * Gets the result of a forward geocoding
  * query using a web service.
  *
  * Returns: (element-type GHashTable) (transfer full):
@@ -712,6 +701,13 @@ geocode_forward_search (GeocodeForward      *forward,
 	return ret;
 }
 
+/**
+ * geocode_forward_set_answer_count:
+ * @forward: a #GeocodeForward representing a query
+ * @count: the number of requested results
+ *
+ * Sets the number of requested results to @count.
+ **/
 void
 geocode_forward_set_answer_count (GeocodeForward *forward,
 				  guint           count)

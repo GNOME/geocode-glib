@@ -22,6 +22,13 @@
 
 #include <geocode-location.h>
 
+/**
+ * SECTION:geocode-location
+ * @short_description: Geocode location object
+ * @include: geocode-glib/geocode-glib.h
+ *
+ * An object representing a location, with optional description.
+ **/
 static gpointer
 geocode_location_copy (gpointer boxed)
 {
@@ -37,6 +44,12 @@ geocode_location_copy (gpointer boxed)
 	return to;
 }
 
+/**
+ * geocode_location_free:
+ * @loc: a #GeocodeLocation object
+ *
+ * Frees a #GeocodeLocation object.
+ **/
 void
 geocode_location_free (GeocodeLocation *loc)
 {
@@ -46,6 +59,15 @@ geocode_location_free (GeocodeLocation *loc)
 
 G_DEFINE_BOXED_TYPE(GeocodeLocation, geocode_location, geocode_location_copy, geocode_location_free)
 
+/**
+ * geocode_location_new:
+ * @latitude: a valid latitude
+ * @longitude: a valid longitude
+ *
+ * Creates a new #GeocodeLocation object.
+ *
+ * Returns: a new #GeocodeLocation object. Use geocode_location_free() when done.
+ **/
 GeocodeLocation *
 geocode_location_new (gdouble latitude,
 		      gdouble longitude)
@@ -62,6 +84,16 @@ geocode_location_new (gdouble latitude,
 	return ret;
 }
 
+/**
+ * geocode_location_new_with_description:
+ * @latitude: a valid latitude
+ * @longitude: a valid longitude
+ * @description: a description for the location
+ *
+ * Creates a new #GeocodeLocation object.
+ *
+ * Returns: a new #GeocodeLocation object. Use geocode_location_free() when done.
+ **/
 GeocodeLocation *
 geocode_location_new_with_description (gdouble     latitude,
 				       gdouble     longitude,

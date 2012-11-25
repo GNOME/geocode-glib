@@ -37,9 +37,9 @@
  *
  * Contains functions for geocoding and reverse geocoding using the
  * <ulink url="http://developer.yahoo.com/geo/placefinder/guide/requests.html">Yahoo! Place Finder APIs</ulink>
- * for geocoding and reverse geocoding, and the
+ * for reverse geocoding, and the
  * <ulink url="http://developer.yahoo.com/geo/geoplanet/">Yahoo! GeoPlanet APIs</ulink>
- * for forward geocoding searches.
+ * for forward geocoding.
  **/
 
 char *

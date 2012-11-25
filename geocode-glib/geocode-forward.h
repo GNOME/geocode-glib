@@ -48,11 +48,18 @@ typedef struct _GeocodeForwardClass   GeocodeForwardClass;
 typedef struct _GeocodeForwardPrivate GeocodeForwardPrivate;
 
 struct _GeocodeForward {
+	/* <private> */
 	GObject parent_instance;
 	GeocodeForwardPrivate *priv;
 };
 
+/**
+ * GeocodeForwardClass:
+ *
+ * All the fields in the #GeocodeForwardClass structure are private and should never be accessed directly.
+**/
 struct _GeocodeForwardClass {
+	/* <private> */
 	GObjectClass parent_class;
 };
 

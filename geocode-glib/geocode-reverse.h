@@ -47,11 +47,18 @@ typedef struct _GeocodeReverseClass   GeocodeReverseClass;
 typedef struct _GeocodeReversePrivate GeocodeReversePrivate;
 
 struct _GeocodeReverse {
+	/* <private> */
 	GObject parent_instance;
 	GeocodeReversePrivate *priv;
 };
 
+/**
+ * GeocodeReverseClass:
+ *
+ * All the fields in the #GeocodeReverseClass structure are private and should never be accessed directly.
+**/
 struct _GeocodeReverseClass {
+	/* <private> */
 	GObjectClass parent_class;
 };
 

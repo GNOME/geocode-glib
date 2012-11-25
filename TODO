@@ -1,5 +1,4 @@
 - More test cases
-- Finish API docs
 - Write examples
 
 - Make geocode_foward_new_for_params() output warnings if a key is unknown to us
