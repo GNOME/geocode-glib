@@ -33,7 +33,7 @@ typedef struct _GeocodeLocation GeocodeLocation;
  * GeocodeLocation:
  * @longitude: a longitude, in degrees
  * @latitude: a latitude, in degrees
- * @timestamp: a timestamp in seconds since Epoch.
+ * @timestamp: a timestamp in seconds since <ulink url="http://en.wikipedia.org/wiki/Unix_epoch">Epoch</ulink>.
  * @description: a description for display
  *
  * The #GeocodeLocation structure represents a location
