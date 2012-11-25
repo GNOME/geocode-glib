@@ -597,13 +597,16 @@ insert_place_attr (GHashTable *ht,
 	    IS_EL("areaRank")) {
 		value = g_strdup_printf ("%"G_GINT64_FORMAT, json_reader_get_int_value (reader));
 	} else if (IS_EL("centroid")) {
+		char str[16];
+
 		json_reader_read_member (reader, "longitude");
-		g_hash_table_insert (ht, g_strdup ("longitude"),
-				     g_strdup_printf ("%lf", json_reader_get_double_value (reader)));
+		g_ascii_dtostr (str, sizeof(str), json_reader_get_double_value (reader));
+		g_hash_table_insert (ht, g_strdup ("longitude"), g_strdup (str));
 		json_reader_end_member (reader);
+
 		json_reader_read_member (reader, "latitude");
-		g_hash_table_insert (ht, g_strdup ("latitude"),
-				     g_strdup_printf ("%lf", json_reader_get_double_value (reader)));
+		g_ascii_dtostr (str, sizeof(str), json_reader_get_double_value (reader));
+		g_hash_table_insert (ht, g_strdup ("latitude"), g_strdup (str));
 		json_reader_end_member (reader);
 		goto end;
 	} else if (g_str_has_suffix (element_name, " attrs")) {
