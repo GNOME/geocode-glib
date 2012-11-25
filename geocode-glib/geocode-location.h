@@ -57,6 +57,9 @@ GeocodeLocation *geocode_location_new_with_description (gdouble     latitude,
 							gdouble     longitude,
 							const char *description);
 
+double geocode_location_get_distance_from (GeocodeLocation *loca,
+					   GeocodeLocation *locb);
+
 void geocode_location_free (GeocodeLocation *loc);
 
 G_END_DECLS

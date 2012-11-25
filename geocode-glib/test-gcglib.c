@@ -260,6 +260,21 @@ test_search_lat_long (void)
 	g_list_free_full (res, (GDestroyNotify) geocode_location_free);
 }
 
+/* Test case from:
+ * http://andrew.hedges.name/experiments/haversine/ */
+static void
+test_distance (void)
+{
+	GeocodeLocation *loca, *locb;
+
+	/* 1600 Pennsylvania Ave NW, Washington, DC */
+	loca = geocode_location_new (38.898556, -77.037852);
+	/* 1600 Pennsylvania Ave NW, Washington, DC */
+	locb = geocode_location_new (38.897147, -77.043934);
+
+	g_assert_cmpfloat (geocode_location_get_distance_from (loca, locb) - 0.549311, <, 0.000001);
+}
+
 static void
 test_locale (void)
 {
@@ -408,6 +423,7 @@ int main (int argc, char **argv)
 		g_test_add_func ("/geocode/locale", test_locale);
 		g_test_add_func ("/geocode/search", test_search);
 		g_test_add_func ("/geocode/search_lat_long", test_search_lat_long);
+		g_test_add_func ("/geocode/distance", test_distance);
 		return g_test_run ();
 	}
 

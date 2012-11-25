@@ -21,6 +21,9 @@
  */
 
 #include <geocode-location.h>
+#include <math.h>
+
+#define EARTH_RADIUS_KM 6372.795
 
 /**
  * SECTION:geocode-location
@@ -114,4 +117,38 @@ geocode_location_new_with_description (gdouble     latitude,
 	ret->description = g_strdup (description);
 
 	return ret;
+}
+
+/**
+ * geocode_location_get_distance_from:
+ * @loca: a #GeocodeLocation
+ * @locb: a #GeocodeLocation
+ *
+ * Calculates the distance in km, along the curvature of the Earth,
+ * between 2 locations. Note that altitude changes are not
+ * taken into account.
+ *
+ * Returns: a distance in km.
+ **/
+double
+geocode_location_get_distance_from (GeocodeLocation *loca,
+				    GeocodeLocation *locb)
+{
+	gdouble dlat, dlon, lat1, lat2;
+	gdouble a, c;
+
+	g_return_val_if_fail (loca != NULL || locb != NULL, 0.0);
+
+	/* Algorithm from:
+	 * http://www.movable-type.co.uk/scripts/latlong.html */
+
+	dlat = (locb->latitude - loca->latitude) * M_PI / 180.0;
+	dlon = (locb->longitude - loca->longitude) * M_PI / 180.0;
+	lat1 = loca->latitude * M_PI / 180.0;
+	lat2 = locb->latitude * M_PI / 180.0;
+
+	a = sin (dlat / 2) * sin (dlat / 2) +
+		sin (dlon / 2) * sin (dlon / 2) * cos (lat1) * cos (lat2);
+	c = 2 * atan2 (sqrt (a), sqrt (1-a));
+	return EARTH_RADIUS_KM * c;
 }
