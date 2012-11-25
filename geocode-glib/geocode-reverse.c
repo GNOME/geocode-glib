@@ -101,6 +101,47 @@ geocode_reverse_new_for_location (GeocodeLocation *location)
 	return object;
 }
 
+static struct {
+	const char *pf_attr;
+	const char *xep_attr;
+} attrs_map[] = {
+	{ "longitude", "longitude" },
+	{ "latitude", "latitude" },
+	{ "offsetlat", NULL },
+	{ "offsetlon", NULL },
+	{ "name", "description" },
+	{ "line1", "building" },
+	{ "line2", NULL },
+	{ "line3", NULL },
+	{ "line4", NULL },
+	{ "street", "street" },
+	{ "postal", "postalcode" },
+	{ "neighborhood", "area" },
+	{ "city", "locality" },
+	{ "county", NULL },
+	{ "state", "region" },
+	{ "country", "country" },
+	{ "countrycode", "countrycode" },
+	{ "countycode", NULL },
+	{ "timezone", NULL },
+	{ "uzip", NULL },
+};
+
+static const char *
+pf_to_xep (const char *attr)
+{
+	guint i;
+
+	for (i = 0; i < G_N_ELEMENTS (attrs_map); i++) {
+		if (g_str_equal (attr, attrs_map[i].pf_attr))
+			return attrs_map[i].xep_attr;
+	}
+
+	g_debug ("Can't convert unknown attribute '%s'", attr);
+
+	return NULL;
+}
+
 GHashTable *
 _geocode_parse_resolve_json (const char *contents,
 			     GError    **error)
@@ -222,8 +263,15 @@ _geocode_parse_resolve_json (const char *contents,
 		if (value && *value == '\0')
 			value = NULL;
 
-		if (value != NULL)
-			g_hash_table_insert (ret, g_strdup (members[i]), g_strdup (value));
+		if (value != NULL) {
+			const char *xep_attr;
+
+			xep_attr = pf_to_xep (members[i]);
+			if (xep_attr != NULL)
+				g_hash_table_insert (ret, g_strdup (xep_attr), g_strdup (value));
+			else
+				g_hash_table_insert (ret, g_strdup (members[i]), g_strdup (value));
+		}
 		json_reader_end_member (reader);
 	}
 	g_strfreev (members);
