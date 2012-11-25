@@ -75,6 +75,15 @@ geocode_location_new (gdouble latitude,
 	GeocodeLocation *ret;
 	GTimeVal tv;
 
+	if (longitude < -180.0 || longitude > 180.0) {
+		g_warning ("Invalid longitude %lf passed, using 0.0 instead", longitude);
+		longitude = 0.0;
+	}
+	if (latitude < -90.0 || latitude > 90.0) {
+		g_warning ("Invalid latitude %lf passed, using 0.0 instead", latitude);
+		latitude = 0.0;
+	}
+
 	ret = g_new0 (GeocodeLocation, 1);
 	ret->longitude = longitude;
 	ret->latitude = latitude;

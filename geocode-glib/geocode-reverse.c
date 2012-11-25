@@ -90,15 +90,6 @@ geocode_reverse_new_for_location (GeocodeLocation *location)
 	GeocodeReverse *object;
 	char buf[16], buf2[16];
 
-	if (location->longitude < -180.0 || location->longitude > 180.0) {
-		g_warning ("Invalid longitude %lf passed, using 0.0 instead", location->longitude);
-		location->longitude = 0.0;
-	}
-	if (location->latitude < -90.0 || location->latitude > 90.0) {
-		g_warning ("Invalid latitude %lf passed, using 0.0 instead", location->latitude);
-		location->latitude = 0.0;
-	}
-
 	object = g_object_new (GEOCODE_TYPE_REVERSE, NULL);
 
 	g_hash_table_insert (object->priv->ht,
