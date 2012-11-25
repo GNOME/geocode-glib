@@ -78,83 +78,6 @@ geocode_reverse_init (GeocodeReverse *object)
 						  g_free, g_free);
 }
 
-static gboolean
-parse_lang (const char *locale,
-	    char      **language_codep,
-	    char      **territory_codep)
-{
-	GRegex     *re;
-	GMatchInfo *match_info;
-	gboolean    res;
-	GError     *error;
-	gboolean    retval;
-
-	match_info = NULL;
-	retval = FALSE;
-
-	error = NULL;
-	re = g_regex_new ("^(?P<language>[^_.@[:space:]]+)"
-			  "(_(?P<territory>[[:upper:]]+))?"
-			  "(\\.(?P<codeset>[-_0-9a-zA-Z]+))?"
-			  "(@(?P<modifier>[[:ascii:]]+))?$",
-			  0, 0, &error);
-	if (re == NULL) {
-		g_warning ("%s", error->message);
-		goto out;
-	}
-
-	if (!g_regex_match (re, locale, 0, &match_info) ||
-	    g_match_info_is_partial_match (match_info)) {
-		g_warning ("locale '%s' isn't valid\n", locale);
-		goto out;
-	}
-
-	res = g_match_info_matches (match_info);
-	if (! res) {
-		g_warning ("Unable to parse locale: %s", locale);
-		goto out;
-	}
-
-	retval = TRUE;
-
-	*language_codep = g_match_info_fetch_named (match_info, "language");
-
-	*territory_codep = g_match_info_fetch_named (match_info, "territory");
-
-	if (*territory_codep != NULL &&
-	    *territory_codep[0] == '\0') {
-		g_free (*territory_codep);
-		*territory_codep = NULL;
-	}
-
-out:
-	g_match_info_free (match_info);
-	g_regex_unref (re);
-
-	return retval;
-}
-
-static char *
-geocode_reverse_get_lang_for_locale (const char *locale)
-{
-	char *lang;
-	char *territory;
-
-	if (parse_lang (locale, &lang, &territory) == FALSE)
-		return NULL;
-
-	return g_strdup_printf ("%s%s%s",
-				lang,
-				territory ? "_" : "",
-				territory ? territory : "");
-}
-
-static char *
-geocode_reverse_get_lang (void)
-{
-	return geocode_reverse_get_lang_for_locale (setlocale (LC_MESSAGES, NULL));
-}
-
 /**
  * geocode_reverse_new_for_coords:
  * @latitude: a valid latitude
@@ -461,7 +384,7 @@ _get_resolve_query_for_params (GHashTable  *orig_ht,
 
 	locale = NULL;
 	if (g_hash_table_lookup (ht, "locale") == NULL) {
-		locale = geocode_reverse_get_lang ();
+		locale = _geocode_object_get_lang ();
 		if (locale)
 			g_hash_table_insert (ht, "locale", locale);
 	}

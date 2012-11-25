@@ -214,12 +214,12 @@ geocode_object_get_lang_for_locale (const char *locale)
 
 	return g_strdup_printf ("%s%s%s",
 				lang,
-				territory ? "_" : "",
+				territory ? "-" : "",
 				territory ? territory : "");
 }
 
-static char *
-geocode_object_get_lang (void)
+char *
+_geocode_object_get_lang (void)
 {
 	return geocode_object_get_lang_for_locale (setlocale (LC_MESSAGES, NULL));
 }
@@ -572,7 +572,7 @@ get_resolve_query_for_params (GeocodeObject *object,
 
 	locale = NULL;
 	if (g_hash_table_lookup (ht, "locale") == NULL) {
-		locale = geocode_object_get_lang ();
+		locale = _geocode_object_get_lang ();
 		if (locale)
 			g_hash_table_insert (ht, "locale", locale);
 	}
@@ -765,7 +765,7 @@ get_search_query_for_params (GeocodeObject *object,
 	ht = g_hash_table_new (g_str_hash, g_str_equal);
 	g_hash_table_insert (ht, "appid", YAHOO_APPID);
 	g_hash_table_insert (ht, "format", "json");
-	lang = geocode_object_get_lang ();
+	lang = _geocode_object_get_lang ();
 	if (lang)
 		g_hash_table_insert (ht, "lang", lang);
 
