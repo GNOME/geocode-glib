@@ -111,7 +111,8 @@ _geocode_parse_single_result_json (const char  *contents,
 
 	longitude = g_ascii_strtod (g_hash_table_lookup (ht, "longitude"), NULL);
 	latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
-	loc = geocode_location_new (longitude, latitude);
+	loc = geocode_location_new_with_description (longitude, latitude,
+						     g_hash_table_lookup (ht, "line2"));
 
 	ret = g_list_append (NULL, loc);
 
