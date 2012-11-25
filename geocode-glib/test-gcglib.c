@@ -224,8 +224,7 @@ test_search (void)
 			got_texas = TRUE;
 		g_hash_table_destroy (ht);
 #endif
-		g_message ("got location: %s", loc->description);
-		g_boxed_free (GEOCODE_TYPE_LOCATION, loc);
+		geocode_location_free (loc);
 
 		if (got_france && got_texas)
 			break;
