@@ -109,8 +109,8 @@ _geocode_parse_single_result_json (const char  *contents,
 	if (ht == NULL)
 		return NULL;
 
-	longitude = strtod (g_hash_table_lookup (ht, "longitude"), NULL);
-	latitude = strtod (g_hash_table_lookup (ht, "latitude"), NULL);
+	longitude = g_ascii_strtod (g_hash_table_lookup (ht, "longitude"), NULL);
+	latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
 	loc = geocode_location_new (longitude, latitude);
 
 	ret = g_list_append (NULL, loc);
@@ -634,8 +634,8 @@ create_description_from_attrs (GHashTable *ht,
 			       gdouble    *longitude,
 			       gdouble    *latitude)
 {
-	*longitude = strtod (g_hash_table_lookup (ht, "longitude"), NULL);
-	*latitude = strtod (g_hash_table_lookup (ht, "latitude"), NULL);
+	*longitude = g_ascii_strtod (g_hash_table_lookup (ht, "longitude"), NULL);
+	*latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
 	return g_strdup (g_hash_table_lookup (ht, "name"));
 }
 
