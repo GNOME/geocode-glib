@@ -237,6 +237,30 @@ test_search (void)
 }
 
 static void
+test_search_lat_long (void)
+{
+	GeocodeForward *object;
+	GError *error = NULL;
+	GList *res;
+	GeocodeLocation *loc;
+
+	object = geocode_forward_new_for_string ("Santa María del Río");
+	res = geocode_forward_search (object, &error);
+	if (res == NULL) {
+		g_warning ("Failed at geocoding: %s", error->message);
+		g_error_free (error);
+	}
+	g_assert (res != NULL);
+	g_object_unref (object);
+
+	loc = res->data;
+	g_assert_cmpfloat (loc->latitude - 21.800699, <, 0.000001);
+	g_assert_cmpfloat (loc->longitude - -100.735626, <, 0.000001);
+
+	g_list_free_full (res, (GDestroyNotify) geocode_location_free);
+}
+
+static void
 test_locale (void)
 {
 	GeocodeForward *object;
@@ -260,8 +284,9 @@ test_locale (void)
 
 	loc = res->data;
 	g_assert_cmpstr (loc->description, ==, "Moskva");
-	g_assert_cmpfloat (loc->latitude - 37.614971, <, 0.000001);
-	g_assert_cmpfloat (loc->longitude - 55.756950, <, 0.000001);
+	g_assert_cmpfloat (loc->latitude - 55.756950, <, 0.000001);
+	g_assert_cmpfloat (loc->longitude - 37.614971, <, 0.000001);
+	print_loc (loc);
 
 	g_list_free_full (res, (GDestroyNotify) geocode_location_free);
 
@@ -382,6 +407,7 @@ int main (int argc, char **argv)
 		g_test_add_func ("/geocode/xep-0080", test_xep);
 		g_test_add_func ("/geocode/locale", test_locale);
 		g_test_add_func ("/geocode/search", test_search);
+		g_test_add_func ("/geocode/search_lat_long", test_search_lat_long);
 		return g_test_run ();
 	}
 

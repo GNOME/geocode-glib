@@ -558,8 +558,8 @@ end:
 
 static char *
 create_description_from_attrs (GHashTable *ht,
-			       gdouble    *longitude,
-			       gdouble    *latitude)
+			       gdouble    *latitude,
+			       gdouble    *longitude)
 {
 	*longitude = g_ascii_strtod (g_hash_table_lookup (ht, "longitude"), NULL);
 	*latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
@@ -574,10 +574,10 @@ new_location_from_result (GHashTable *ht)
 	gdouble longitude, latitude;
 
 	description = create_description_from_attrs (ht,
-						     &longitude,
-						     &latitude);
-	loc = geocode_location_new_with_description (longitude,
-						     latitude,
+						     &latitude,
+						     &longitude);
+	loc = geocode_location_new_with_description (latitude,
+						     longitude,
 						     description);
 	g_free (description);
 
