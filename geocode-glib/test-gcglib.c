@@ -260,6 +260,8 @@ test_locale (void)
 
 	loc = res->data;
 	g_assert_cmpstr (loc->description, ==, "Moskva");
+	g_assert_cmpfloat (loc->latitude - 37.614971, <, 0.000001);
+	g_assert_cmpfloat (loc->longitude - 55.756950, <, 0.000001);
 
 	g_list_free_full (res, (GDestroyNotify) geocode_location_free);
 
