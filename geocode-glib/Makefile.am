@@ -6,16 +6,12 @@ BUILT_GIRSOURCES =
 lib_LTLIBRARIES = libgeocode-glib.la
 
 public_files =						\
+	$(gcglib_HEADERS)				\
 	geocode-location.c				\
-	geocode-location.h				\
 	geocode-forward.c				\
-	geocode-forward.h				\
 	geocode-reverse.c				\
-	geocode-reverse.h				\
 	geocode-glib.c					\
-	geocode-glib.h					\
-	geocode-error.c					\
-	geocode-error.h
+	geocode-error.c
 
 libgeocode_glib_la_SOURCES =				\
 	$(public_files)					\
@@ -30,7 +26,12 @@ libgeocode_glib_la_LDFLAGS =				\
 	-export-symbols $(srcdir)/geocode-glib.symbols
 
 gcglibdir = $(pkgincludedir)
-gcglib_HEADERS = geocode-glib.h geocode-location.h geocode-forward.h
+gcglib_HEADERS = \
+	geocode-glib.h					\
+	geocode-location.h				\
+	geocode-forward.h				\
+	geocode-reverse.h				\
+	geocode-error.h
 
 AM_CFLAGS = -I$(top_srcdir) $(GEOCODE_CFLAGS) $(COMMON_CFLAGS) $(WARN_CFLAGS) $(DISABLE_DEPRECATED)
 
