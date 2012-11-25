@@ -257,7 +257,7 @@ test_locale (void)
 	}
 	g_assert (ht != NULL);
 	g_object_unref (object);
-	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "line4"), "Россия") == 0);
+	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "line2"), "Moskva") == 0);
 	g_print ("Got geocode answer:\n");
 	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
 	g_hash_table_destroy (ht);
