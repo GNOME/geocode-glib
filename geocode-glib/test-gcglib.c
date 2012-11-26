@@ -380,7 +380,25 @@ test_resolve_json (void)
 static void
 test_search_json (void)
 {
-	/* FIXME: Implement */
+	GError *error = NULL;
+	GList *list;
+	char *contents;
+	GeocodeLocation *loc;
+
+	if (g_file_get_contents (TEST_SRCDIR "/geoplanet-rio.json",
+				 &contents, NULL, &error) == FALSE) {
+		g_critical ("Couldn't load contents of '%s': %s",
+			    TEST_SRCDIR "/geoplanet-rio.json", error->message);
+	}
+	list = _geocode_parse_search_json (contents, &error);
+
+	g_assert (list != NULL);
+	g_assert_cmpint (g_list_length (list), ==, 10);
+
+	loc = list->data;
+	g_assert_cmpstr (loc->description, ==, "Rio de Janeiro");
+
+	g_list_free_full (list, (GDestroyNotify) geocode_location_free);
 }
 
 static GeocodeLocation *

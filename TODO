@@ -2,5 +2,4 @@
 - Write examples
 
 - Create better descriptions from the search results, and fix Paris test case for it
-- Add test case for search json parsing
 - Make answer count a property and immutable if XEP params are passed
