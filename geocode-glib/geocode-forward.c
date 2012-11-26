@@ -46,8 +46,6 @@ struct _GeocodeForwardPrivate {
 
 G_DEFINE_TYPE (GeocodeForward, geocode_forward, G_TYPE_OBJECT)
 
-#define DEFAULT_ANSWER_COUNT 10
-
 static void geocode_forward_add (GeocodeForward *forward,
 				 const char     *key,
 				 const char     *value);
