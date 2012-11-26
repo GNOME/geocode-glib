@@ -33,7 +33,7 @@ gcglib_HEADERS = \
 	geocode-reverse.h				\
 	geocode-error.h
 
-AM_CFLAGS = -I$(top_srcdir) $(GEOCODE_CFLAGS) $(COMMON_CFLAGS) $(WARN_CFLAGS) $(DISABLE_DEPRECATED)
+AM_CFLAGS = -I$(top_srcdir) $(GEOCODE_CFLAGS) $(COMMON_CFLAGS) $(WARN_CFLAGS) $(DISABLE_DEPRECATED) -DTEST_SRCDIR=\""$(srcdir)/data/"\"
 
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =

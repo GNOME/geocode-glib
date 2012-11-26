@@ -335,18 +335,29 @@ test_resolve_json (void)
 	GError *error = NULL;
 	guint i;
 	struct {
-		const char *test;
+		const char *fname;
 		const char *error;
 		const char *key;
 		const char *value;
 	} tests[] = {
-		{ "{\"ResultSet\":{\"version\":\"1.0\",\"Error\":0,\"ErrorMessage\":\"No error\",\"Locale\":\"us_US\",\"Quality\":99,\"Found\":1,\"Results\":[{\"quality\":99,\"latitude\":\"51.237100\",\"longitude\":\"-0.589669\",\"offsetlat\":\"51.237100\",\"offsetlon\":\"-0.589669\",\"radius\":500,\"name\":\"51.2371, -0.589669\",\"line1\":\"9 Old Palace Road\",\"line2\":\"Guildford\",\"line3\":\"GU2 7\",\"line4\":\"United Kingdom\",\"house\":\"9\",\"street\":\"Old Palace Road\",\"xstreet\":\"\",\"unittype\":\"\",\"unit\":\"\",\"postal\":\"GU2 7\",\"neighborhood\":\"Onslow Village\",\"city\":\"Guildford\",\"county\":\"Surrey\",\"state\":\"England\",\"country\":\"United Kingdom\",\"countrycode\":\"GB\",\"statecode\":\"ENG\",\"countycode\":\"SRY\",\"timezone\":\"Europe\\/London\",\"hash\":\"\",\"woeid\":26347368,\"woetype\":11,\"uzip\":\"GU2 7\",\"airport\":\"LHR\"}]}}", NULL, "area", "Onslow Village" },
-		{ "{\"ResultSet\":{\"version\":\"1.0\",\"Error\":107,\"ErrorMessage\":\"You gotz done!\",\"Locale\":\"us_US\",\"Quality\":99,\"Found\":1,\"Results\":[{\"quality\":99,\"latitude\":\"51.237100\",\"longitude\":\"-0.589669\",\"offsetlat\":\"51.237100\",\"offsetlon\":\"-0.589669\",\"radius\":500,\"name\":\"51.2371, -0.589669\",\"line1\":\"9 Old Palace Road\",\"line2\":\"Guildford\",\"line3\":\"GU2 7\",\"line4\":\"United Kingdom\",\"house\":\"9\",\"street\":\"Old Palace Road\",\"xstreet\":\"\",\"unittype\":\"\",\"unit\":\"\",\"postal\":\"GU2 7\",\"neighborhood\":\"Onslow Village\",\"city\":\"Guildford\",\"county\":\"Surrey\",\"state\":\"England\",\"country\":\"United Kingdom\",\"countrycode\":\"GB\",\"statecode\":\"ENG\",\"countycode\":\"SRY\",\"timezone\":\"Europe\\/London\",\"hash\":\"\",\"woeid\":26347368,\"woetype\":11,\"uzip\":\"GU2 7\",\"airport\":\"LHR\"}]}}", "You gotz done!" },
-		{ "{\"ResultSet\":{\"version\":\"1.0\",\"Error\":0,\"ErrorMessage\":\"No error\",\"Locale\":\"us_US\",\"Quality\":10,\"Found\":0}}", "No matches found for request", NULL, NULL },
+		{ "placefinder-area.json", NULL, "area", "Onslow Village" },
+		{ "placefinder-got-error.json", "You gotz done!" },
+		{ "placefinder-no-results.json", "No matches found for request", NULL, NULL },
 	};
 
 	for (i = 0; i < G_N_ELEMENTS (tests); i++) {
-		ht = _geocode_parse_resolve_json (tests[i].test, &error);
+		char *contents;
+		char *filename;
+
+		filename = g_strdup_printf (TEST_SRCDIR "/%s", tests[i].fname);
+		if (g_file_get_contents (filename, &contents, NULL, &error) == FALSE) {
+			g_critical ("Couldn't load contents of '%s': %s",
+				    filename, error->message);
+		}
+		g_free (filename);
+
+		ht = _geocode_parse_resolve_json (contents, &error);
+		g_free (contents);
 
 		if (tests[i].error) {
 			g_assert (ht == NULL);
