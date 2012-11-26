@@ -176,6 +176,8 @@ geocode_forward_fill_params (GeocodeForward *forward,
 			g_warning ("XEP attribute '%s' unhandled", key);
 			continue;
 		}
+		if (gc_attr == NULL)
+			continue;
 
 		str = g_value_get_string (value);
 		if (str == NULL)
