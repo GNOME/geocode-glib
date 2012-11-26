@@ -88,6 +88,7 @@ _geocode_glib_cache_save (GFile      *query,
 	gboolean ret;
 
 	path = _geocode_glib_cache_path_for_query (query);
+	g_debug ("Saving cache file '%s'", path);
 	ret = g_file_set_contents (path, contents, -1, NULL);
 
 	g_free (path);
@@ -102,6 +103,7 @@ _geocode_glib_cache_load (GFile  *query,
 	gboolean ret;
 
 	path = _geocode_glib_cache_path_for_query (query);
+	g_debug ("Loading cache file '%s'", path);
 	ret = g_file_get_contents (path, contents, NULL, NULL);
 
 	g_free (path);
