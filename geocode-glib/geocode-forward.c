@@ -85,7 +85,7 @@ static void
 set_is_search (GeocodeForward *forward,
 	       GObject        *object)
 {
-	if (forward->priv->answer_count > 1)
+	if (forward->priv->answer_count != 1)
 		g_object_set_data (object, "is-search", GINT_TO_POINTER (1));
 }
 
@@ -432,7 +432,7 @@ geocode_forward_search_async (GeocodeForward      *forward,
 					    user_data,
 					    geocode_forward_search_async);
 
-	if (forward->priv->answer_count > 1)
+	if (forward->priv->answer_count != 1)
 		query = get_search_query_for_params (forward, &error);
 	else
 		query = _get_resolve_query_for_params (forward->priv->ht, FALSE);
@@ -678,7 +678,7 @@ geocode_forward_search (GeocodeForward      *forward,
 
 	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), NULL);
 
-	if (forward->priv->answer_count > 1)
+	if (forward->priv->answer_count != 1)
 		query = get_search_query_for_params (forward, error);
 	else
 		query = _get_resolve_query_for_params (forward->priv->ht, FALSE);
@@ -702,7 +702,7 @@ geocode_forward_search (GeocodeForward      *forward,
 		to_cache = TRUE;
 	}
 
-	if (forward->priv->answer_count > 1)
+	if (forward->priv->answer_count != 1)
 		ret = _geocode_parse_search_json (contents, error);
 	else
 		ret = _geocode_parse_single_result_json (contents, error);
