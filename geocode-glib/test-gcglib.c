@@ -198,6 +198,7 @@ test_search (void)
 	gboolean got_france, got_texas;
 
 	forward = geocode_forward_new_for_string ("paris");
+	geocode_forward_set_answer_count (forward, 0);
 	results = geocode_forward_search (forward, &error);
 	if (results == NULL) {
 		g_warning ("Failed at geocoding: %s", error->message);
@@ -206,6 +207,8 @@ test_search (void)
 	g_assert (results != NULL);
 
 	g_object_unref (forward);
+
+	g_assert_cmpint (g_list_length (results), ==, 38);
 
 	/* We need to find Paris in France and in Texas */
 	got_france = FALSE;
