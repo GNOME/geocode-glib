@@ -557,32 +557,133 @@ end:
 	json_reader_end_member (reader);
 }
 
-static char *
-create_description_from_attrs (GHashTable *ht,
-			       gdouble    *latitude,
-			       gdouble    *longitude)
+static gboolean
+node_free_func (GNode    *node,
+		gpointer  user_data)
 {
-	*longitude = g_ascii_strtod (g_hash_table_lookup (ht, "longitude"), NULL);
-	*latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
-	return g_strdup (g_hash_table_lookup (ht, "name"));
+	/* Leaf nodes are GeocodeLocation objects
+	 * which we reuse for the results */
+	if (G_NODE_IS_LEAF (node) == FALSE)
+		g_free (node->data);
+
+	return FALSE;
 }
 
-static GeocodeLocation *
-new_location_from_result (GHashTable *ht)
+#define N_ATTRS 7
+static const char const *attributes[7] = {
+	"country",
+	"admin1",
+	"admin2",
+	"admin3",
+	"postal",
+	"placeTypeName",
+	"locality1"
+};
+
+static void
+insert_place_into_tree (GNode *location_tree, GHashTable *ht)
 {
-	GeocodeLocation *loc;
-	char *description;
+	GNode *start = location_tree, *child = NULL;
+	GeocodeLocation *loc = NULL;
+	char *attr_val = NULL;
+	char *name;
 	gdouble longitude, latitude;
+	guint i;
 
-	description = create_description_from_attrs (ht,
-						     &latitude,
-						     &longitude);
-	loc = geocode_location_new_with_description (latitude,
-						     longitude,
-						     description);
-	g_free (description);
+	for (i = 0; i < G_N_ELEMENTS(attributes); i++) {
+		attr_val = g_hash_table_lookup (ht, attributes[i]);
+		if (!attr_val) {
+			/* Add a dummy node if the attribute value is not
+			 * available for the place */
+			child = g_node_insert_data (start, -1, NULL);
+		} else {
+			/* If the attr value (eg for country United States)
+			 * already exists, then keep on adding other attributes under that node. */
+			child = g_node_first_child (start);
+			while (child &&
+			       child->data &&
+			       g_ascii_strcasecmp (child->data, attr_val) != 0) {
+				child = g_node_next_sibling (child);
+			}
+			if (!child) {
+				/* create a new node */
+				child = g_node_insert_data (start, -1, g_strdup (attr_val));
+			}
+		}
+		start = child;
+	}
 
-	return loc;
+	/* Get latitude and longitude and create GeocodeLocation object.
+	 * The leaf node of the tree is the GeocodeLocation object */
+	longitude = g_ascii_strtod (g_hash_table_lookup (ht, "longitude"), NULL);
+	latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
+	name = g_hash_table_lookup (ht, "name");
+
+	loc = geocode_location_new_with_description (latitude, longitude, name);
+
+	g_node_insert_data (start, -1, loc);
+}
+
+static void
+make_location_list_from_tree (GNode   *node,
+			      char   **s_array,
+			      GList  **location_list,
+			      int      i)
+{
+	GNode *child;
+	GeocodeLocation *loc;
+	char *description, *name;
+	char *rev_s_array[N_ATTRS + 2]; /* name + 7 attrs + NULL */
+	int counter = 0;
+	gboolean add_attribute = FALSE;
+
+	if (node == NULL)
+		return;
+
+	if (G_NODE_IS_LEAF (node)) {
+		/* If leaf node, then add all the attributes in the s_array
+		 * and set it to the description of the loc object */
+		loc = (GeocodeLocation *) node->data;
+
+		name = loc->description;
+
+		/* To print the attributes in a meaningful manner
+		 * reverse the s_array */
+		rev_s_array[0] = name;
+		counter = 1;
+		while (counter <= i) {
+			rev_s_array[counter] = s_array[i - counter];
+			counter++;
+		}
+		rev_s_array[counter] = NULL;
+		description = g_strjoinv (", ", rev_s_array);
+
+		loc->description = description;
+		g_free (name);
+
+		/* no need to free description since when GeocodeLocation
+		 * object gets freed it will free the description */
+		*location_list = g_list_prepend (*location_list, loc);
+	} else {
+		/* If there are other attributes with a different value,
+		 * add those attributes to the string to differentiate them */
+		if (g_node_prev_sibling (node) ||
+		   g_node_next_sibling (node))
+			add_attribute = TRUE;
+
+		if (add_attribute) {
+			s_array[i] = node->data;
+			i++;
+		}
+	}
+
+	child = node->children;
+	while (child) {
+		make_location_list_from_tree (child, s_array, location_list, i);
+		child = child->next;
+	}
+	if (add_attribute)
+		i--;
 }
 
 GList *
@@ -595,6 +696,8 @@ _geocode_parse_search_json (const char *contents,
 	JsonReader *reader;
 	const GError *err = NULL;
 	int num_places, i;
+	GNode *location_tree;
+	char *s_array[N_ATTRS];
 
 	ret = NULL;
 
@@ -616,8 +719,9 @@ _geocode_parse_search_json (const char *contents,
 	if (num_places < 0)
 		goto parse;
 
+	location_tree = g_node_new (NULL);
+
 	for (i = 0; i < num_places; i++) {
-		GeocodeLocation *loc;
 		GHashTable *ht;
 		char **members;
 		int j;
@@ -630,14 +734,26 @@ _geocode_parse_search_json (const char *contents,
 		members = json_reader_list_members (reader);
 		for (j = 0; members != NULL && members[j] != NULL; j++)
 			insert_place_attr (ht, reader, members[j]);
+
+		/* Populate the tree with place details */
+		insert_place_into_tree (location_tree, ht);
+
+		g_hash_table_destroy (ht);
 		g_strfreev (members);
 
 		json_reader_end_element (reader);
-
-		loc = new_location_from_result (ht);
-
-		ret = g_list_prepend (ret, loc);
 	}
+
+	make_location_list_from_tree (location_tree, s_array, &ret, 0);
+
+	g_node_traverse (location_tree,
+			 G_IN_ORDER,
+			 G_TRAVERSE_ALL,
+			 -1,
+			 (GNodeTraverseFunc) node_free_func,
+			 NULL);
+
+	g_node_destroy (location_tree);
 
 	g_object_unref (parser);
 	g_object_unref (reader);

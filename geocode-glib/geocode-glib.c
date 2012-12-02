@@ -171,14 +171,20 @@ geocode_object_get_lang_for_locale (const char *locale)
 {
 	char *lang;
 	char *territory;
+	char *ret;
 
 	if (parse_lang (locale, &lang, &territory) == FALSE)
 		return NULL;
 
-	return g_strdup_printf ("%s%s%s",
+	ret =  g_strdup_printf ("%s%s%s",
 				lang,
 				territory ? "-" : "",
 				territory ? territory : "");
+
+	g_free (lang);
+	g_free (territory);
+
+	return ret;
 }
 
 char *
