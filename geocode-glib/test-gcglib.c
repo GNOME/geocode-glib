@@ -196,6 +196,10 @@ test_search (void)
 	GError *error = NULL;
 	GList *results, *l;
 	gboolean got_france, got_texas;
+	char *old_locale;
+
+	old_locale = g_strdup (setlocale(LC_MESSAGES, NULL));
+	setlocale (LC_MESSAGES, "en_GB.UTF-8");
 
 	forward = geocode_forward_new_for_string ("paris");
 	geocode_forward_set_answer_count (forward, 0);
@@ -216,17 +220,11 @@ test_search (void)
 	for (l = results; l != NULL; l = l->next) {
 		GeocodeLocation *loc = l->data;
 
-		/* FIXME: implement once description
-		 * is generated properly */
-#if 0
-		if (key_is_value (ht, "country", "France") &&
-		    key_is_value (ht, "name", "Paris"))
+		if (g_strcmp0 (loc->description, "Paris, France") == 0)
 			got_france = TRUE;
-		else if (key_is_value (ht, "admin1", "Texas") &&
-			 key_is_value (ht, "name", "Paris"))
+		else if (g_strcmp0 (loc->description, "Paris, Texas, United States") == 0)
 			got_texas = TRUE;
-		g_hash_table_destroy (ht);
-#endif
+
 		geocode_location_free (loc);
 
 		if (got_france && got_texas)
@@ -234,9 +232,11 @@ test_search (void)
 	}
 	g_list_free (results);
 
-	/* FIXME
 	g_assert (got_france);
-	g_assert (got_texas); */
+	g_assert (got_texas);
+
+	setlocale (LC_MESSAGES, old_locale);
+	g_free (old_locale);
 }
 
 static void
@@ -301,31 +301,30 @@ test_locale (void)
 	g_object_unref (object);
 
 	loc = res->data;
-	g_assert_cmpstr (loc->description, ==, "Moskva");
+	g_assert_cmpstr (loc->description, ==, "Moskva, Rusko");
 	g_assert_cmpfloat (loc->latitude - 55.756950, <, 0.000001);
 	g_assert_cmpfloat (loc->longitude - 37.614971, <, 0.000001);
 	print_loc (loc);
 
 	g_list_free_full (res, (GDestroyNotify) geocode_location_free);
 
-	/* FIXME, when we have a better way to
-	 * differentiate the results */
-#if 0
-	/* Check Lyon's region in French */
+	/* Check Bonneville's region in French */
 	setlocale (LC_MESSAGES, "fr_FR.UTF-8");
-	object = geocode_object_new_for_location ("lyon");
-	ht = geocode_object_resolve (object, &error);
-	if (ht == NULL) {
+	object = geocode_forward_new_for_string ("bonneville");
+	res = geocode_forward_search (object, &error);
+	if (res == NULL) {
 		g_warning ("Failed at geocoding: %s", error->message);
 		g_error_free (error);
 	}
-	g_assert (ht != NULL);
+	g_assert (res != NULL);
 	g_object_unref (object);
-	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "state"), "Rhône-Alpes") == 0);
-	g_print ("Got geocode answer:\n");
-	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
-	g_hash_table_destroy (ht);
-#endif
+
+	loc = res->data;
+	g_assert_cmpstr (loc->description, ==, "Bonneville, Rhône-Alpes, France");
+	print_loc (loc);
+
+	g_list_free_full (res, (GDestroyNotify) geocode_location_free);
+
 	/* And reset the locale */
 	setlocale (LC_MESSAGES, old_locale);
 	g_free (old_locale);
@@ -399,7 +398,7 @@ test_search_json (void)
 	g_assert_cmpint (g_list_length (list), ==, 10);
 
 	loc = list->data;
-	g_assert_cmpstr (loc->description, ==, "Rio de Janeiro");
+	g_assert_cmpstr (loc->description, ==, "Rio de Janeiro, Brazil");
 
 	g_list_free_full (list, (GDestroyNotify) geocode_location_free);
 }
