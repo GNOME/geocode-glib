@@ -1,5 +1,6 @@
 - More test cases
 - Write examples
 
-- Create better descriptions from the search results, and fix Paris test case for it
+- Remove country from the results when the country is US or Canada (show only the state it's in)
+- Use short names for US and Canadian states (TX instead of Texas)
 - Make answer count a property and immutable if XEP params are passed
