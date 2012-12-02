@@ -675,11 +675,9 @@ make_location_list_from_tree (GNode   *node,
 		}
 	}
 
-	child = node->children;
-	while (child) {
+	for (child = node->children; child != NULL; child = child->next)
 		make_location_list_from_tree (child, s_array, location_list, i);
-		child = child->next;
-	}
+
 	if (add_attribute)
 		i--;
 }
