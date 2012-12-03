@@ -653,11 +653,8 @@ make_location_list_from_tree (GNode   *node,
 		/* To print the attributes in a meaningful manner
 		 * reverse the s_array */
 		g_ptr_array_add (rev_s_array, name);
-		counter = 1;
-		while (counter <= i) {
+		for (counter = 1; counter <= i; counter++)
 			g_ptr_array_add (rev_s_array, s_array[i - counter]);
-			counter++;
-		}
 		g_ptr_array_add (rev_s_array, NULL);
 		description = g_strjoinv (", ", (char **) rev_s_array->pdata);
 		g_ptr_array_unref (rev_s_array);
