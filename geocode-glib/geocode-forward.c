@@ -110,6 +110,7 @@ _geocode_parse_single_result_json (const char  *contents,
 	latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
 	loc = geocode_location_new_with_description (longitude, latitude,
 						     g_hash_table_lookup (ht, "line2"));
+	g_hash_table_destroy (ht);
 
 	return g_list_append (NULL, loc);
 }
