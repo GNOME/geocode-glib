@@ -633,7 +633,6 @@ make_location_list_from_tree (GNode   *node,
 	GNode *child;
 	GeocodeLocation *loc;
 	char *description, *name;
-	char *rev_s_array[N_ATTRS + 2]; /* name + 7 attrs + NULL */
 	int counter = 0;
 	gboolean add_attribute = FALSE;
 
@@ -641,6 +640,10 @@ make_location_list_from_tree (GNode   *node,
 		return;
 
 	if (G_NODE_IS_LEAF (node)) {
+		GPtrArray *rev_s_array;
+
+		rev_s_array = g_ptr_array_new ();
+
 		/* If leaf node, then add all the attributes in the s_array
 		 * and set it to the description of the loc object */
 		loc = (GeocodeLocation *) node->data;
@@ -649,14 +652,15 @@ make_location_list_from_tree (GNode   *node,
 
 		/* To print the attributes in a meaningful manner
 		 * reverse the s_array */
-		rev_s_array[0] = name;
+		g_ptr_array_add (rev_s_array, name);
 		counter = 1;
 		while (counter <= i) {
-			rev_s_array[counter] = s_array[i - counter];
+			g_ptr_array_add (rev_s_array, s_array[i - counter]);
 			counter++;
 		}
-		rev_s_array[counter] = NULL;
-		description = g_strjoinv (", ", rev_s_array);
+		g_ptr_array_add (rev_s_array, NULL);
+		description = g_strjoinv (", ", (char **) rev_s_array->pdata);
+		g_ptr_array_unref (rev_s_array);
 
 		loc->description = description;
 		g_free (name);
