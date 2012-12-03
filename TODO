@@ -3,4 +3,6 @@
 
 - Remove country from the results when the country is US or Canada (show only the state it's in)
 - Use short names for US and Canadian states (TX instead of Texas)
+- Make GeocodeLocation into a real object
+- Add WOEID as a property to GeocodeLocation for the benefit of libgweather
 - Make answer count a property and immutable if XEP params are passed
