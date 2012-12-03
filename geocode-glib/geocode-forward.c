@@ -97,7 +97,6 @@ static GList *
 _geocode_parse_single_result_json (const char  *contents,
 				   GError     **error)
 {
-	GList *ret;
 	GHashTable *ht;
 	GeocodeLocation *loc;
 	gdouble longitude;
@@ -112,9 +111,7 @@ _geocode_parse_single_result_json (const char  *contents,
 	loc = geocode_location_new_with_description (longitude, latitude,
 						     g_hash_table_lookup (ht, "line2"));
 
-	ret = g_list_append (NULL, loc);
-
-	return ret;
+	return g_list_append (NULL, loc);
 }
 
 static struct {
