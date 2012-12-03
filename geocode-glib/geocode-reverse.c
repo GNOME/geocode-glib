@@ -250,7 +250,8 @@ _geocode_parse_resolve_json (const char *contents,
 		json_reader_read_member (reader, members[i]);
 
 		if (g_str_equal (members[i], "radius") ||
-		    g_str_equal (members[i], "quality")) {
+		    g_str_equal (members[i], "quality") ||
+		    g_str_equal (members[i], "woeid")) {
 			gint64 num;
 
 			num = json_reader_get_int_value (reader);
