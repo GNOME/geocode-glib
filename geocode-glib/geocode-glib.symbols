@@ -3,6 +3,7 @@ geocode_location_new
 geocode_location_new_with_description
 geocode_location_free
 geocode_location_get_distance_from
+geocode_location_set_description
 geocode_forward_get_type
 geocode_forward_new_for_string
 geocode_forward_new_for_params

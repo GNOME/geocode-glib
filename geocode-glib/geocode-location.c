@@ -120,6 +120,23 @@ geocode_location_new_with_description (gdouble     latitude,
 }
 
 /**
+ * geocode_location_set_description:
+ * @description: a description for the location
+ *
+ * Sets the #GeocodeLocation object's @description to
+ * the passed value.
+ **/
+void
+geocode_location_set_description (GeocodeLocation *loc,
+				  const char      *description)
+{
+	g_return_if_fail (loc != NULL);
+
+	g_free (loc->description);
+	loc->description = g_strdup (description);
+}
+
+/**
  * geocode_location_get_distance_from:
  * @loca: a #GeocodeLocation
  * @locb: a #GeocodeLocation
