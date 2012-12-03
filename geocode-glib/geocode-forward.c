@@ -631,9 +631,6 @@ make_location_list_from_tree (GNode   *node,
 			      int      i)
 {
 	GNode *child;
-	GeocodeLocation *loc;
-	char *description, *name;
-	int counter = 0;
 	gboolean add_attribute = FALSE;
 
 	if (node == NULL)
@@ -641,6 +638,10 @@ make_location_list_from_tree (GNode   *node,
 
 	if (G_NODE_IS_LEAF (node)) {
 		GPtrArray *rev_s_array;
+		GeocodeLocation *loc;
+		const char *name;
+		char *description;
+		int counter = 0;
 
 		rev_s_array = g_ptr_array_new ();
 
@@ -652,18 +653,16 @@ make_location_list_from_tree (GNode   *node,
 
 		/* To print the attributes in a meaningful manner
 		 * reverse the s_array */
-		g_ptr_array_add (rev_s_array, name);
+		g_ptr_array_add (rev_s_array, (gpointer) name);
 		for (counter = 1; counter <= i; counter++)
 			g_ptr_array_add (rev_s_array, s_array[i - counter]);
 		g_ptr_array_add (rev_s_array, NULL);
 		description = g_strjoinv (", ", (char **) rev_s_array->pdata);
 		g_ptr_array_unref (rev_s_array);
 
-		loc->description = description;
-		g_free (name);
+		geocode_location_set_description (loc, description);
+		g_free (description);
 
-		/* no need to free description since when GeocodeLocation
-		 * object gets freed it will free the description */
 		*location_list = g_list_prepend (*location_list, loc);
 	} else {
 		/* If there are other attributes with a different value,
