@@ -1,5 +1,7 @@
 include $(top_srcdir)/Makefile.decl
 
+SUBDIRS = geocode-ip-server
+
 EXTRA_DIST = geocode-glib.symbols
 BUILT_GIRSOURCES =
 

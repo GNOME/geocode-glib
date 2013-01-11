@@ -1,0 +1,13 @@
+include $(top_srcdir)/Makefile.decl
+
+BUILT_GIRSOURCES =
+
+AM_CFLAGS = -I$(top_srcdir) $(GEOCODE_CFLAGS) $(GEOCODE_SERVER_CFLAGS) $(COMMON_CFLAGS) $(WARN_CFLAGS) $(DISABLE_DEPRECATED)
+
+TEST_PROGS += geoip-lookup
+noinst_PROGRAMS = $(TEST_PROGS)
+
+geoip_lookup_LDADD = $(GEOCODE_LIBS) $(GEOCODE_SERVER_LIBS)
+
+MAINTAINERCLEANFILES = Makefile.in
+
