@@ -6,8 +6,7 @@
 #include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
 
-
-static const gchar *attribution_text = "This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com\n";
+static const char *attribution_text = "This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com\n";
 
 enum ERROR_CODES {
         PARSE_ERR = 0,
@@ -114,7 +113,7 @@ print_json_data (JsonBuilder *builder)
 {
         JsonNode *node;
         JsonGenerator *generator;
-        gchar *json_data;
+        char *json_data;
         gsize length;
 
         node = json_builder_get_root (builder);
@@ -122,7 +121,7 @@ print_json_data (JsonBuilder *builder)
         generator = json_generator_new ();
         json_generator_set_root (generator, node);
         json_data = json_generator_to_data (generator, &length);
-        g_print ("%*s\n", (int)length, json_data);
+        g_print ("%*s\n", (int) length, json_data);
 
         g_free (json_data);
         json_node_free (node);
@@ -140,12 +139,12 @@ print_error_in_json (int error_code, const char *extra_info)
 }
 
 static void
-ip_addr_lookup (const gchar *ipaddress)
+ip_addr_lookup (const char *ipaddress)
 {
         GeoIP *gi;
         GeoIPRecord *gir;
         JsonBuilder *builder;
-        const gchar *db;
+        const char *db;
 
         db = g_getenv ("GEOIP_DATABASE_PATH");
         if (!db)
@@ -168,9 +167,8 @@ ip_addr_lookup (const gchar *ipaddress)
            of the place*/
         builder = add_result_attr_to_json_tree (ipaddress, gir);
         print_json_data (builder);
-
-
         g_object_unref (builder);
+
         GeoIPRecord_delete (gir);
         GeoIP_delete (gi);
 }
@@ -193,7 +191,7 @@ get_ipaddress_from_query (void)
         return value;
 }
 
-static gchar *
+static char *
 get_ipaddress (void)
 {
         char *value;
@@ -224,7 +222,7 @@ get_ipaddress (void)
 int
 main (void)
 {
-        gchar *ipaddress;
+        char *ipaddress;
 
         g_type_init ();
 
