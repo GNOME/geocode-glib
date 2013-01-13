@@ -21,7 +21,7 @@ static char *error_message_array [] = {
         "Invalid data",
         "Invalid IP address format",
         "Can not find the IP address in the database",
-        "Can not open the database. Set GEOIP_DATABASE_PATH env variable"
+        "Can not open the GeoLiteCity Binary database. Set GEOIP_DATABASE_PATH env variable."
 };
 
 static void
