@@ -177,28 +177,36 @@ ip_addr_lookup (const gchar *ipaddress)
         GeoIP_delete (gi);
 }
 
+static char *
+get_ipaddress_from_query (void)
+{
+        GHashTable *table;
+        const char *data;
+        char *value;
+
+        data = g_getenv ("QUERY_STRING");
+        if (data == NULL)
+                return NULL;
+
+        table = soup_form_decode (data);
+        value = g_strdup (g_hash_table_lookup (table, "ip"));
+        g_hash_table_destroy (table);
+
+        return value;
+}
+
 static gchar *
 get_ipaddress (void)
 {
-        const gchar *data;
-        const gchar *value;
-        gchar *ipaddress;
-        GHashTable *table;
+        char *value;
         GInetAddress *inet_address;
 
-        data = g_getenv ("QUERY_STRING");
-        if (data == NULL) {
-                print_error_in_json (PARSE_ERR, NULL);
-                return NULL;
-        }
-
-        table = soup_form_decode (data);
-        value = g_hash_table_lookup (table, "ip");
+        value = get_ipaddress_from_query ();
         if (!value) {
-                value = g_getenv ("REMOTE_ADDR");
+                value = g_strdup (g_getenv ("REMOTE_ADDR"));
                 if (!value) {
                         print_error_in_json (PARSE_ERR, NULL);
-                        g_hash_table_destroy (table);
+                        g_free (value);
                         return NULL;
                 }
         }
@@ -206,15 +214,13 @@ get_ipaddress (void)
         inet_address = g_inet_address_new_from_string (value);
         if (!inet_address) {
                 print_error_in_json (INVALID_IP_ADDRESS_ERR, NULL);
-                g_hash_table_destroy (table);
+                g_free (value);
                 return NULL;
         }
 
-        ipaddress = g_strdup (value);
-        g_hash_table_destroy (table);
         g_object_unref (inet_address);
 
-        return ipaddress;
+        return value;
 }
 
 int
