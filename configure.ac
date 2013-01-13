@@ -61,8 +61,11 @@ PKG_CHECK_MODULES(GEOCODE,
 		  json-glib-1.0 >= 0.14
 		  libsoup-2.4)
 
-# apart from the above GEOCODE packages, the server requires the following packages
+# Requires for the server
 PKG_CHECK_MODULES(GEOCODE_SERVER,
+		  gio-2.0 >= 2.34
+		  json-glib-1.0 >= 0.14
+		  libsoup-2.4
                   geoip)
 
 GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal glib-2.0`
