@@ -148,10 +148,8 @@ ip_addr_lookup (const gchar *ipaddress)
         const gchar *db;
 
         db = g_getenv ("GEOIP_DATABASE_PATH");
-        if (!db) {
-                print_error_in_json (DATABASE_ERR, NULL);
-                return;
-        }
+        if (!db)
+                db = GEOIP_DATABASE_PATH "/GeoLiteCity.dat";
 
         gi = GeoIP_open (db, GEOIP_INDEX_CACHE);
         if (gi == NULL) {
