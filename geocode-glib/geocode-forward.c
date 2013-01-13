@@ -677,9 +677,6 @@ make_location_list_from_tree (GNode   *node,
 
 	for (child = node->children; child != NULL; child = child->next)
 		make_location_list_from_tree (child, s_array, location_list, i);
-
-	if (add_attribute)
-		i--;
 }
 
 GList *
