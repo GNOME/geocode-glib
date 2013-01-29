@@ -3,6 +3,7 @@
 #include <locale.h>
 #include <glib.h>
 #include <stdlib.h>
+#include <string.h>
 #include <gio/gio.h>
 #include <geocode-ipclient.h>
 
@@ -28,7 +29,7 @@ test_search (gconstpointer data)
                 g_error_free (error);
         }
         g_assert (contents != NULL);
-
+        g_assert (strstr (contents, "\"ERROR\"") == NULL);
         g_object_unref (ipclient);
         g_print ("%s\n", contents);
         g_free (contents);
