@@ -340,7 +340,14 @@ get_ipaddress (void)
         char *value;
 
         value = get_ipaddress_from_query ();
-        if (!value) {
+        if (value) {
+                if (validate_ip_address (value) == FALSE) {
+                        print_error_in_json (INVALID_IP_ADDRESS_ERR, NULL);
+                        g_free (value);
+                        return NULL;
+                }
+        }
+        else {
                 value = get_client_ipaddress ();
                 if (!value) {
                         print_error_in_json (INVALID_IP_ADDRESS_ERR, NULL);
