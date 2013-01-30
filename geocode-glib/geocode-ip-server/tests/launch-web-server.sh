@@ -70,7 +70,10 @@ server_exec=geoip-lookup
 #set up the cgi-bin directory
 if [ ! -d $CGI_BIN_DIR ] ; then
     mkdir -p cgi-bin/ || ( echo "Could not create the cgi-bin directory" ; exit 1 )
-    cp ../$server_exec cgi-bin/ || ( echo "Could not copy the server executable to the cgi-bin directory" ; exit 1 )
+fi
+
+if [ ! -f cgi-bin/$server_exec ] ; then
+    ln -s `pwd`/../$server_exec cgi-bin/$server_exec || ( echo "Could not create a symbolic link to the server executable" ; exit 1 )
 fi
 
 pushd root/ > /dev/null
@@ -156,4 +159,4 @@ $HTTPD -f $ROOTDIR/conf -C "Listen $PORT"
 else
 $HTTPD -f $ROOTDIR/conf -C "Listen ${ADDRESS}:$PORT"
 fi
-echo "Please start debugging at http://localhost:$PORT/"
+echo "Please start debugging at http://localhost:$PORT/cgi-bin/$server_exec"
