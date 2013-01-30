@@ -9,16 +9,12 @@
 static const char *attribution_text = "This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com\n";
 
 enum ERROR_CODES {
-        PARSE_ERR = 0,
-        INVALID_DATA_ERR,
-        INVALID_IP_ADDRESS_ERR,
+        INVALID_IP_ADDRESS_ERR = 0,
         INVALID_ENTRY_ERR,
         DATABASE_ERR
 };
 static char *error_message_array [] = {
-        "Can not parse the input",
-        "Invalid data",
-        "Invalid IP address format",
+        "Invalid IP address input",
         "Can not find the IP address in the database",
         "Can not open the GeoLiteCity Binary database. Set GEOIP_DATABASE_PATH env variable."
 };
