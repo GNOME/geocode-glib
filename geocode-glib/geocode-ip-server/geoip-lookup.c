@@ -54,10 +54,17 @@ print_error_in_json (int error_code,
 
 static JsonBuilder*
 add_result_attr_to_json_tree (const char* ipaddress,
-                              GeoIPRecord *gir)
+                              GeoIP *gi)
 {
         const char *timezone = NULL;
         JsonBuilder *builder;
+        GeoIPRecord *gir;
+
+        gir = GeoIP_record_by_addr (gi, ipaddress);
+        if (gir == NULL) {
+                print_error_in_json (INVALID_ENTRY_ERR, ipaddress);
+                return NULL;
+        }
 
         builder = json_builder_new ();
 
@@ -101,6 +108,68 @@ add_result_attr_to_json_tree (const char* ipaddress,
                 json_builder_add_string_value (builder, timezone);
         }
 
+        json_builder_set_member_name (builder, "accuracy");
+        json_builder_add_string_value (builder, "city");
+
+        json_builder_set_member_name (builder, "attribution");
+        json_builder_add_string_value (builder, attribution_text);
+
+        json_builder_end_object (builder); /* end ipaddress object */
+
+        json_builder_end_array (builder); /* end ipaddress array */
+
+        json_builder_end_object (builder); /* end results object */
+
+        json_builder_end_object (builder); /* end */
+
+        GeoIPRecord_delete (gir);
+
+        return builder;
+}
+
+static JsonBuilder*
+add_result_attr_to_json_tree_geoipdb (const char* ipaddress,
+                                      GeoIP *gi)
+{
+        JsonBuilder *builder;
+        const char *country_name;
+        const char *country_code;
+
+        country_code = GeoIP_country_code_by_addr (gi, ipaddress);
+        country_name = GeoIP_country_name_by_addr (gi, ipaddress);
+
+        if (!country_name && !country_code) {
+                print_error_in_json (INVALID_ENTRY_ERR, ipaddress);
+                return NULL;
+        }
+
+        builder = json_builder_new ();
+
+        json_builder_begin_object (builder); /* begin */
+
+        json_builder_set_member_name (builder, "results");
+        json_builder_begin_object (builder); /* begin results object */
+
+        json_builder_set_member_name (builder, ipaddress);
+        json_builder_begin_array (builder); /* begin ipaddress array */
+        json_builder_begin_object (builder); /* begin ipaddress object */
+
+        json_builder_set_member_name (builder, "address");
+        json_builder_begin_array (builder); /* begin address array */
+
+        /* Before adding any entry check if that's NULL.
+           If NULL then don't add it to the JSON output.
+        */
+        add_json_object_for_address (builder,
+                                     GeoIP_country_name_by_addr (gi, ipaddress),
+                                     GeoIP_country_code_by_addr (gi, ipaddress),
+                                     "country");
+
+        json_builder_end_array (builder); /* end address array  */
+
+        json_builder_set_member_name (builder, "accuracy");
+        json_builder_add_string_value (builder, "country");
+
         json_builder_set_member_name (builder, "attribution");
         json_builder_add_string_value (builder, attribution_text);
 
@@ -140,34 +209,40 @@ static void
 ip_addr_lookup (const char *ipaddress)
 {
         GeoIP *gi;
-        GeoIPRecord *gir;
         JsonBuilder *builder;
         const char *db;
+        gboolean using_geoip_db = FALSE;
 
+        /* TODO : the server expects a GeoLiteCity database in
+           the GEOIP_DATABASE_PATH env variable. If the env var
+           gives a GeoIp database it will return an error even
+           though the server is capable of handling the latter.
+         */
         db = g_getenv ("GEOIP_DATABASE_PATH");
         if (!db)
                 db = GEOIP_DATABASE_PATH "/GeoLiteCity.dat";
 
-        gi = GeoIP_open (db, GEOIP_INDEX_CACHE);
+        if (g_file_test (db, G_FILE_TEST_EXISTS) == FALSE) {
+                db = GEOIP_DATABASE_PATH "/GeoIP.dat";
+                using_geoip_db = TRUE;
+        }
+
+        gi = GeoIP_open (db,  GEOIP_STANDARD | GEOIP_CHECK_CACHE);
         if (gi == NULL) {
                 print_error_in_json (DATABASE_ERR, NULL);
                 return;
         }
 
-        gir = GeoIP_record_by_addr (gi, ipaddress);
-        if (gir == NULL) {
-                print_error_in_json (INVALID_ENTRY_ERR, ipaddress);
-                GeoIP_delete (gi);
+        if (using_geoip_db == TRUE)
+                builder = add_result_attr_to_json_tree_geoipdb (ipaddress, gi);
+        else
+                builder = add_result_attr_to_json_tree (ipaddress, gi);
+
+        if (!builder)
                 return;
-        }
-        /* Add the result attributes to the Json tree
-           at present only add the latitude and longitude
-           of the place*/
-        builder = add_result_attr_to_json_tree (ipaddress, gir);
+
         print_json_data (builder);
         g_object_unref (builder);
-
-        GeoIPRecord_delete (gir);
         GeoIP_delete (gi);
 }
 
