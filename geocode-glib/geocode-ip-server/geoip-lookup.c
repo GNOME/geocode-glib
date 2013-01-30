@@ -21,9 +21,9 @@ static char *error_message_array [] = {
 
 static void
 add_json_object_for_address (JsonBuilder *builder,
-                             const char *name,
-                             const char *code,
-                             const char *type)
+                             const char  *name,
+                             const char  *code,
+                             const char  *type)
 {
         if (!name && !code)
                 return;
@@ -42,7 +42,7 @@ add_json_object_for_address (JsonBuilder *builder,
 }
 
 static void
-print_error_in_json (int error_code,
+print_error_in_json (int        error_code,
                      const char *extra_info)
 {
         g_print ("{\"results\":\"[error] %s",error_message_array[error_code]);
@@ -53,8 +53,8 @@ print_error_in_json (int error_code,
 }
 
 static JsonBuilder*
-add_result_attr_to_json_tree (const char* ipaddress,
-                              GeoIP *gi)
+add_result_attr_to_json_tree (const char *ipaddress,
+                              GeoIP      *gi)
 {
         const char *timezone = NULL;
         JsonBuilder *builder;
@@ -128,8 +128,8 @@ add_result_attr_to_json_tree (const char* ipaddress,
 }
 
 static JsonBuilder*
-add_result_attr_to_json_tree_geoipdb (const char* ipaddress,
-                                      GeoIP *gi)
+add_result_attr_to_json_tree_geoipdb (const char *ipaddress,
+                                      GeoIP      *gi)
 {
         JsonBuilder *builder;
         const char *country_name;
