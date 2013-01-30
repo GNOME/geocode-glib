@@ -13,7 +13,8 @@ public_files =						\
 	geocode-forward.c				\
 	geocode-reverse.c				\
 	geocode-glib.c					\
-	geocode-error.c
+	geocode-error.c                                 \
+	geocode-ipclient.c
 
 libgeocode_glib_la_SOURCES =				\
 	$(public_files)					\
@@ -33,7 +34,8 @@ gcglib_HEADERS = \
 	geocode-location.h				\
 	geocode-forward.h				\
 	geocode-reverse.h				\
-	geocode-error.h
+	geocode-error.h                                 \
+	geocode-ipclient.h
 
 AM_CFLAGS = -I$(top_srcdir) $(GEOCODE_CFLAGS) $(COMMON_CFLAGS) $(WARN_CFLAGS) $(DISABLE_DEPRECATED) -DTEST_SRCDIR=\""$(srcdir)/data/"\"
 
@@ -65,10 +67,11 @@ CLEANFILES += $(gir_DATA) $(typelib_DATA)
 
 endif # HAVE_INTROSPECTION
 
-TEST_PROGS += test-gcglib
+TEST_PROGS += test-gcglib test-geoip
 noinst_PROGRAMS = $(TEST_PROGS)
 
 test_gcglib_LDADD = libgeocode-glib.la $(GEOCODE_LIBS)
+test_geoip_LDADD = libgeocode-glib.la $(GEOCODE_LIBS)
 
 MAINTAINERCLEANFILES = Makefile.in
 
