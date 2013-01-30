@@ -41,6 +41,17 @@ add_json_object_for_address (JsonBuilder *builder,
         json_builder_end_object (builder);
 }
 
+static void
+print_error_in_json (int error_code,
+                     const char *extra_info)
+{
+        g_print ("{\"results\":\"[error] %s",error_message_array[error_code]);
+        if (extra_info)
+                g_print (" - %s\"}\n", extra_info);
+        else
+                g_print ("\"}\n");
+}
+
 static JsonBuilder*
 add_result_attr_to_json_tree (const char* ipaddress,
                               GeoIPRecord *gir)
@@ -124,15 +135,6 @@ print_json_data (JsonBuilder *builder)
         g_object_unref (generator);
 }
 
-static void
-print_error_in_json (int error_code, const char *extra_info)
-{
-        g_print ("{\"results\":\"[error] %s",error_message_array[error_code]);
-        if (extra_info)
-                g_print (" - %s\"}\n", extra_info);
-        else
-                g_print ("\"}\n");
-}
 
 static void
 ip_addr_lookup (const char *ipaddress)
