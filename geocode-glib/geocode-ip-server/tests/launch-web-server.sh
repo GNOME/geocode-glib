@@ -106,6 +106,7 @@ LoadModule reqtimeout_module /usr/lib/apache2/modules/mod_reqtimeout.so
 LoadModule setenvif_module /usr/lib/apache2/modules/mod_setenvif.so
 LoadModule status_module /usr/lib/apache2/modules/mod_status.so
 
+SetEnv HTTP_CLIENT_IP 24.24.24.24
 
 ServerName localhost
 ServerRoot "$ROOTDIR"
