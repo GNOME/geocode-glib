@@ -45,11 +45,12 @@ static void
 print_error_in_json (int        error_code,
                      const char *extra_info)
 {
-        g_print ("{\"results\":\"[error] %s",error_message_array[error_code]);
+        g_print ("{\"results\":\"%s",error_message_array[error_code]);
         if (extra_info)
-                g_print (" - %s\"}\n", extra_info);
+                g_print (" - %s\"", extra_info);
         else
-                g_print ("\"}\n");
+                g_print ("\"");
+        g_print (",\"status\":\"ERROR\"}\n");
 }
 
 static JsonBuilder*
@@ -120,6 +121,9 @@ add_result_attr_to_json_tree (const char *ipaddress,
 
         json_builder_end_object (builder); /* end results object */
 
+        json_builder_set_member_name (builder, "status");
+        json_builder_add_string_value (builder, "OK");
+
         json_builder_end_object (builder); /* end */
 
         GeoIPRecord_delete (gir);
@@ -178,6 +182,9 @@ add_result_attr_to_json_tree_geoipdb (const char *ipaddress,
         json_builder_end_array (builder); /* end ipaddress array */
 
         json_builder_end_object (builder); /* end results object */
+
+        json_builder_set_member_name (builder, "status");
+        json_builder_add_string_value (builder, "OK");
 
         json_builder_end_object (builder); /* end */
 
