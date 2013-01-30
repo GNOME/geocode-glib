@@ -173,6 +173,23 @@ ip_addr_lookup (const char *ipaddress)
         GeoIP_delete (gi);
 }
 
+static gboolean
+validate_ip_address (const char *ipaddress)
+{
+        /* TODO : put a check for private ips */
+        GInetAddress *inet_address;
+
+        if (!ipaddress)
+                return FALSE;
+
+        inet_address = g_inet_address_new_from_string (ipaddress);
+        if (inet_address) {
+                g_object_unref (inet_address);
+                return TRUE;
+        }
+        return FALSE;
+}
+
 static char *
 get_ipaddress_from_query (void)
 {
@@ -188,33 +205,69 @@ get_ipaddress_from_query (void)
         value = g_strdup (g_hash_table_lookup (table, "ip"));
         g_hash_table_destroy (table);
 
-        return value;
+        if (validate_ip_address (value))
+                return value;
+
+        g_free (value);
+
+        return NULL;
+}
+
+static char *
+get_client_ipaddress (void)
+{
+        const char *data;
+        char *value;
+        guint i;
+        static const char *variables[] = {
+                "HTTP_CLIENT_IP",
+                "HTTP_X_FORWARDED_FOR",
+                "HTTP_X_FORWARDED",
+                "HTTP_X_CLUSTER_CLIENT_IP",
+                "HTTP_FORWARDED_FOR",
+                "HTTP_FORWARDED",
+                "REMOTE_ADDR",
+        };
+
+        for (i = 0; i < G_N_ELEMENTS (variables); i++) {
+                data = g_getenv (variables[i]);
+                if (g_strcmp0 (variables[i], "HTTP_X_FORWARDED_FOR") == 0) {
+                        if (data) {
+                                int j;
+                                char **data_array;
+                                data_array = g_strsplit (data, ",", 0);
+                                for (j = 0; data_array[j] != NULL; j++) {
+                                        data = data_array[j];
+                                        if (validate_ip_address (data) == TRUE) {
+                                                value = g_strdup (data);
+                                                g_strfreev (data_array);
+                                                return value;
+                                        }
+                                }
+                                g_strfreev (data_array);
+                        }
+                } else {
+                        if (validate_ip_address (data) == TRUE)
+                                return g_strdup (data);
+                }
+        }
+        return NULL;
 }
 
 static char *
 get_ipaddress (void)
 {
         char *value;
-        GInetAddress *inet_address;
 
         value = get_ipaddress_from_query ();
         if (!value) {
-                value = g_strdup (g_getenv ("REMOTE_ADDR"));
+                value = get_client_ipaddress ();
                 if (!value) {
-                        print_error_in_json (PARSE_ERR, NULL);
+                        print_error_in_json (INVALID_IP_ADDRESS_ERR, NULL);
                         g_free (value);
                         return NULL;
                 }
         }
-
-        inet_address = g_inet_address_new_from_string (value);
-        if (!inet_address) {
-                print_error_in_json (INVALID_IP_ADDRESS_ERR, NULL);
-                g_free (value);
-                return NULL;
-        }
-
-        g_object_unref (inet_address);
 
         return value;
 }
