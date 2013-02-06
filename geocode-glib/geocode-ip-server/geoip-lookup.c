@@ -16,7 +16,7 @@ enum ERROR_CODES {
 static char *error_message_array [] = {
         "Invalid IP address input",
         "Can not find the IP address in the database",
-        "Can not open the GeoLiteCity Binary database. Set GEOIP_DATABASE_PATH env variable."
+        "Can not open GeoLiteCity/GeoIP Binary database. Set GEOIP_DATABASE_PATH env variable."
 };
 
 static void
@@ -217,24 +217,22 @@ ip_addr_lookup (const char *ipaddress)
 {
         GeoIP *gi;
         JsonBuilder *builder;
-        const char *db;
+        const char *db_path;
+        char *db;
         gboolean using_geoip_db = FALSE;
 
-        /* TODO : the server expects a GeoLiteCity database in
-           the GEOIP_DATABASE_PATH env variable. If the env var
-           gives a GeoIp database it will return an error even
-           though the server is capable of handling the latter.
-         */
-        db = g_getenv ("GEOIP_DATABASE_PATH");
-        if (!db)
-                db = GEOIP_DATABASE_PATH "/GeoLiteCity.dat";
-
+        db_path = g_getenv ("GEOIP_DATABASE_PATH");
+        if (!db_path)
+                db_path = GEOIP_DATABASE_PATH ;
+        db = g_strconcat (db_path, "/GeoLiteCity.dat", NULL);
         if (g_file_test (db, G_FILE_TEST_EXISTS) == FALSE) {
-                db = GEOIP_DATABASE_PATH "/GeoIP.dat";
+                g_free (db);
+                db = g_strconcat (db_path, "/GeoIP.dat", NULL);
                 using_geoip_db = TRUE;
         }
 
         gi = GeoIP_open (db,  GEOIP_STANDARD | GEOIP_CHECK_CACHE);
+        g_free (db);
         if (gi == NULL) {
                 print_error_in_json (DATABASE_ERR, NULL);
                 return;
