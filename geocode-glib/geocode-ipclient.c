@@ -33,11 +33,58 @@
  * Contains functions to get the geolocation corresponding to IP addresses from a server.
  **/
 
+enum {
+        PROP_0,
+        PROP_SERVER,
+        N_PROPERTIES
+};
+
 struct _GeocodeIpclientPrivate {
         char *ip;
+        char *server;
 };
 
 G_DEFINE_TYPE (GeocodeIpclient, geocode_ipclient, G_TYPE_OBJECT)
+
+static void
+geocode_ipclient_set_property (GObject           *gipclient,
+                               guint              property_id,
+                               const GValue      *value,
+                               GParamSpec        *pspec)
+{
+        GeocodeIpclient *ipclient = (GeocodeIpclient *) gipclient;
+
+        switch (property_id) {
+                case PROP_SERVER:
+                        g_free (ipclient->priv->server);
+                        ipclient->priv->server = g_value_dup_string (value);
+                        break;
+                default:
+                        G_OBJECT_WARN_INVALID_PROPERTY_ID (gipclient,
+                                                           property_id,
+                                                           pspec);
+                        break;
+        }
+}
+
+static void
+geocode_ipclient_get_property (GObject           *gipclient,
+                               guint              property_id,
+                               GValue            *value,
+                               GParamSpec        *pspec)
+{
+        GeocodeIpclient *ipclient = (GeocodeIpclient *) gipclient;
+        switch (property_id) {
+                case PROP_SERVER:
+                        g_value_set_string (value, ipclient->priv->server);
+                        break;
+                default:
+                        G_OBJECT_WARN_INVALID_PROPERTY_ID (gipclient,
+                                                           property_id,
+                                                           pspec);
+                        break;
+        }
+}
 
 static void
 geocode_ipclient_finalize (GObject *gipclient)
@@ -55,8 +102,18 @@ geocode_ipclient_class_init (GeocodeIpclientClass *klass)
         GObjectClass *gipclient_class = G_OBJECT_CLASS (klass);
 
         gipclient_class->finalize = geocode_ipclient_finalize;
+        gipclient_class->set_property = geocode_ipclient_set_property;
+        gipclient_class->get_property = geocode_ipclient_get_property;
 
         g_type_class_add_private (klass, sizeof (GeocodeIpclientPrivate));
+
+        g_object_class_install_property (gipclient_class,
+                                         PROP_SERVER,
+                                         g_param_spec_string ("server",
+                                                              "server uri",
+                                                              "server uri",
+                                                              "http://127.0.0.1:12345/cgi-bin/geoip-lookup",
+                                                              G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 }
 
 static void
@@ -109,8 +166,6 @@ get_search_query (GeocodeIpclient *ipclient)
         char *query_string;
         char *uri;
         const char *ipaddress;
-        /* FIXME: the server uri needs to be made a property */
-        const char *server_uri = "http://127.0.0.1:12345/cgi-bin/geoip-lookup";
 
         ipaddress = ipclient->priv->ip;
         if (ipaddress) {
@@ -119,10 +174,10 @@ get_search_query (GeocodeIpclient *ipclient)
                 query_string = soup_form_encode_hash (ht);
                 g_hash_table_destroy (ht);
 
-                uri = g_strdup_printf ("%s?%s", server_uri, query_string);
+                uri = g_strdup_printf ("%s?%s", ipclient->priv->server, query_string);
                 g_free (query_string);
         } else
-                uri = g_strdup (server_uri);
+                uri = g_strdup (ipclient->priv->server);
 
         ret = g_file_new_for_uri (uri);
         g_free (uri);
