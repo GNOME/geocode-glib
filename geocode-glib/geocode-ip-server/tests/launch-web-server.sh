@@ -116,6 +116,7 @@ SetEnv HTTP_CLIENT_IP 24.24.24.24
 
 ServerName localhost
 ServerRoot "$ROOTDIR"
+DefaultRuntimeDir "$ROOTDIR"
 PidFile pid
 #LockFile lock
 # LogLevel crit
