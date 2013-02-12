@@ -25,6 +25,14 @@
 #include <libsoup/soup.h>
 #include "geocode-ipclient.h"
 
+/**
+ * SECTION:geocode-ipclient
+ * @short_description: GeoIP client
+ * @include: geocode-glib/geocode-ipclient.h
+ *
+ * Contains functions to get the geolocation corresponding to IP addresses from a server.
+ **/
+
 struct _GeocodeIpclientPrivate {
         char *ip;
 };
@@ -57,6 +65,15 @@ geocode_ipclient_init (GeocodeIpclient *ipclient)
         ipclient->priv = G_TYPE_INSTANCE_GET_PRIVATE ((ipclient), GEOCODE_TYPE_IPCLIENT, GeocodeIpclientPrivate);
 }
 
+/**
+ * geocode_ipclient_new_for_ip:
+ * @str: The IP address
+ *
+ * Creates a new #GeocodeIpclient to fetch the geolocation data
+ * Use geocode_ipclient_search_async() to query the server
+ *
+ * Returns: a new #GeocodeIpclient. Use g_object_unref() when done.
+ **/
 GeocodeIpclient *
 geocode_ipclient_new_for_ip (const char *ip)
 {
@@ -68,6 +85,16 @@ geocode_ipclient_new_for_ip (const char *ip)
         return ipclient;
 }
 
+/**
+ * geocode_ipclient_new:
+ *
+ * Creates a new #GeocodeIpclient to fetch the geolocation data.
+ * Here the IP address is not provided the by client, hence the server
+ * will try to get the IP address from various proxy variables.
+ * Use geocode_ipclient_search_async() to query the server
+ *
+ * Returns: a new #GeocodeIpclient. Use g_object_unref() when done.
+ **/
 GeocodeIpclient *
 geocode_ipclient_new (void)
 {
@@ -139,6 +166,20 @@ query_callback (GObject        *source_forward,
         g_object_unref (simple);
 }
 
+/**
+ * geocode_ipclient_search_async:
+ * @ipclient: a #GeocodeIpclient representing a query
+ * @cancellable: optional #GCancellable forward, %NULL to ignore.
+ * @callback: a #GAsyncReadyCallback to call when the request is satisfied
+ * @user_data: the data to pass to callback function
+ *
+ * Asynchronously performs a query to get the geolocation information
+ * from the server. Use geocode_ipclient_search() to do the same
+ * thing synchronously.
+ *
+ * When the operation is finished, @callback will be called. You can then call
+ * geocode_ipclient_search_finish() to get the result of the operation.
+ **/
 void
 geocode_ipclient_search_async (GeocodeIpclient           *ipclient,
                                GCancellable              *cancellable,
@@ -170,6 +211,18 @@ geocode_ipclient_search_async (GeocodeIpclient           *ipclient,
         g_object_unref (query);
 }
 
+/**
+ * geocode_ipclient_search_finish:
+ * @ipclient: a #GeocodeIpclient representing a query
+ * @res: a #GAsyncResult
+ * @error: a #GError
+ *
+ * Finishes a geolocation search operation. See geocode_ipclient_search_async().
+ *
+ * Returns: a string containing the result of the query in JSON format
+ * or %NULL in case of errors.
+ * Free the returned string with g_free() when done.
+ **/
 char *
 geocode_ipclient_search_finish (GeocodeIpclient *ipclient,
                                 GAsyncResult    *res,
@@ -189,6 +242,17 @@ geocode_ipclient_search_finish (GeocodeIpclient *ipclient,
         return contents;
 }
 
+/**
+ * geocode_ipclient_search:
+ * @ipclient: a #GeocodeIpclient representing a query
+ * @error: a #GError
+ *
+ * Gets the geolocation data for an IP address from the server.
+ *
+ * Returns: a string containing the result of the query in JSON format
+ * or %NULL in case of errors.
+ * Free the returned string with g_free() when done.
+ **/
 char *
 geocode_ipclient_search (GeocodeIpclient        *ipclient,
                          GError                 **error)
