@@ -94,12 +94,23 @@ LoadModule alias_module modules/mod_alias.so
 LoadModule log_config_module modules/mod_log_config.so
 LoadModule unixd_module modules/mod_unixd.so
 LoadModule access_compat_module modules/mod_access_compat.so
+# Authentication modules
 LoadModule auth_basic_module modules/mod_auth_basic.so
+LoadModule auth_digest_module modules/mod_auth_digest.so
+LoadModule authn_anon_module modules/mod_authn_anon.so
+LoadModule authn_core_module modules/mod_authn_core.so
+LoadModule authn_dbd_module modules/mod_authn_dbd.so
+LoadModule authn_dbm_module modules/mod_authn_dbm.so
 LoadModule authn_file_module modules/mod_authn_file.so
-LoadModule authz_default_module modules/mod_authz_default.so
+LoadModule authn_socache_module modules/mod_authn_socache.so
+LoadModule authz_core_module modules/mod_authz_core.so
+LoadModule authz_dbd_module modules/mod_authz_dbd.so
+LoadModule authz_dbm_module modules/mod_authz_dbm.so
 LoadModule authz_groupfile_module modules/mod_authz_groupfile.so
 LoadModule authz_host_module modules/mod_authz_host.so
+LoadModule authz_owner_module modules/mod_authz_owner.so
 LoadModule authz_user_module modules/mod_authz_user.so
+
 LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
 LoadModule autoindex_module modules/mod_autoindex.so
 LoadModule cgid_module modules/mod_cgid.so
