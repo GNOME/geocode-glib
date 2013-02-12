@@ -91,6 +91,9 @@ rm -f conf pid lock log access_log
 
 cat > conf <<EOF
 LoadModule alias_module modules/mod_alias.so
+LoadModule log_config_module modules/mod_log_config.so
+LoadModule unixd_module modules/mod_unixd.so
+LoadModule access_compat_module modules/mod_access_compat.so
 LoadModule auth_basic_module modules/mod_auth_basic.so
 LoadModule authn_file_module modules/mod_authn_file.so
 LoadModule authz_default_module modules/mod_authz_default.so
