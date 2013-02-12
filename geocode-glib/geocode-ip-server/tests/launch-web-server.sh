@@ -90,23 +90,24 @@ rm -f conf pid lock log access_log
 # Setup the config file
 
 cat > conf <<EOF
-LoadModule alias_module /usr/lib/apache2/modules/mod_alias.so
-LoadModule auth_basic_module /usr/lib/apache2/modules/mod_auth_basic.so
-LoadModule authn_file_module /usr/lib/apache2/modules/mod_authn_file.so
-LoadModule authz_default_module /usr/lib/apache2/modules/mod_authz_default.so
-LoadModule authz_groupfile_module /usr/lib/apache2/modules/mod_authz_groupfile.so
-LoadModule authz_host_module /usr/lib/apache2/modules/mod_authz_host.so
-LoadModule authz_user_module /usr/lib/apache2/modules/mod_authz_user.so
-LoadModule autoindex_module /usr/lib/apache2/modules/mod_autoindex.so
-LoadModule cgid_module /usr/lib/apache2/modules/mod_cgid.so
-LoadModule deflate_module /usr/lib/apache2/modules/mod_deflate.so
-LoadModule dir_module /usr/lib/apache2/modules/mod_dir.so
-LoadModule env_module /usr/lib/apache2/modules/mod_env.so
-LoadModule mime_module /usr/lib/apache2/modules/mod_mime.so
-LoadModule negotiation_module /usr/lib/apache2/modules/mod_negotiation.so
-LoadModule reqtimeout_module /usr/lib/apache2/modules/mod_reqtimeout.so
-LoadModule setenvif_module /usr/lib/apache2/modules/mod_setenvif.so
-LoadModule status_module /usr/lib/apache2/modules/mod_status.so
+LoadModule alias_module modules/mod_alias.so
+LoadModule auth_basic_module modules/mod_auth_basic.so
+LoadModule authn_file_module modules/mod_authn_file.so
+LoadModule authz_default_module modules/mod_authz_default.so
+LoadModule authz_groupfile_module modules/mod_authz_groupfile.so
+LoadModule authz_host_module modules/mod_authz_host.so
+LoadModule authz_user_module modules/mod_authz_user.so
+LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
+LoadModule autoindex_module modules/mod_autoindex.so
+LoadModule cgid_module modules/mod_cgid.so
+LoadModule deflate_module modules/mod_deflate.so
+LoadModule dir_module modules/mod_dir.so
+LoadModule env_module modules/mod_env.so
+LoadModule mime_module modules/mod_mime.so
+LoadModule negotiation_module modules/mod_negotiation.so
+LoadModule reqtimeout_module modules/mod_reqtimeout.so
+LoadModule setenvif_module modules/mod_setenvif.so
+LoadModule status_module modules/mod_status.so
 
 SetEnv HTTP_CLIENT_IP 24.24.24.24
 
