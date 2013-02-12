@@ -16,6 +16,8 @@ exit 1
 
 # Find Apache first
 
+if [ -x /usr/sbin/httpd ] ; then APACHE_HTTPD=/usr/sbin/httpd; fi
+
 HTTPD=${APACHE_HTTPD:-/usr/sbin/apache2}
 
 if [ -z $HTTPD ] ; then
