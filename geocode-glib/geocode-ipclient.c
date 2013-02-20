@@ -259,6 +259,7 @@ geocode_ipclient_search_async (GeocodeIpclient           *ipclient,
         GError *error = NULL;
 
         g_return_if_fail (GEOCODE_IS_IPCLIENT (ipclient));
+        g_return_if_fail (ipclient->priv->server != NULL);
 
         simple = g_simple_async_result_new (G_OBJECT (ipclient),
                                             callback,
@@ -329,6 +330,7 @@ geocode_ipclient_search (GeocodeIpclient        *ipclient,
         GFile *query;
 
         g_return_val_if_fail (GEOCODE_IS_IPCLIENT (ipclient), NULL);
+        g_return_val_if_fail (ipclient->priv->server != NULL, NULL);
 
         query = get_search_query (ipclient);
 
