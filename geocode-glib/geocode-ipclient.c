@@ -47,6 +47,19 @@ struct _GeocodeIpclientPrivate {
 G_DEFINE_TYPE (GeocodeIpclient, geocode_ipclient, G_TYPE_OBJECT)
 
 static void
+geocode_ipclient_set_server (GeocodeIpclient *ipclient,
+			     const char      *server)
+{
+        g_return_if_fail (server != NULL);
+        g_return_if_fail (g_str_has_prefix (server, "http://") ||
+                          g_str_has_prefix (server, "https://"));
+
+        g_free (ipclient->priv->server);
+        ipclient->priv->server = g_strdup (server);
+
+}
+
+static void
 geocode_ipclient_set_property (GObject           *gipclient,
                                guint              property_id,
                                const GValue      *value,
@@ -56,8 +69,8 @@ geocode_ipclient_set_property (GObject           *gipclient,
 
         switch (property_id) {
                 case PROP_SERVER:
-                        g_free (ipclient->priv->server);
-                        ipclient->priv->server = g_value_dup_string (value);
+                        geocode_ipclient_set_server (ipclient,
+                                                     g_value_get_string (value));
                         break;
                 default:
                         G_OBJECT_WARN_INVALID_PROPERTY_ID (gipclient,
