@@ -68,6 +68,10 @@ PKG_CHECK_MODULES(GEOCODE_SERVER,
 		  libsoup-2.4
                   geoip)
 
+# Requires for the database update
+PKG_CHECK_MODULES(GEOCODE_DBUPDATE,
+		  gio-2.0 >= 2.34)
+
 GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal glib-2.0`
 AC_SUBST(GLIB_GENMARSHAL)
 
