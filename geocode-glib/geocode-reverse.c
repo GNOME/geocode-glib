@@ -513,26 +513,20 @@ geocode_reverse_resolve_async (GeocodeReverse       *object,
  * Free the returned string with g_hash_table_destroy() when done.
  **/
 GHashTable *
-geocode_reverse_resolve_finish (GeocodeReverse       *object,
+geocode_reverse_resolve_finish (GeocodeReverse      *object,
 				GAsyncResult        *res,
 				GError             **error)
 {
 	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
-	GHashTable *ret;
 
 	g_return_val_if_fail (GEOCODE_IS_REVERSE (object), NULL);
 
 	g_warn_if_fail (g_simple_async_result_get_source_tag (simple) == geocode_reverse_resolve_async);
 
-	ret = NULL;
-
 	if (g_simple_async_result_propagate_error (simple, error))
-		goto out;
+		return NULL;
 
-	ret = g_simple_async_result_get_op_res_gpointer (simple);
-
-out:
-	return ret;
+	return g_simple_async_result_get_op_res_gpointer (simple);
 }
 
 /**
