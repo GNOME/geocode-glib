@@ -17,12 +17,12 @@ static struct {
         }
 };
 
-/* if_db_updated function returns TRUE on success and FALSE on failure.
+/* local_db_needs_update function returns TRUE on success and FALSE on failure.
  * It sets the parameter needs_update to TRUE if the local database needs
  * to be updated.
  */
 static gboolean
-if_db_updated (GFile *db, GFile *db_local, gboolean *needs_update, GError **error)
+local_db_needs_update (GFile *db, GFile *db_local, gboolean *needs_update, GError **error)
 {
         GFileInfo *db_info;
         GFileInfo *db_local_info;
@@ -189,7 +189,7 @@ main (int argc, char **argv)
                 db_local = g_file_new_for_path (db_path);
                 g_free (db_path);
 
-                if (if_db_updated (db_remote, db_local, &needs_update, &error) == FALSE) {
+                if (local_db_needs_update (db_remote, db_local, &needs_update, &error) == FALSE) {
                         g_print ("Could not update the database: %s\n", error->message);
                         g_error_free (error);
                         goto end_loop;
