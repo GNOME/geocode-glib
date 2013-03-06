@@ -18,11 +18,11 @@ static struct {
 };
 
 /* if_db_updated function returns TRUE on success and FALSE on failure.
- * It sets the parameter - updated to TRUE or FALSE based on the status
- * of last update of the database.
+ * It sets the parameter needs_update to TRUE if the local database needs
+ * to be updated.
  */
 static gboolean
-if_db_updated (GFile *db, GFile *db_local, gboolean *updated, GError **error)
+if_db_updated (GFile *db, GFile *db_local, gboolean *needs_update, GError **error)
 {
         GFileInfo *db_info;
         GFileInfo *db_local_info;
@@ -30,7 +30,7 @@ if_db_updated (GFile *db, GFile *db_local, gboolean *updated, GError **error)
         guint64 db_local_time;
 
         if (g_file_query_exists (db_local, NULL) == FALSE) {
-                *updated = FALSE;
+                *needs_update = TRUE;
                 return TRUE;
         }
 
@@ -55,9 +55,9 @@ if_db_updated (GFile *db, GFile *db_local, gboolean *updated, GError **error)
         db_time = g_file_info_get_attribute_uint64 (db_info, "time::modified");
         db_local_time = g_file_info_get_attribute_uint64 (db_local_info, "time::modified");
         if (db_time == db_local_time)
-                *updated = TRUE;
+                *needs_update = FALSE;
         else
-                *updated = FALSE;
+                *needs_update = TRUE;
 
         g_object_unref (db_info);
         g_object_unref (db_local_info);
@@ -180,7 +180,7 @@ main (int argc, char **argv)
                 GFile *db_local;
                 char *db_path;
                 char *db_decompressed_path;
-                gboolean updated;
+                gboolean needs_update;
 
                 g_print ("Updating %s database\n", db_info_map[i].db_name);
                 db_remote = g_file_new_for_uri (db_info_map[i].uri);
@@ -189,12 +189,12 @@ main (int argc, char **argv)
                 db_local = g_file_new_for_path (db_path);
                 g_free (db_path);
 
-                if (if_db_updated (db_remote, db_local, &updated, &error) == FALSE) {
+                if (if_db_updated (db_remote, db_local, &needs_update, &error) == FALSE) {
                         g_print ("Could not update the database: %s\n", error->message);
                         g_error_free (error);
                         goto end_loop;
                 }
-                if (updated) {
+                if (!needs_update) {
                         g_print ("Database '%s' up to date\n", db_info_map[i].db_name);
                         goto end_loop;
                 }
