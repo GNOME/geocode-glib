@@ -53,7 +53,11 @@ GeocodeGlib_1_0_gir_INCLUDES = GObject-2.0 Gio-2.0 Json-1.0 SoupGNOME-2.4
 GeocodeGlib_1_0_gir_PACKAGES = gobject-2.0 gmodule-2.0 glib-2.0 gio-2.0 libsoup-gnome-2.4 json-glib-1.0
 GeocodeGlib_1_0_gir_CFLAGS = -I$(top_srcdir)
 GeocodeGlib_1_0_gir_LIBS = libgeocode-glib.la
-GeocodeGlib_1_0_gir_SCANNERFLAGS = --symbol-prefix=geocode_ --identifier-prefix=Geocode --pkg-export=geocode-glib-1.0
+GeocodeGlib_1_0_gir_SCANNERFLAGS = \
+	--symbol-prefix=geocode_ \
+	--identifier-prefix=Geocode \
+	--pkg-export=geocode-glib-1.0 \
+	--c-include="geocode-glib/geocode-glib.h"
 GeocodeGlib_1_0_gir_FILES = $(introspection_files)
 INTROSPECTION_GIRS += GeocodeGlib-1.0.gir
 
