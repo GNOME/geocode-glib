@@ -470,10 +470,9 @@ geocode_forward_search_async (GeocodeForward      *forward,
  *
  * Finishes a forward geocoding operation. See geocode_forward_search_async().
  *
- * Returns: (element-type GHashTable) (transfer full):
- * a #GHashTable containing the results of the query
- * or %NULL in case of errors.
- * Free the returned string with g_hash_table_destroy() when done.
+ * Returns: (element-type GeocodeLocation) (transfer container): A list of
+ * locations or %NULL in case of errors. Free the returned list with
+ * g_list_free() when done.
  **/
 GList *
 geocode_forward_search_finish (GeocodeForward       *forward,
@@ -769,10 +768,9 @@ parse:
  * Gets the result of a forward geocoding
  * query using a web service.
  *
- * Returns: (element-type GHashTable) (transfer full):
- * a #GHashTable containing the results of the query
- * or %NULL in case of errors.
- * Free the returned string with g_hash_table_destroy() when done.
+ * Returns: (element-type GeocodeLocation) (transfer container): A list of
+ * locations or %NULL in case of errors. Free the returned list with
+ * g_list_free() when done.
  **/
 GList *
 geocode_forward_search (GeocodeForward      *forward,
