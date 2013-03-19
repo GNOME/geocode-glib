@@ -97,7 +97,7 @@ fi
 
 AC_CONFIG_FILES([
           Makefile
-	  geocode-glib.pc
+	  geocode-glib-1.0.pc
 	  docs/Makefile
 	  docs/version.xml
 	  geocode-glib/Makefile

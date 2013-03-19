@@ -12,10 +12,10 @@ MAINTAINERCLEANFILES = Makefile.in \
 	aclocal.m4 configure config.h.in config.sub config.guess \
 	ltmain.sh depcomp missing install-sh mkinstalldirs \
 	intltool-extract.in intltool-update.in intltool-merge.in \
-	geocode-glib.pc
+	geocode-glib-1.0.pc
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = geocode-glib.pc
+pkgconfig_DATA = geocode-glib-1.0.pc
 
 # Build ChangeLog from GIT history
 ChangeLog:
