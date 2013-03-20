@@ -150,11 +150,11 @@ main (int argc, char **argv)
 {
 
         GError *error = NULL;
-        char *path = "/usr/share/GeoIP/";
+        const char *path, *dbpath;
         guint i;
         GOptionContext *context;
         const GOptionEntry entries[] = {
-                { "dbpath", 0, 0, G_OPTION_ARG_STRING, &path, "The directory containing the databases", NULL },
+                { "dbpath", 0, 0, G_OPTION_ARG_STRING, &dbpath, "The directory containing the databases", NULL },
                 { NULL }
         };
 
@@ -165,6 +165,14 @@ main (int argc, char **argv)
         if (g_option_context_parse (context, &argc, &argv, &error) == FALSE) {
                 g_print ("Option parsing failed: %s\n", error->message);
                 return 1;
+        }
+
+        path = g_getenv ("GEOIP_DATABASE_PATH");
+        if (!path) {
+                if (dbpath)
+                        path = dbpath;
+                else
+                        path = GEOIP_DATABASE_PATH;
         }
 
         for (i = 0; i < G_N_ELEMENTS (db_info_map); i++) {
