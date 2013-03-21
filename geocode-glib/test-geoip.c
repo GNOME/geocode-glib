@@ -19,10 +19,10 @@ test_search (gconstpointer data)
 
         ip = (const char *) data;
         if (ip)
-                ipclient = geocode_ipclient_new_for_ip ("24.34.34.24");
-        else {
+                ipclient = geocode_ipclient_new_for_ip (ip);
+        else
                 ipclient = geocode_ipclient_new ();
-        }
+
         contents = geocode_ipclient_search (ipclient, &error);
         if (!contents) {
                 g_warning ("Failed at getting the geolocation information: %s", error->message);
