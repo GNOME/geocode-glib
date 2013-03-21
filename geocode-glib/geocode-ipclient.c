@@ -105,7 +105,7 @@ geocode_ipclient_finalize (GObject *gipclient)
         GeocodeIpclient *ipclient = (GeocodeIpclient *) gipclient;
 
         g_free (ipclient->priv->ip);
-
+        g_free (ipclient->priv->server);
         G_OBJECT_CLASS (geocode_ipclient_parent_class)->finalize (gipclient);
 }
 
