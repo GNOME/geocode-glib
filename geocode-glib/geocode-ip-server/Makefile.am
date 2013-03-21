@@ -4,7 +4,9 @@ BUILT_GIRSOURCES =
 
 AM_CFLAGS = -I$(top_srcdir) $(GEOCODE_SERVER_CFLAGS) $(COMMON_CFLAGS) $(WARN_CFLAGS) $(DISABLE_DEPRECATED) -DGEOIP_DATABASE_PATH=\""$(GEOIP_DATABASE_PATH)"\"
 
-TEST_PROGS += geoip-lookup geoip-update
+bin_PROGRAMS = geoip-update
+
+TEST_PROGS += geoip-lookup
 noinst_PROGRAMS = $(TEST_PROGS)
 
 geoip_lookup_LDADD = $(GEOCODE_SERVER_LIBS)
