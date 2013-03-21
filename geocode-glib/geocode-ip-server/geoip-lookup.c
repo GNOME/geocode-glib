@@ -17,28 +17,6 @@ static char *error_message_array [] = {
 };
 
 static void
-add_json_object_for_address (JsonBuilder *builder,
-                             const char  *name,
-                             const char  *code,
-                             const char  *type)
-{
-        if (!name && !code)
-                return;
-        json_builder_begin_object (builder);
-        if (name) {
-                json_builder_set_member_name (builder, "name");
-                json_builder_add_string_value (builder, name);
-        }
-        if (code) {
-                json_builder_set_member_name (builder, "code");
-                json_builder_add_string_value (builder, code);
-        }
-        json_builder_set_member_name (builder, "type");
-        json_builder_add_string_value (builder, type);
-        json_builder_end_object (builder);
-}
-
-static void
 print_error_in_json (int        error_code,
                      const char *extra_info)
 {
@@ -68,37 +46,55 @@ add_result_attr_to_json_tree (const char *ipaddress,
 
         json_builder_begin_object (builder); /* begin */
 
-        json_builder_set_member_name (builder, "results");
-        json_builder_begin_object (builder); /* begin results object */
+        json_builder_set_member_name (builder, "ip");
+        json_builder_add_string_value (builder, ipaddress);
 
-        json_builder_set_member_name (builder, ipaddress);
-        json_builder_begin_array (builder); /* begin ipaddress array */
-
-        json_builder_begin_object (builder); /* begin ipaddress object */
-
-        json_builder_set_member_name (builder, "location");
-        json_builder_begin_object (builder); /* begin location object */
         json_builder_set_member_name (builder, "latitude");
         json_builder_add_double_value (builder, gir->latitude);
         json_builder_set_member_name (builder, "longitude");
         json_builder_add_double_value (builder, gir->longitude);
-        json_builder_end_object (builder); /* end location object */
 
-        json_builder_set_member_name (builder, "address");
-        json_builder_begin_array (builder); /* begin address array */
+        const char *accuracy = "country";
 
-        /* Before adding any entry check if that's NULL.
-           If NULL then don't add it to the JSON output.
-        */
-        add_json_object_for_address (builder, gir->city, NULL, "city");
-        add_json_object_for_address (builder,
-                                     GeoIP_region_name_by_code (gir->country_code, gir->region),
-                                     gir->region,
-                                     "region");
-        add_json_object_for_address (builder, NULL, gir->postal_code, "postalcode");
-        add_json_object_for_address (builder, gir->country_name, gir->country_code, "country");
+        /* Country level information */
+        if (gir->country_name != NULL) {
+                json_builder_set_member_name (builder, "country_name");
+                json_builder_add_string_value (builder, gir->country_name);
+        }
+        if (gir->country_code != NULL) {
+                json_builder_set_member_name (builder, "country_code");
+                json_builder_add_string_value (builder, gir->country_code);
 
-        json_builder_end_array (builder); /* end address array  */
+                /* Region level information */
+                if (gir->region != NULL) {
+                    accuracy = "region";
+                    json_builder_set_member_name (builder, "region_name");
+                    json_builder_add_string_value (builder,
+                                                   GeoIP_region_name_by_code (gir->country_code, gir->region));
+                }
+        }
+        if (gir->area_code > 0) {
+                json_builder_set_member_name (builder, "areacode");
+                json_builder_add_int_value (builder, gir->area_code);
+        }
+
+        /* City level information */
+        if (gir->city != NULL) {
+                accuracy = "city";
+                json_builder_set_member_name (builder, "city");
+                json_builder_add_string_value (builder, gir->city);
+        }
+        if (gir->postal_code != NULL) {
+                json_builder_set_member_name (builder, "zipcode");
+                json_builder_add_string_value (builder, gir->postal_code);
+        }
+        if (gir->metro_code > 0) {
+                json_builder_set_member_name (builder, "metro_code");
+                json_builder_add_int_value (builder, gir->metro_code);
+        }
+
+        json_builder_set_member_name (builder, "accuracy");
+        json_builder_add_string_value (builder, accuracy);
 
         timezone = GeoIP_time_zone_by_country_and_region(gir->country_code, gir->region);
         if (timezone) {
@@ -106,20 +102,8 @@ add_result_attr_to_json_tree (const char *ipaddress,
                 json_builder_add_string_value (builder, timezone);
         }
 
-        json_builder_set_member_name (builder, "accuracy");
-        json_builder_add_string_value (builder, "city");
-
         json_builder_set_member_name (builder, "attribution");
         json_builder_add_string_value (builder, attribution_text);
-
-        json_builder_end_object (builder); /* end ipaddress object */
-
-        json_builder_end_array (builder); /* end ipaddress array */
-
-        json_builder_end_object (builder); /* end results object */
-
-        json_builder_set_member_name (builder, "status");
-        json_builder_add_string_value (builder, "OK");
 
         json_builder_end_object (builder); /* end */
 
@@ -148,40 +132,19 @@ add_result_attr_to_json_tree_geoipdb (const char *ipaddress,
 
         json_builder_begin_object (builder); /* begin */
 
-        json_builder_set_member_name (builder, "results");
-        json_builder_begin_object (builder); /* begin results object */
+        json_builder_set_member_name (builder, "ip");
+        json_builder_add_string_value (builder, ipaddress);
 
-        json_builder_set_member_name (builder, ipaddress);
-        json_builder_begin_array (builder); /* begin ipaddress array */
-        json_builder_begin_object (builder); /* begin ipaddress object */
-
-        json_builder_set_member_name (builder, "address");
-        json_builder_begin_array (builder); /* begin address array */
-
-        /* Before adding any entry check if that's NULL.
-           If NULL then don't add it to the JSON output.
-        */
-        add_json_object_for_address (builder,
-                                     GeoIP_country_name_by_addr (gi, ipaddress),
-                                     GeoIP_country_code_by_addr (gi, ipaddress),
-                                     "country");
-
-        json_builder_end_array (builder); /* end address array  */
+        json_builder_set_member_name (builder, "country_code");
+        json_builder_add_string_value (builder, country_code);
+        json_builder_set_member_name (builder, "country_name");
+        json_builder_add_string_value (builder, country_name);
 
         json_builder_set_member_name (builder, "accuracy");
         json_builder_add_string_value (builder, "country");
 
         json_builder_set_member_name (builder, "attribution");
         json_builder_add_string_value (builder, attribution_text);
-
-        json_builder_end_object (builder); /* end ipaddress object */
-
-        json_builder_end_array (builder); /* end ipaddress array */
-
-        json_builder_end_object (builder); /* end results object */
-
-        json_builder_set_member_name (builder, "status");
-        json_builder_add_string_value (builder, "OK");
 
         json_builder_end_object (builder); /* end */
 
