@@ -48,7 +48,7 @@ G_DEFINE_TYPE (GeocodeIpclient, geocode_ipclient, G_TYPE_OBJECT)
 
 static void
 geocode_ipclient_set_server (GeocodeIpclient *ipclient,
-			     const char      *server)
+                             const char      *server)
 {
         g_return_if_fail (server != NULL);
         g_return_if_fail (g_str_has_prefix (server, "http://") ||
