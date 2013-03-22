@@ -9,30 +9,39 @@
 
 static GMainLoop *loop = NULL;
 
+typedef struct {
+        const char *ip;
+
+        double expected_latitude;
+        double expected_longitude;
+        const char *expected_description;
+} TestData;
+
 static void
 test_search (gconstpointer data)
 {
         GeocodeIpclient *ipclient;
         GError *error = NULL;
-        char *contents;
-        const char *ip;
+        GeocodeLocation *location;
+        TestData *test_data = (TestData *) data;
 
-        ip = (const char *) data;
-        if (ip)
-                ipclient = geocode_ipclient_new_for_ip (ip);
-        else
+        if (test_data->ip)
+                ipclient = geocode_ipclient_new_for_ip (test_data->ip);
+        else {
                 ipclient = geocode_ipclient_new ();
-
-        contents = geocode_ipclient_search (ipclient, &error);
-        if (!contents) {
+        }
+        location = geocode_ipclient_search (ipclient, &error);
+        if (!location) {
                 g_warning ("Failed at getting the geolocation information: %s", error->message);
                 g_error_free (error);
         }
-        g_assert (contents != NULL);
-        g_assert (strstr (contents, "\"ERROR\"") == NULL);
+        g_assert (location != NULL);
+        g_assert (location->latitude == test_data->expected_latitude);
+        g_assert (location->longitude == test_data->expected_longitude);
+        g_assert (location->description != NULL &&
+                  strcmp(location->description, test_data->expected_description) == 0);
+        geocode_location_free (location);
         g_object_unref (ipclient);
-        g_print ("%s\n", contents);
-        g_free (contents);
 }
 
 static void
@@ -42,31 +51,30 @@ print_geolocation_info_cb (GObject          *source_object,
 {
         GeocodeIpclient *object = (GeocodeIpclient *) source_object;
         GError *error = NULL;
-        char *results;
+        GeocodeLocation *location;
 
-        results = geocode_ipclient_search_finish (object, res, &error);
-        if (results == NULL) {
+        location = geocode_ipclient_search_finish (object, res, &error);
+        if (location == NULL) {
                 g_message ("Failed to search the geolocation info: %s", error->message);
                 g_error_free (error);
                 exit (1);
         }
-        g_print ("%s\n", results);
-        g_free (results);
+        g_print ("Location: %s (%f,%f)\n", location->description, location->latitude,  location->longitude);
 
+        geocode_location_free (location);
         g_object_unref (object);
         exit (0);
 }
-
 
 int main (int argc, char **argv)
 {
         GError *error = NULL;
         GOptionContext *context;
         GeocodeIpclient *ipclient;
-        char *ip = NULL;
+        TestData data = { NULL, 0.0f, 0.0f, NULL };
         gboolean regr = FALSE;
         const GOptionEntry entries[] = {
-                { "ip", 0, 0, G_OPTION_ARG_STRING, &ip, "The ip address for which to search the geolocation data", NULL },
+                { "ip", 0, 0, G_OPTION_ARG_STRING, &data.ip, "The ip address for which to search the geolocation data", NULL },
                 { "regr", 0, 0, G_OPTION_ARG_NONE, &regr, "Run the default testcases", NULL },
                 { NULL }
         };
@@ -86,13 +94,19 @@ int main (int argc, char **argv)
         }
 
         if (regr == TRUE) {
-                g_test_add_data_func ("/geoip/search_with_ip", "24.24.24.24", test_search);
-                g_test_add_data_func ("/geocode/search", NULL, test_search);
+                data.expected_latitude = 43.089199f;
+                data.expected_longitude = -76.025002f;
+                data.expected_description = "East Syracuse, New York, United States";
+
+                g_test_add_data_func ("/geocode/search", &data, test_search);
+
+                data.ip = "24.24.24.24";
+                g_test_add_data_func ("/geoip/search_with_ip", &data, test_search);
                 return g_test_run ();
         }
 
-        if (ip)
-                ipclient = geocode_ipclient_new_for_ip (ip);
+        if (data.ip)
+                ipclient = geocode_ipclient_new_for_ip (data.ip);
         else
                 ipclient = geocode_ipclient_new ();
         geocode_ipclient_search_async (ipclient, NULL, print_geolocation_info_cb, NULL);

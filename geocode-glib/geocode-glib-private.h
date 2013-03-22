@@ -24,6 +24,7 @@
 #define GEOCODE_GLIB_PRIVATE_H
 
 #include <glib.h>
+#include "geocode-location.h"
 
 G_BEGIN_DECLS
 
@@ -41,6 +42,8 @@ GList      *_geocode_parse_search_json  (const char *contents,
 					 GError    **error);
 GFile      *_get_resolve_query_for_params (GHashTable  *orig_ht,
 					   gboolean     reverse);
+GeocodeLocation *_geocode_ip_json_to_location (const char  *json,
+					       GError     **error);
 
 char       *_geocode_object_get_lang (void);
 

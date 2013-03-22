@@ -25,6 +25,7 @@
 
 #include <glib.h>
 #include <gio/gio.h>
+#include "geocode-location.h"
 
 G_BEGIN_DECLS
 
@@ -71,12 +72,12 @@ void geocode_ipclient_search_async  (GeocodeIpclient       *ipclient,
                                      GAsyncReadyCallback    callback,
                                      gpointer               user_data);
 
-char *geocode_ipclient_search_finish (GeocodeIpclient   *ipclient,
-                                      GAsyncResult      *res,
-                                      GError            **error);
+GeocodeLocation *geocode_ipclient_search_finish (GeocodeIpclient   *ipclient,
+                                                 GAsyncResult      *res,
+                                                 GError            **error);
 
-char *geocode_ipclient_search (GeocodeIpclient *ipclient,
-                               GError          **error);
+GeocodeLocation *geocode_ipclient_search (GeocodeIpclient *ipclient,
+                                          GError          **error);
 
 G_END_DECLS
 

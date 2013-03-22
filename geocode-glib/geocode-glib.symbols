@@ -19,6 +19,7 @@ geocode_reverse_resolve
 geocode_error_quark
 _geocode_parse_search_json
 _geocode_parse_resolve_json
+_geocode_ip_json_to_location
 geocode_ipclient_get_type
 geocode_ipclient_new
 geocode_ipclient_new_for_ip
