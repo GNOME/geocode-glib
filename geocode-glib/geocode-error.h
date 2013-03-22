@@ -42,6 +42,7 @@ G_BEGIN_DECLS
  * @GEOCODE_ERROR_NOT_SUPPORTED: The request made was not supported.
  * @GEOCODE_ERROR_NO_MATCHES: The requests made didn't have any matches.
  * @GEOCODE_ERROR_INVALID_ARGUMENTS: The request made contained invalid arguments.
+ * @GEOCODE_ERROR_INTERNAL_SERVER: The server encountered an (possibly unrecoverable) internal error.
  *
  * Error codes returned by geocode-glib functions.
  **/
@@ -49,9 +50,9 @@ typedef enum {
 	GEOCODE_ERROR_PARSE,
 	GEOCODE_ERROR_NOT_SUPPORTED,
 	GEOCODE_ERROR_NO_MATCHES,
-	GEOCODE_ERROR_INVALID_ARGUMENTS
+	GEOCODE_ERROR_INVALID_ARGUMENTS,
+	GEOCODE_ERROR_INTERNAL_SERVER
 } GeocodeError;
-
 
 GQuark geocode_error_quark (void);
 
