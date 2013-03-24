@@ -89,7 +89,7 @@ test_rev (void)
 	GError *error = NULL;
 	GHashTable *ht;
 
-	loc = geocode_location_new (51.237070, -0.589669);
+	loc = geocode_location_new (51.237070, -0.589669, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
 	rev = geocode_reverse_new_for_location (loc);
 	geocode_location_free (loc);
 
@@ -271,9 +271,9 @@ test_distance (void)
 	GeocodeLocation *loca, *locb;
 
 	/* 1600 Pennsylvania Ave NW, Washington, DC */
-	loca = geocode_location_new (38.898556, -77.037852);
+	loca = geocode_location_new (38.898556, -77.037852, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
 	/* 1600 Pennsylvania Ave NW, Washington, DC */
-	locb = geocode_location_new (38.897147, -77.043934);
+	locb = geocode_location_new (38.897147, -77.043934, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
 
 	g_assert_cmpfloat (geocode_location_get_distance_from (loca, locb) - 0.549311, <, 0.000001);
 }
@@ -415,7 +415,7 @@ new_loc (void)
 		return NULL;
 	latitude = g_ascii_strtod (params[0], NULL);
 	longitude = g_ascii_strtod (params[1], NULL);
-	return geocode_location_new (latitude, longitude);
+	return geocode_location_new (latitude, longitude, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
 }
 
 int main (int argc, char **argv)

@@ -43,6 +43,7 @@ geocode_location_copy (gpointer boxed)
 	to->latitude = from->latitude;
 	to->timestamp = from->timestamp;
 	to->description = from->description;
+	to->accuracy = from->accuracy;
 
 	return to;
 }
@@ -66,6 +67,7 @@ G_DEFINE_BOXED_TYPE(GeocodeLocation, geocode_location, geocode_location_copy, ge
  * geocode_location_new:
  * @latitude: a valid latitude
  * @longitude: a valid longitude
+ * @accuracy: accuracy of location in meters
  *
  * Creates a new #GeocodeLocation object.
  *
@@ -73,7 +75,8 @@ G_DEFINE_BOXED_TYPE(GeocodeLocation, geocode_location, geocode_location_copy, ge
  **/
 GeocodeLocation *
 geocode_location_new (gdouble latitude,
-		      gdouble longitude)
+                      gdouble longitude,
+                      gdouble accuracy)
 {
 	GeocodeLocation *ret;
 	GTimeVal tv;
@@ -86,10 +89,15 @@ geocode_location_new (gdouble latitude,
 		g_warning ("Invalid latitude %lf passed, using 0.0 instead", latitude);
 		latitude = 0.0;
 	}
+	if (accuracy < GEOCODE_LOCATION_ACCURACY_UNKNOWN) {
+		g_warning ("Invalid accuracy %lf passed, assuming its unknown", accuracy);
+		accuracy = GEOCODE_LOCATION_ACCURACY_UNKNOWN;
+	}
 
 	ret = g_new0 (GeocodeLocation, 1);
 	ret->longitude = longitude;
 	ret->latitude = latitude;
+	ret->accuracy = accuracy;
 	g_get_current_time (&tv);
 	ret->timestamp = tv.tv_sec;
 
@@ -100,6 +108,7 @@ geocode_location_new (gdouble latitude,
  * geocode_location_new_with_description:
  * @latitude: a valid latitude
  * @longitude: a valid longitude
+ * @accuracy: accuracy of location in meters
  * @description: a description for the location
  *
  * Creates a new #GeocodeLocation object.
@@ -108,12 +117,13 @@ geocode_location_new (gdouble latitude,
  **/
 GeocodeLocation *
 geocode_location_new_with_description (gdouble     latitude,
-				       gdouble     longitude,
-				       const char *description)
+                                       gdouble     longitude,
+                                       gdouble     accuracy,
+                                       const char *description)
 {
 	GeocodeLocation *ret;
 
-	ret = geocode_location_new (latitude, longitude);
+	ret = geocode_location_new (latitude, longitude, accuracy);
 	ret->description = g_strdup (description);
 
 	return ret;

@@ -108,8 +108,10 @@ _geocode_parse_single_result_json (const char  *contents,
 
 	longitude = g_ascii_strtod (g_hash_table_lookup (ht, "longitude"), NULL);
 	latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
-	loc = geocode_location_new_with_description (longitude, latitude,
-						     g_hash_table_lookup (ht, "line2"));
+	loc = geocode_location_new_with_description (longitude,
+                                                 latitude,
+                                                 GEOCODE_LOCATION_ACCURACY_UNKNOWN,
+                                                 g_hash_table_lookup (ht, "line2"));
 	g_hash_table_destroy (ht);
 
 	return g_list_append (NULL, loc);
@@ -616,7 +618,10 @@ insert_place_into_tree (GNode *location_tree, GHashTable *ht)
 	latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
 	name = g_hash_table_lookup (ht, "name");
 
-	loc = geocode_location_new_with_description (latitude, longitude, name);
+	loc = geocode_location_new_with_description (latitude,
+                                                 longitude,
+                                                 GEOCODE_LOCATION_ACCURACY_UNKNOWN,
+                                                 name);
 
 	g_node_insert_data (start, -1, loc);
 }

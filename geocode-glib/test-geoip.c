@@ -54,6 +54,7 @@ test_search (gconstpointer data)
         GError *error = NULL;
         GeocodeLocation *location;
         TestData *test_data = (TestData *) data;
+        gdouble accuracy = GEOCODE_LOCATION_ACCURACY_UNKNOWN;
 
         if (test_data->ip)
                 ipclient = geocode_ipclient_new_for_ip (test_data->ip);
@@ -70,6 +71,7 @@ test_search (gconstpointer data)
         g_assert (location->longitude == test_data->expected_longitude);
         g_assert (location->description != NULL &&
                   strcmp(location->description, test_data->expected_description) == 0);
+        g_assert (accuracy != GEOCODE_LOCATION_ACCURACY_UNKNOWN);
         geocode_location_free (location);
         g_object_unref (ipclient);
 }

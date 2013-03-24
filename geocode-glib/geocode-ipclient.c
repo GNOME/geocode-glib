@@ -24,9 +24,11 @@
 #include <glib.h>
 #include <libsoup/soup.h>
 #include <json-glib/json-glib.h>
+#include <string.h>
 #include "geocode-glib-private.h"
 #include "geocode-ipclient.h"
 #include "geocode-error.h"
+#include "geocode-enum-types.h"
 #include "geocode-ip-server/geoip-server.h"
 
 /**
@@ -317,6 +319,46 @@ parse_server_error (JsonObject *object, GError **error)
         return TRUE;
 }
 
+static gdouble
+get_accuracy_from_string (const char *str)
+{
+        if (strcmp (str, "street") == 0)
+                return GEOCODE_LOCATION_ACCURACY_STREET;
+        else if (strcmp (str, "city") == 0)
+                return GEOCODE_LOCATION_ACCURACY_CITY;
+        else if (strcmp (str, "region") == 0)
+                return GEOCODE_LOCATION_ACCURACY_REGION;
+        else if (strcmp (str, "country") == 0)
+                return GEOCODE_LOCATION_ACCURACY_COUNTRY;
+        else if (strcmp (str, "continent") == 0)
+                return GEOCODE_LOCATION_ACCURACY_CONTINENT;
+        else
+                return GEOCODE_LOCATION_ACCURACY_UNKNOWN;
+}
+
+static gdouble
+get_accuracy_from_json_location (JsonObject *object)
+{
+        if (json_object_has_member (object, "accuracy")) {
+                const char *str;
+
+                str = json_object_get_string_member (object, "accuracy");
+                return get_accuracy_from_string (str);
+        } else if (json_object_has_member (object, "street")) {
+                return GEOCODE_LOCATION_ACCURACY_STREET;
+        } else if (json_object_has_member (object, "city")) {
+                return GEOCODE_LOCATION_ACCURACY_CITY;
+        } else if (json_object_has_member (object, "region_name")) {
+                return GEOCODE_LOCATION_ACCURACY_REGION;
+        } else if (json_object_has_member (object, "country_name")) {
+                return GEOCODE_LOCATION_ACCURACY_COUNTRY;
+        } else if (json_object_has_member (object, "continent")) {
+                return GEOCODE_LOCATION_ACCURACY_CONTINENT;
+        } else {
+                return GEOCODE_LOCATION_ACCURACY_UNKNOWN;
+        }
+}
+
 GeocodeLocation *
 _geocode_ip_json_to_location (const char *json,
                               GError    **error)
@@ -325,6 +367,7 @@ _geocode_ip_json_to_location (const char *json,
         JsonNode *node;
         JsonObject *object;
         GeocodeLocation *location;
+        gdouble latitude, longitude, accuracy;
         char *desc = NULL;
 
         parser = json_parser_new ();
@@ -338,9 +381,11 @@ _geocode_ip_json_to_location (const char *json,
         if (parse_server_error (object, error))
                 return NULL;
 
-        location = geocode_location_new (0, 0);
-        location->latitude = json_object_get_double_member (object, "latitude");
-        location->longitude = json_object_get_double_member (object, "longitude");
+        latitude = json_object_get_double_member (object, "latitude");
+        longitude = json_object_get_double_member (object, "longitude");
+        accuracy = get_accuracy_from_json_location (object);
+
+        location = geocode_location_new (latitude, longitude, accuracy);
 
         if (json_object_has_member (object, "country_name")) {
                 if (json_object_has_member (object, "region_name")) {
