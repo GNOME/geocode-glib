@@ -43,7 +43,7 @@ test_parse_json (gconstpointer data)
         }
         g_free (contents);
         g_free (path);
-        geocode_location_free (location);
+        g_object_unref (location);
 }
 
 
@@ -54,7 +54,6 @@ test_search (gconstpointer data)
         GError *error = NULL;
         GeocodeLocation *location;
         TestData *test_data = (TestData *) data;
-        gdouble accuracy = GEOCODE_LOCATION_ACCURACY_UNKNOWN;
 
         if (test_data->ip)
                 ipclient = geocode_ipclient_new_for_ip (test_data->ip);
@@ -67,12 +66,13 @@ test_search (gconstpointer data)
                 g_error_free (error);
         }
         g_assert (location != NULL);
-        g_assert (location->latitude == test_data->expected_latitude);
-        g_assert (location->longitude == test_data->expected_longitude);
-        g_assert (location->description != NULL &&
-                  strcmp(location->description, test_data->expected_description) == 0);
-        g_assert (accuracy != GEOCODE_LOCATION_ACCURACY_UNKNOWN);
-        geocode_location_free (location);
+        g_assert (geocode_location_get_latitude (location) == test_data->expected_latitude);
+        g_assert (geocode_location_get_longitude (location) == test_data->expected_longitude);
+        g_assert (geocode_location_get_description (location) != NULL);
+        g_assert (strcmp (geocode_location_get_description (location),
+                          test_data->expected_description) == 0);
+        g_assert (geocode_location_get_accuracy (location) != GEOCODE_LOCATION_ACCURACY_UNKNOWN);
+        g_object_unref (location);
         g_object_unref (ipclient);
 }
 
@@ -91,9 +91,12 @@ print_geolocation_info_cb (GObject          *source_object,
                 g_error_free (error);
                 exit (1);
         }
-        g_print ("Location: %s (%f,%f)\n", location->description, location->latitude,  location->longitude);
+        g_print ("Location: %s (%f,%f)\n",
+                 geocode_location_get_description (location),
+                 geocode_location_get_latitude (location),
+                 geocode_location_get_longitude (location));
 
-        geocode_location_free (location);
+        g_object_unref (location);
         g_object_unref (object);
         exit (0);
 }

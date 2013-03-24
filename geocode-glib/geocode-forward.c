@@ -651,7 +651,7 @@ make_location_list_from_tree (GNode   *node,
 		 * and set it to the description of the loc object */
 		loc = (GeocodeLocation *) node->data;
 
-		name = loc->description;
+		name = geocode_location_get_description (loc);
 
 		/* To print the attributes in a meaningful manner
 		 * reverse the s_array */

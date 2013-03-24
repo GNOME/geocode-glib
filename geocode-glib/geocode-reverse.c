@@ -92,11 +92,12 @@ geocode_reverse_new_for_location (GeocodeLocation *location)
 
 	object = g_object_new (GEOCODE_TYPE_REVERSE, NULL);
 
+	g_ascii_formatd (buf, sizeof (buf), "%g", geocode_location_get_latitude (location));
+	g_ascii_formatd (buf2, sizeof (buf2), "%g", geocode_location_get_longitude (location));
+
 	g_hash_table_insert (object->priv->ht,
 			     g_strdup ("location"),
-			     g_strdup_printf ("%s, %s",
-					      g_ascii_formatd (buf, sizeof (buf), "%g", location->latitude),
-					      g_ascii_formatd (buf2, sizeof (buf2), "%g", location->longitude)));
+			     g_strdup_printf ("%s, %s", buf, buf2));
 
 	return object;
 }

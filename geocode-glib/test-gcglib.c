@@ -15,7 +15,10 @@ static char **params = NULL;
 static void
 print_loc (GeocodeLocation *loc)
 {
-	g_print ("\t%s @ %lf, %lf\n", loc->description, loc->latitude, loc->longitude);
+	g_print ("\t%s @ %lf, %lf\n",
+             geocode_location_get_description (loc),
+             geocode_location_get_latitude (loc),
+             geocode_location_get_longitude (loc));
 }
 
 static void
@@ -72,7 +75,7 @@ got_geocode_search_cb (GObject *source_object,
 
 		g_print ("Got geocode search answer:\n");
 		print_loc (loc);
-		geocode_location_free (loc);
+		g_object_unref (loc);
 	}
 	g_list_free (results);
 
@@ -91,7 +94,7 @@ test_rev (void)
 
 	loc = geocode_location_new (51.237070, -0.589669, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
 	rev = geocode_reverse_new_for_location (loc);
-	geocode_location_free (loc);
+	g_object_unref (loc);
 
 	ht = geocode_reverse_resolve (rev, &error);
 	if (ht == NULL) {
@@ -153,10 +156,10 @@ test_xep (void)
 	g_object_unref (object);
 
 	loc = res->data;
-	g_assert_cmpfloat (loc->latitude, ==, -0.589669);
-	g_assert_cmpfloat (loc->longitude, ==, 51.237070);
+	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, -0.589669);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, 51.237070);
 
-	geocode_location_free (loc);
+	g_object_unref (loc);
 	g_list_free (res);
 }
 
@@ -182,10 +185,10 @@ test_pub (void)
 	g_assert_cmpint (g_list_length (res), ==, 1);
 	loc = res->data;
 
-	g_assert_cmpfloat (loc->latitude, ==, -0.589669);
-	g_assert_cmpfloat (loc->longitude, ==, 51.237070);
+	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, -0.589669);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, 51.237070);
 
-	geocode_location_free (loc);
+	g_object_unref (loc);
 	g_list_free (res);
 }
 
@@ -220,12 +223,12 @@ test_search (void)
 	for (l = results; l != NULL; l = l->next) {
 		GeocodeLocation *loc = l->data;
 
-		if (g_strcmp0 (loc->description, "Paris, France") == 0)
+		if (g_strcmp0 (geocode_location_get_description (loc), "Paris, France") == 0)
 			got_france = TRUE;
-		else if (g_strcmp0 (loc->description, "Paris, Texas, United States") == 0)
+		else if (g_strcmp0 (geocode_location_get_description (loc), "Paris, Texas, United States") == 0)
 			got_texas = TRUE;
 
-		geocode_location_free (loc);
+		g_object_unref (loc);
 
 		if (got_france && got_texas)
 			break;
@@ -257,10 +260,10 @@ test_search_lat_long (void)
 	g_object_unref (object);
 
 	loc = res->data;
-	g_assert_cmpfloat (loc->latitude - 21.800699, <, 0.000001);
-	g_assert_cmpfloat (loc->longitude - -100.735626, <, 0.000001);
+	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 21.800699, <, 0.000001);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc) - -100.735626, <, 0.000001);
 
-	g_list_free_full (res, (GDestroyNotify) geocode_location_free);
+	g_list_free_full (res, (GDestroyNotify) g_object_unref);
 }
 
 /* Test case from:
@@ -301,12 +304,12 @@ test_locale (void)
 	g_object_unref (object);
 
 	loc = res->data;
-	g_assert_cmpstr (loc->description, ==, "Moskva, Rusko");
-	g_assert_cmpfloat (loc->latitude - 55.756950, <, 0.000001);
-	g_assert_cmpfloat (loc->longitude - 37.614971, <, 0.000001);
+	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Moskva, Rusko");
+	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 55.756950, <, 0.000001);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc) - 37.614971, <, 0.000001);
 	print_loc (loc);
 
-	g_list_free_full (res, (GDestroyNotify) geocode_location_free);
+	g_list_free_full (res, (GDestroyNotify) g_object_unref);
 
 	/* Check Bonneville's region in French */
 	setlocale (LC_MESSAGES, "fr_FR.UTF-8");
@@ -320,10 +323,10 @@ test_locale (void)
 	g_object_unref (object);
 
 	loc = res->data;
-	g_assert_cmpstr (loc->description, ==, "Bonneville, Rhône-Alpes, France");
+	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Bonneville, Rhône-Alpes, France");
 	print_loc (loc);
 
-	g_list_free_full (res, (GDestroyNotify) geocode_location_free);
+	g_list_free_full (res, (GDestroyNotify) g_object_unref);
 
 	/* And reset the locale */
 	setlocale (LC_MESSAGES, old_locale);
@@ -398,9 +401,9 @@ test_search_json (void)
 	g_assert_cmpint (g_list_length (list), ==, 10);
 
 	loc = list->data;
-	g_assert_cmpstr (loc->description, ==, "Rio de Janeiro, Brazil");
+	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Rio de Janeiro, Brazil");
 
-	g_list_free_full (list, (GDestroyNotify) geocode_location_free);
+	g_list_free_full (list, (GDestroyNotify) g_object_unref);
 }
 
 static GeocodeLocation *
@@ -477,7 +480,7 @@ int main (int argc, char **argv)
 		}
 		print_loc (loc);
 		reverse = geocode_reverse_new_for_location (loc);
-		geocode_location_free (loc);
+		g_object_unref (loc);
 		geocode_reverse_resolve_async (reverse, NULL, got_geocode_cb, NULL);
 	}
 

@@ -27,25 +27,38 @@
 
 G_BEGIN_DECLS
 
-typedef struct _GeocodeLocation GeocodeLocation;
+GType geocode_location_get_type (void) G_GNUC_CONST;
+
+#define GEOCODE_TYPE_LOCATION                  (geocode_location_get_type ())
+#define GEOCODE_LOCATION(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), GEOCODE_TYPE_LOCATION, GeocodeLocation))
+#define GEOCODE_IS_LOCATION(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GEOCODE_TYPE_LOCATION))
+#define GEOCODE_LOCATION_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), GEOCODE_TYPE_LOCATION, GeocodeLocationClass))
+#define GEOCODE_IS_LOCATION_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), GEOCODE_TYPE_LOCATION))
+#define GEOCODE_LOCATION_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), GEOCODE_TYPE_LOCATION, GeocodeLocationClass))
+
+typedef struct _GeocodeLocation        GeocodeLocation;
+typedef struct _GeocodeLocationClass   GeocodeLocationClass;
+typedef struct _GeocodeLocationPrivate GeocodeLocationPrivate;
 
 /**
  * GeocodeLocation:
- * @longitude: a longitude, in degrees
- * @latitude: a latitude, in degrees
- * @accuracy: accuracy of location, in meters
- * @timestamp: a timestamp in seconds since <ulink url="http://en.wikipedia.org/wiki/Unix_epoch">Epoch</ulink>.
- * @description: a description for display
  *
- * The #GeocodeLocation structure represents a location
- * on earth, with an optional description.
- **/
+ * All the fields in the #GeocodeLocation structure are private and should never be accessed directly.
+**/
 struct _GeocodeLocation {
-	gdouble longitude;
-	gdouble latitude;
-	gdouble accuracy;
-	gint64  timestamp;
-	char   *description;
+        /* <private> */
+        GObject parent_instance;
+        GeocodeLocationPrivate *priv;
+};
+
+/**
+ * GeocodeLocationClass:
+ *
+ * All the fields in the #GeocodeLocationClass structure are private and should never be accessed directly.
+**/
+struct _GeocodeLocationClass {
+        /* <private> */
+        GObjectClass parent_class;
 };
 
 #define GEOCODE_LOCATION_ACCURACY_UNKNOWN   -1
@@ -57,8 +70,6 @@ struct _GeocodeLocation {
 
 #define GEOCODE_TYPE_LOCATION (geocode_location_get_type ())
 
-GType geocode_location_get_type (void) G_GNUC_CONST;
-
 GeocodeLocation *geocode_location_new (gdouble latitude,
                                        gdouble longitude,
                                        gdouble accuracy);
@@ -68,13 +79,18 @@ GeocodeLocation *geocode_location_new_with_description (gdouble     latitude,
                                                         gdouble     accuracy,
                                                         const char *description);
 
-double geocode_location_get_distance_from (GeocodeLocation *loca,
-					   GeocodeLocation *locb);
+double geocode_location_get_distance_from              (GeocodeLocation *loca,
+                                                        GeocodeLocation *locb);
 
-void geocode_location_set_description (GeocodeLocation *loc,
-				       const char      *description);
+void geocode_location_set_description                  (GeocodeLocation *loc,
+                                                        const char      *description);
 
-void geocode_location_free (GeocodeLocation *loc);
+const char *geocode_location_get_description           (GeocodeLocation *loc);
+
+gdouble geocode_location_get_latitude                  (GeocodeLocation *loc);
+gdouble geocode_location_get_longitude                 (GeocodeLocation *loc);
+gdouble geocode_location_get_accuracy                  (GeocodeLocation *loc);
+guint64 geocode_location_get_timestamp                 (GeocodeLocation *loc);
 
 G_END_DECLS
 
