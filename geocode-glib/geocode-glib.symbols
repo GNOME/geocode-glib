@@ -17,6 +17,7 @@ geocode_reverse_resolve_async
 geocode_reverse_resolve_finish
 geocode_reverse_resolve
 geocode_error_quark
+geocode_error_get_type
 _geocode_parse_search_json
 _geocode_parse_resolve_json
 _geocode_ip_json_to_location

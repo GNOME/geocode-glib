@@ -30,6 +30,7 @@
 #include <geocode-glib/geocode-reverse.h>
 #include <geocode-glib/geocode-ipclient.h>
 #include <geocode-glib/geocode-error.h>
+#include <geocode-glib/geocode-enum-types.h>
 
 G_BEGIN_DECLS
 

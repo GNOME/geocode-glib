@@ -3,21 +3,19 @@ include $(top_srcdir)/Makefile.decl
 SUBDIRS = geocode-ip-server
 
 EXTRA_DIST = geocode-glib.symbols
+
 BUILT_GIRSOURCES =
 
 lib_LTLIBRARIES = libgeocode-glib.la
 
-public_files =						\
-	$(gcglib_HEADERS)				\
+libgeocode_glib_la_SOURCES =				\
 	geocode-location.c				\
 	geocode-forward.c				\
 	geocode-reverse.c				\
 	geocode-glib.c					\
 	geocode-error.c                                 \
-	geocode-ipclient.c
-
-libgeocode_glib_la_SOURCES =				\
-	$(public_files)					\
+	geocode-ipclient.c				\
+	geocode-enum-types.c
 	geocode-glib-private.h
 
 libgeocode_glib_la_LIBADD = $(GEOCODE_LIBS)
@@ -28,8 +26,7 @@ libgeocode_glib_la_LDFLAGS =				\
 	$(AM_LDFLAGS)					\
 	-export-symbols $(srcdir)/geocode-glib.symbols
 
-gcglibdir = $(pkgincludedir)
-gcglib_HEADERS = \
+GCGLIB_HEADER_FILES = \
 	geocode-glib.h					\
 	geocode-location.h				\
 	geocode-forward.h				\
@@ -37,7 +34,33 @@ gcglib_HEADERS = \
 	geocode-error.h                                 \
 	geocode-ipclient.h
 
+gcglibdir = $(pkgincludedir)
+gcglib_HEADERS =					\
+	$(GCGLIB_HEADER_FILES)				\
+	geocode-enum-types.h
+
 AM_CFLAGS = -I$(top_srcdir) $(GEOCODE_CFLAGS) $(COMMON_CFLAGS) $(WARN_CFLAGS) $(DISABLE_DEPRECATED) -DTEST_SRCDIR=\""$(srcdir)/data/"\"
+
+BUILT_SOURCES = \
+               geocode-enum-types.c \
+               geocode-enum-types.h
+
+geocode-enum-types.h: $(GCGLIB_HEADER_FILES)
+	$(AM_V_GEN) ($(GLIB_MKENUMS) \
+		--fhead "#ifndef __GEOCODE_ENUM_TYPES_H__\n#define __GEOCODE_ENUM_TYPES_H__\n\n#include <glib-object.h>\n\nG_BEGIN_DECLS\n" \
+		--fprod "/* enumerations from \"@filename@\" */\n" \
+		--vhead "GType @enum_name@_get_type (void) G_GNUC_CONST;\n#define GEOCODE_TYPE_@ENUMSHORT@ (@enum_name@_get_type())\n" \
+		--ftail "G_END_DECLS\n\n#endif /* __GEOCODE_ENUM_TYPES_H__ */" $^ > xgen-$(@F) \
+		&& mv -f xgen-$(@F) $@)
+
+geocode-enum-types.c: $(GCGLIB_HEADER_FILES) geocode-enum-types.h
+	$(AM_V_GEN) ($(GLIB_MKENUMS) \
+		--fhead "#include \"geocode-glib.h\"\n#include \"geocode-enum-types.h\"" \
+		--fprod "\n/* enumerations from \"@filename@\" */" \
+		--vhead "GType\n@enum_name@_get_type (void)\n{\n  static GType etype = 0;\n  if (etype == 0) {\n    static const G@Type@Value values[] = {" \
+		--vprod "      { @VALUENAME@, \"@VALUENAME@\", \"@valuenick@\" }," \
+		--vtail "      { 0, NULL, NULL }\n    };\n    etype = g_@type@_register_static (\"@EnumName@\", values);\n  }\n  return etype;\n}\n" $^ > xgen-$(@F) \
+		&& mv -f xgen-$(@F) $@)
 
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =
@@ -46,7 +69,7 @@ INTROSPECTION_COMPILER_ARGS = --includedir=$(top_srcdir)
 CLEANFILES =
 
 if HAVE_INTROSPECTION
-introspection_files = $(public_files)
+introspection_files = $(libgeocode_glib_la_SOURCES) $(gcglib_HEADERS)
 
 GeocodeGlib-1.0.gir: libgeocode-glib.la
 GeocodeGlib_1_0_gir_INCLUDES = GObject-2.0 Gio-2.0 Json-1.0 SoupGNOME-2.4
