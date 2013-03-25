@@ -6,13 +6,10 @@
 #include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
 
+#include "geoip-server.h"
+
 static const char *attribution_text = "This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com\n";
 
-enum ERROR_CODES {
-        INVALID_IP_ADDRESS_ERR = 0,
-        INVALID_ENTRY_ERR,
-        DATABASE_ERR
-};
 static char *error_message_array [] = {
         "Invalid IP address input",
         "Can not find the IP address in the database",
