@@ -11,8 +11,8 @@
 static const char *attribution_text = "This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com\n";
 
 static char *error_message_array [] = {
-        "Invalid IP address input",
-        "Can not find the IP address in the database",
+        "Invalid IP address '%s'",
+        "Can not find the IP address '%s' in the database",
         "Can not open GeoLiteCity/GeoIP Binary database. Set GEOIP_DATABASE_PATH env variable."
 };
 
@@ -20,12 +20,12 @@ static void
 print_error_in_json (int        error_code,
                      const char *extra_info)
 {
-        g_print ("{\"results\":\"%s",error_message_array[error_code]);
+        g_print ("{\"error_code\":%d, \"error_message\":\"", error_code);
         if (extra_info)
-                g_print (" - %s\"", extra_info);
+                g_print (error_message_array[error_code], extra_info);
         else
-                g_print ("\"");
-        g_print (",\"status\":\"ERROR\"}\n");
+                g_print (error_message_array[error_code]);
+        g_print ("\"}\n");
 }
 
 static JsonBuilder*
