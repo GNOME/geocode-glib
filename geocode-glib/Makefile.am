@@ -79,3 +79,8 @@ test_geoip_LDADD = libgeocode-glib.la $(GEOCODE_LIBS)
 
 MAINTAINERCLEANFILES = Makefile.in
 
+EXTRA_DIST +=					\
+	data/geoplanet-rio.json			\
+	data/placefinder-area.json		\
+	data/placefinder-got-error.json		\
+	data/placefinder-no-results.json
