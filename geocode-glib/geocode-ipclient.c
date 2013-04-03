@@ -253,10 +253,10 @@ query_callback (GObject        *source_forward,
  * geocode_ipclient_search_finish() to get the result of the operation.
  **/
 void
-geocode_ipclient_search_async (GeocodeIpclient           *ipclient,
-                               GCancellable              *cancellable,
-                               GAsyncReadyCallback       callback,
-                               gpointer                  user_data)
+geocode_ipclient_search_async (GeocodeIpclient    *ipclient,
+                               GCancellable       *cancellable,
+                               GAsyncReadyCallback callback,
+                               gpointer            user_data)
 {
         GSimpleAsyncResult *simple;
         GFile *query;
@@ -318,8 +318,8 @@ parse_server_error (JsonObject *object, GError **error)
 }
 
 GeocodeLocation *
-_geocode_ip_json_to_location (const char  *json,
-			      GError     **error)
+_geocode_ip_json_to_location (const char *json,
+                              GError    **error)
 {
         JsonParser *parser;
         JsonNode *node;
@@ -384,7 +384,7 @@ _geocode_ip_json_to_location (const char  *json,
 GeocodeLocation *
 geocode_ipclient_search_finish (GeocodeIpclient *ipclient,
                                 GAsyncResult    *res,
-                                GError          **error)
+                                GError         **error)
 {
         GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
         char *contents = NULL;
@@ -415,8 +415,8 @@ geocode_ipclient_search_finish (GeocodeIpclient *ipclient,
  * errors. Free the returned object with g_object_unref() when done.
  **/
 GeocodeLocation *
-geocode_ipclient_search (GeocodeIpclient        *ipclient,
-                         GError                 **error)
+geocode_ipclient_search (GeocodeIpclient *ipclient,
+                         GError         **error)
 {
         char *contents;
         GFile *query;

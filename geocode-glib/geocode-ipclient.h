@@ -67,17 +67,17 @@ GeocodeIpclient *geocode_ipclient_new           (void);
 GeocodeIpclient *geocode_ipclient_new_for_ip    (const char *str);
 
 
-void geocode_ipclient_search_async  (GeocodeIpclient       *ipclient,
-                                     GCancellable          *cancellable,
-                                     GAsyncReadyCallback    callback,
-                                     gpointer               user_data);
+void geocode_ipclient_search_async              (GeocodeIpclient    *ipclient,
+                                                 GCancellable       *cancellable,
+                                                 GAsyncReadyCallback callback,
+                                                 gpointer            user_data);
 
-GeocodeLocation *geocode_ipclient_search_finish (GeocodeIpclient   *ipclient,
-                                                 GAsyncResult      *res,
-                                                 GError            **error);
+GeocodeLocation *geocode_ipclient_search_finish (GeocodeIpclient *ipclient,
+                                                 GAsyncResult    *res,
+                                                 GError         **error);
 
-GeocodeLocation *geocode_ipclient_search (GeocodeIpclient *ipclient,
-                                          GError          **error);
+GeocodeLocation *geocode_ipclient_search        (GeocodeIpclient *ipclient,
+                                                 GError         **error);
 
 G_END_DECLS
 
