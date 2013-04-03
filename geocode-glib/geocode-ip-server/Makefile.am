@@ -14,8 +14,8 @@ AM_CFLAGS = \
 
 bin_PROGRAMS = geoip-update
 
-TEST_PROGS += geoip-lookup test-geoipformat
-noinst_PROGRAMS = $(TEST_PROGS)
+TEST_PROGS += test-geoipformat
+noinst_PROGRAMS = geoip-lookup $(TEST_PROGS)
 
 geoip_lookup_SOURCES = geoip-lookup.c geoip-server.h
 
