@@ -42,12 +42,14 @@
 enum {
         PROP_0,
         PROP_SERVER,
+        PROP_COMPAT_MODE,
         N_PROPERTIES
 };
 
 struct _GeocodeIpclientPrivate {
         char *ip;
         char *server;
+        gboolean compat_mode;
 };
 
 G_DEFINE_TYPE (GeocodeIpclient, geocode_ipclient, G_TYPE_OBJECT)
@@ -78,6 +80,9 @@ geocode_ipclient_set_property (GObject           *gipclient,
                         geocode_ipclient_set_server (ipclient,
                                                      g_value_get_string (value));
                         break;
+                case PROP_COMPAT_MODE:
+                        ipclient->priv->compat_mode = g_value_get_boolean (value);
+                        break;
                 default:
                         G_OBJECT_WARN_INVALID_PROPERTY_ID (gipclient,
                                                            property_id,
@@ -97,6 +102,11 @@ geocode_ipclient_get_property (GObject           *gipclient,
                 case PROP_SERVER:
                         g_value_set_string (value, ipclient->priv->server);
                         break;
+
+                case PROP_COMPAT_MODE:
+                        g_value_set_boolean (value, ipclient->priv->compat_mode);
+                        break;
+
                 default:
                         G_OBJECT_WARN_INVALID_PROPERTY_ID (gipclient,
                                                            property_id,
@@ -133,6 +143,19 @@ geocode_ipclient_class_init (GeocodeIpclientClass *klass)
                                                               "server uri",
                                                               "http://127.0.0.1:12345/cgi-bin/geoip-lookup",
                                                               G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
+
+        /**
+         * GeocodeIpclient:compatibility-mode:
+         *
+         * Enable this mode if you are using freegeoip's (or a compatible) service.
+         */
+        g_object_class_install_property (gipclient_class,
+                                         PROP_COMPAT_MODE,
+                                         g_param_spec_boolean ("compatibility-mode",
+                                                               "compatiblity mode",
+                                                               "compatiblity Mode",
+                                                               FALSE,
+                                                               G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 }
 
 static void
@@ -188,13 +211,25 @@ get_search_query (GeocodeIpclient *ipclient)
 
         ipaddress = ipclient->priv->ip;
         if (ipaddress) {
-                ht = g_hash_table_new (g_str_hash, g_str_equal);
-                g_hash_table_insert (ht, "ip", g_strdup (ipaddress));
-                query_string = soup_form_encode_hash (ht);
-                g_hash_table_destroy (ht);
+                if (ipclient->priv->compat_mode) {
+                        char *escaped;
 
-                uri = g_strdup_printf ("%s?%s", ipclient->priv->server, query_string);
-                g_free (query_string);
+                        escaped = soup_uri_encode (ipaddress, NULL);
+                        uri = g_strdup_printf ("%s/%s",
+                                               ipclient->priv->server,
+                                               escaped);
+                        g_free (escaped);
+                } else {
+                        ht = g_hash_table_new (g_str_hash, g_str_equal);
+                        g_hash_table_insert (ht, "ip", g_strdup (ipaddress));
+                        query_string = soup_form_encode_hash (ht);
+                        g_hash_table_destroy (ht);
+
+                        uri = g_strdup_printf ("%s?%s",
+                                               ipclient->priv->server,
+                                               query_string);
+                        g_free (query_string);
+                }
         } else
                 uri = g_strdup (ipclient->priv->server);
 
