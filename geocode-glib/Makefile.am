@@ -15,7 +15,7 @@ libgeocode_glib_la_SOURCES =				\
 	geocode-glib.c					\
 	geocode-error.c                                 \
 	geocode-ipclient.c				\
-	geocode-enum-types.c
+	geocode-enum-types.c				\
 	geocode-glib-private.h
 
 libgeocode_glib_la_LIBADD = $(GEOCODE_LIBS)
