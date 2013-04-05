@@ -5,8 +5,11 @@
 #include <glib.h>
 #include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
+#include <string.h>
 
 #include "geoip-server.h"
+
+#define WIFI_LOOKUP_BASE_URI "https://maps.googleapis.com/maps/api/browserlocation/json?browser=firefox&sensor=true"
 
 static const char *attribution_text = "This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com\n";
 
@@ -229,29 +232,6 @@ validate_ip_address (const char *ipaddress)
 }
 
 static char *
-get_ipaddress_from_query (void)
-{
-        GHashTable *table;
-        const char *data;
-        char *value;
-
-        data = g_getenv ("QUERY_STRING");
-        if (data == NULL)
-                return NULL;
-
-        table = soup_form_decode (data);
-        value = g_strdup (g_hash_table_lookup (table, "ip"));
-        g_hash_table_destroy (table);
-
-        if (validate_ip_address (value))
-                return value;
-
-        g_free (value);
-
-        return NULL;
-}
-
-static char *
 get_client_ipaddress (void)
 {
         const char *data;
@@ -289,48 +269,195 @@ get_client_ipaddress (void)
                                 return g_strdup (data);
                 }
         }
+        print_error_in_json (INVALID_IP_ADDRESS_ERR, NULL);
         return NULL;
 }
 
-static char *
-get_ipaddress (void)
+/* parse_json_for_wifi function parses the JSON output from
+ * google web service and converts it into the JSON format
+ * used by geocode-glib library. On failure, it returns FALSE.
+ * It doesn't print any error message since the IP based search
+ * is performed if Wi-Fi based search fails.
+ */
+static gboolean
+parse_json_for_wifi (const char *data)
 {
-        char *value;
+        JsonParser *parser;
+        JsonNode *root;
+        JsonObject *root_object;
+        JsonObject *loc_obj;
+        JsonBuilder *builder;
+        GError *error;
 
-        value = get_ipaddress_from_query ();
-        if (value) {
-                if (validate_ip_address (value) == FALSE) {
-                        print_error_in_json (INVALID_IP_ADDRESS_ERR, NULL);
-                        g_free (value);
-                        return NULL;
-                }
-        }
-        else {
-                value = get_client_ipaddress ();
-                if (!value) {
-                        print_error_in_json (INVALID_IP_ADDRESS_ERR, NULL);
-                        g_free (value);
-                        return NULL;
-                }
+        parser = json_parser_new ();
+        if (json_parser_load_from_data (parser, data, -1, &error) == FALSE) {
+                g_object_unref (parser);
+                return FALSE;
         }
 
-        return value;
+        root = json_parser_get_root (parser);
+        root_object = json_node_get_object (root);
+
+        loc_obj = json_object_get_object_member (root_object, "location");
+
+        if (loc_obj == NULL) {
+                return FALSE;
+        }
+        builder = json_builder_new ();
+        json_builder_begin_object (builder);
+        json_builder_set_member_name (builder, "latitude");
+        json_builder_add_double_value (builder,
+                                       json_object_get_double_member (loc_obj, "lat"));
+        json_builder_set_member_name (builder, "longitude");
+        json_builder_add_double_value (builder,
+                                       json_object_get_double_member (loc_obj, "lng"));
+
+
+        json_builder_set_member_name (builder, "accuracy");
+        json_builder_add_double_value (builder,
+                                       json_object_get_double_member (root_object, "accuracy"));
+
+        /* TODO: What should the text of the attribution text be? */
+        json_builder_end_object (builder);
+        print_json_data (builder);
+        g_object_unref (parser);
+        g_object_unref (builder);
+        return TRUE;
+}
+
+static gboolean
+wifi_ap_lookup (const char *data)
+{
+        SoupSession *session;
+        SoupMessage *msg;
+        char *final_uri;
+
+        session =  soup_session_sync_new ();
+        final_uri = g_strconcat (WIFI_LOOKUP_BASE_URI, "&", data, NULL);
+        msg = soup_message_new ("GET", final_uri);
+        g_free (final_uri);
+
+        soup_session_send_message (session, msg);
+        if (SOUP_STATUS_IS_SUCCESSFUL (msg->status_code)) {
+                return parse_json_for_wifi (msg->response_body->data);
+        }
+
+        return FALSE;
+}
+
+/* Taken from libsoup/soup-form.c */
+#define XDIGIT(c) ((c) <= '9' ? (c) - '0' : ((c) & 0x4F) - 'A' + 10)
+#define HEXCHAR(s) ((XDIGIT (s[1]) << 4) + XDIGIT (s[2]))
+
+static gboolean
+form_decode (char *part)
+{
+        unsigned char *s, *d;
+
+        s = d = (unsigned char *)part;
+        do {
+                if (*s == '%') {
+                        if (!g_ascii_isxdigit (s[1]) ||
+                            !g_ascii_isxdigit (s[2]))
+                                return FALSE;
+                        *d++ = HEXCHAR (s);
+                        s += 2;
+                } else if (*s == '+')
+                        *d++ = ' ';
+                else
+                        *d++ = *s;
+        } while (*s++);
+
+        return TRUE;
+}
+
+/**
+ * decode_query_string () returns a hashtable of Wi-Fi AP
+ * details and fills the ipaddress variable if there's any
+ * ip address in the query string.
+ **/
+static GHashTable *
+decode_query_string (const char *encoded_form,
+                     char       **ipaddress)
+{
+        GHashTable *form_data_set;
+        char **pairs, *eq, *name, *value;
+        int i;
+
+        form_data_set = g_hash_table_new_full (g_direct_hash, g_direct_equal,
+                                               g_free, NULL);
+        pairs = g_strsplit (encoded_form, "&", -1);
+        for (i = 0; pairs[i]; i++) {
+                name = pairs[i];
+
+                eq = strchr (name, '=');
+                if (!eq)
+                        goto end;
+                *eq = '\0';
+                value = eq + 1;
+
+                if (!form_decode (name) || !form_decode (value))
+                        goto end;
+                if (strcmp (name, "wifi") == 0) {
+                        g_hash_table_insert (form_data_set, name, value);
+                        continue;
+                } else if (strcmp (name, "ip") == 0) {
+                        *ipaddress = g_strdup (value);
+                }
+end:
+                g_free (name);
+        }
+
+        g_free (pairs);
+
+        return form_data_set;
 }
 
 int
 main (void)
 {
-        char *ipaddress;
+        GHashTable *ht;
+        char *ipaddress = NULL;
+        const char *data;
 
         g_type_init ();
 
         g_print ("Content-type: text/plain;charset=us-ascii\n\n");
-        ipaddress = get_ipaddress ();
+        /* If the query string contains a Wi-Fi field, request
+         * the information from the Google web service. otherwise
+         * use MaxMind's database for an IP-based search.
+         * IP-based search is also used as a fallback option
+         * when the Wi-Fi based lookup returns an error. */
+        data = g_getenv ("QUERY_STRING");
+        if (data != NULL) {
+                ht = decode_query_string (data, &ipaddress);
+                if (g_hash_table_size (ht) > 0) {
+                        char *wifi_ap = soup_form_encode_hash (ht);
+                        if (wifi_ap_lookup (wifi_ap) != FALSE) {
+                                g_hash_table_destroy (ht);
+                                g_free (wifi_ap);
+                                return 0;
+                        }
+                        g_free (wifi_ap);
+                }
+                g_hash_table_destroy (ht);
+        }
+
+        if (ipaddress) {
+                if (validate_ip_address (ipaddress) == FALSE) {
+                        print_error_in_json (INVALID_IP_ADDRESS_ERR, NULL);
+                        g_free (ipaddress);
+                        return 1;
+                }
+        } else {
+                ipaddress = get_client_ipaddress ();
+        }
+
         if (!ipaddress)
-                return 0;
+                return 1;
 
         ip_addr_lookup (ipaddress);
-
         g_free (ipaddress);
+
         return 0;
 }
