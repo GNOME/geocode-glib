@@ -55,6 +55,8 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE",
 dnl gtk-doc checks
 GTK_DOC_CHECK([1.13],[--flavour no-tmpl])
 
+AC_CHECK_LIB([m],[sin])
+
 dnl Requires for the library
 PKG_CHECK_MODULES(GEOCODE,
 		  gio-2.0 >= 2.34

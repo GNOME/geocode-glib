@@ -18,7 +18,7 @@ libgeocode_glib_la_SOURCES =				\
 	geocode-enum-types.c				\
 	geocode-glib-private.h
 
-libgeocode_glib_la_LIBADD = $(GEOCODE_LIBS)
+libgeocode_glib_la_LIBADD = $(GEOCODE_LIBS) $(LIBS)
 
 libgeocode_glib_la_LDFLAGS =				\
 	-version-info $(GCLIB_LT_VERSION)		\
