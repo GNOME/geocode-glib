@@ -69,7 +69,7 @@ get_freegeoip_response (void)
 }
 
 static char *
-get_our_server_response (void)
+get_our_server_response (const char *query)
 {
         char *response;
         char *p;
@@ -80,7 +80,7 @@ get_our_server_response (void)
         GError *error = NULL;
 
         environ = g_get_environ ();
-        environ = g_environ_setenv (environ, "QUERY_STRING", "ip=213.243.180.91", TRUE);
+        environ = g_environ_setenv (environ, "QUERY_STRING", query, TRUE);
 
         argv[0] = g_build_filename (BUILDDIR, "geoip-lookup", NULL);
         g_assert (argv[0] != NULL);
@@ -124,7 +124,7 @@ main (int argc, char **argv)
         g_test_init (&argc, &argv, NULL);
         g_test_bug_base ("http://bugzilla.gnome.org/show_bug.cgi?id=");
 
-        our_response = get_our_server_response ();
+        our_response = get_our_server_response ("ip=213.243.180.91");
         g_test_add_data_func ("/geoip/geocode-glib-server-format",
                               our_response,
                               test_response_data);
