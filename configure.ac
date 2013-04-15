@@ -56,6 +56,8 @@ AM_GLIB_DEFINE_LOCALEDIR(GEOCODE_GLIB_LOCALEDIR)
 dnl gtk-doc checks
 GTK_DOC_CHECK([1.13],[--flavour no-tmpl])
 
+AC_CHECK_LIB([m],[atan2])
+
 dnl Requires for the library
 PKG_CHECK_MODULES(GEOCODE,
 		  gio-2.0 >= 2.34
