@@ -420,7 +420,9 @@ main (void)
         char *ipaddress = NULL;
         const char *data;
 
+#if (!GLIB_CHECK_VERSION (2, 36, 0))
         g_type_init ();
+#endif
 
         g_print ("Content-type: text/plain;charset=us-ascii\n\n");
         /* If the query string contains a Wi-Fi field, request

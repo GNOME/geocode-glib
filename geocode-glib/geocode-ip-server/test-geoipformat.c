@@ -120,7 +120,9 @@ main (int argc, char **argv)
         char *our_response, *freegeoip_response;
         int ret;
 
+#if (!GLIB_CHECK_VERSION (2, 36, 0))
         g_type_init ();
+#endif
         g_test_init (&argc, &argv, NULL);
         g_test_bug_base ("http://bugzilla.gnome.org/show_bug.cgi?id=");
 
