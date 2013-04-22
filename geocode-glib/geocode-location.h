@@ -17,6 +17,7 @@
    Boston, MA 02110-1301  USA.
 
    Authors: Bastien Nocera <hadess@hadess.net>
+            Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
 
  */
 
