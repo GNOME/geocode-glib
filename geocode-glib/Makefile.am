@@ -16,7 +16,8 @@ libgeocode_glib_la_SOURCES =				\
 	geocode-error.c                                 \
 	geocode-ipclient.c				\
 	geocode-enum-types.c				\
-	geocode-glib-private.h
+	geocode-glib-private.h				\
+	geocode-place.c
 
 libgeocode_glib_la_LIBADD = $(GEOCODE_LIBS) $(LIBS)
 
@@ -32,7 +33,8 @@ GCGLIB_HEADER_FILES = \
 	geocode-forward.h				\
 	geocode-reverse.h				\
 	geocode-error.h                                 \
-	geocode-ipclient.h
+	geocode-ipclient.h				\
+	geocode-place.h
 
 gcglibdir = $(pkgincludedir)
 gcglib_HEADERS =					\

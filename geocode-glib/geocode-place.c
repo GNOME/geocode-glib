@@ -1,0 +1,808 @@
+/*
+   Copyright (C) 2012 Bastien Nocera
+
+   The Gnome Library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Library General Public License as
+   published by the Free Software Foundation; either version 2 of the
+   License, or (at your option) any later version.
+
+   The Gnome Library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
+
+   You should have received a copy of the GNU Library General Public
+   License along with the Gnome Library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301  USA.
+
+   Authors: Bastien Nocera <hadess@hadess.net>
+            Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
+ */
+
+#include "geocode-place.h"
+#include "geocode-enum-types.h"
+
+/**
+ * SECTION:geocode-place
+ * @short_description: Geocode place object
+ * @include: geocode-glib/geocode-glib.h
+ *
+ * The #GeocodePlace instance represents a place on earth. While
+ * #GeocodeLocation represents a point on the planet, #GeocodePlace represents
+ * places, e.g street, town, village, county, country or points of interest
+ * (POI) etc.
+ **/
+
+struct _GeocodePlacePrivate {
+        char *name;
+        GeocodePlaceType place_type;
+        GeocodeLocation *location;
+
+        char *street_address;
+        char *postal_code;
+        char *town;
+        char *county;
+        char *state;
+        char *admin_area;
+        char *country_code;
+        char *country;
+        char *continent;
+};
+
+enum {
+        PROP_0,
+
+        PROP_NAME,
+        PROP_PLACE_TYPE,
+        PROP_LOCATION,
+        PROP_STREET_ADDRESS,
+        PROP_POSTAL_CODE,
+        PROP_TOWN,
+        PROP_COUNTY,
+        PROP_STATE,
+        PROP_ADMINISTRATIVE_AREA,
+        PROP_COUNTRY_CODE,
+        PROP_COUNTRY,
+        PROP_CONTINENT,
+};
+
+G_DEFINE_TYPE (GeocodePlace, geocode_place, G_TYPE_OBJECT)
+
+static void
+geocode_place_get_property (GObject    *object,
+                            guint       property_id,
+                            GValue     *value,
+                            GParamSpec *pspec)
+{
+        GeocodePlace *place = GEOCODE_PLACE (object);
+
+        switch (property_id) {
+        case PROP_NAME:
+                g_value_set_string (value,
+                                    geocode_place_get_name (place));
+                break;
+
+        case PROP_PLACE_TYPE:
+                g_value_set_enum (value,
+                                  geocode_place_get_place_type (place));
+                break;
+
+        case PROP_LOCATION:
+                g_value_set_object (value,
+                                    geocode_place_get_location (place));
+                break;
+
+        case PROP_STREET_ADDRESS:
+                g_value_set_string (value,
+                                    geocode_place_get_street_address (place));
+                break;
+
+        case PROP_POSTAL_CODE:
+                g_value_set_string (value,
+                                    geocode_place_get_postal_code (place));
+                break;
+
+        case PROP_TOWN:
+                g_value_set_string (value,
+                                    geocode_place_get_town (place));
+                break;
+
+        case PROP_COUNTY:
+                g_value_set_string (value,
+                                    geocode_place_get_county (place));
+                break;
+
+        case PROP_STATE:
+                g_value_set_string (value,
+                                    geocode_place_get_state (place));
+                break;
+
+        case PROP_ADMINISTRATIVE_AREA:
+                g_value_set_string (value,
+                                    geocode_place_get_administrative_area (place));
+                break;
+
+        case PROP_COUNTRY_CODE:
+                g_value_set_string (value,
+                                    geocode_place_get_country_code (place));
+                break;
+
+        case PROP_COUNTRY:
+                g_value_set_string (value,
+                                    geocode_place_get_country (place));
+                break;
+
+        case PROP_CONTINENT:
+                g_value_set_string (value,
+                                    geocode_place_get_continent (place));
+                break;
+
+        default:
+                G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+                break;
+        }
+}
+
+static void
+geocode_place_set_property(GObject      *object,
+                           guint         property_id,
+                           const GValue *value,
+                           GParamSpec   *pspec)
+{
+        GeocodePlace *place = GEOCODE_PLACE (object);
+
+        switch (property_id) {
+        case PROP_NAME:
+                place->priv->name = g_value_dup_string (value);
+                break;
+
+        case PROP_PLACE_TYPE:
+                place->priv->place_type = g_value_get_enum (value);
+                break;
+
+        case PROP_LOCATION:
+                place->priv->location = g_value_dup_object (value);
+                break;
+
+        case PROP_STREET_ADDRESS:
+                geocode_place_set_street_address (place,
+                                                  g_value_get_string (value));
+                break;
+
+        case PROP_POSTAL_CODE:
+                geocode_place_set_postal_code (place,
+                                               g_value_get_string (value));
+                break;
+
+        case PROP_TOWN:
+                geocode_place_set_town (place, g_value_get_string (value));
+                break;
+
+        case PROP_COUNTY:
+                geocode_place_set_county (place, g_value_get_string (value));
+                break;
+
+        case PROP_STATE:
+                geocode_place_set_state (place, g_value_get_string (value));
+                break;
+
+        case PROP_ADMINISTRATIVE_AREA:
+                geocode_place_set_administrative_area (place,
+                                                       g_value_get_string (value));
+                break;
+
+        case PROP_COUNTRY_CODE:
+                geocode_place_set_country_code (place,
+                                                g_value_get_string (value));
+                break;
+
+        case PROP_COUNTRY:
+                geocode_place_set_country (place,
+                                           g_value_get_string (value));
+                break;
+
+        case PROP_CONTINENT:
+                geocode_place_set_continent (place, g_value_get_string (value));
+                break;
+
+        default:
+                G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+                break;
+        }
+}
+
+static void
+geocode_place_dispose (GObject *gplace)
+{
+        GeocodePlace *place = (GeocodePlace *) gplace;
+
+        g_clear_object (&place->priv->location);
+
+        g_clear_pointer (&place->priv->name, g_free);
+        g_clear_pointer (&place->priv->street_address, g_free);
+        g_clear_pointer (&place->priv->postal_code, g_free);
+        g_clear_pointer (&place->priv->town, g_free);
+        g_clear_pointer (&place->priv->county, g_free);
+        g_clear_pointer (&place->priv->state, g_free);
+        g_clear_pointer (&place->priv->admin_area, g_free);
+        g_clear_pointer (&place->priv->country_code, g_free);
+        g_clear_pointer (&place->priv->country, g_free);
+        g_clear_pointer (&place->priv->continent, g_free);
+
+        G_OBJECT_CLASS (geocode_place_parent_class)->dispose (gplace);
+}
+
+static void
+geocode_place_class_init (GeocodePlaceClass *klass)
+{
+        GObjectClass *gplace_class = G_OBJECT_CLASS (klass);
+        GParamSpec *pspec;
+
+        gplace_class->dispose = geocode_place_dispose;
+        gplace_class->get_property = geocode_place_get_property;
+        gplace_class->set_property = geocode_place_set_property;
+
+        g_type_class_add_private (klass, sizeof (GeocodePlacePrivate));
+
+        /**
+         * GeocodePlace:name:
+         *
+         * The name of the place.
+         */
+        pspec = g_param_spec_string ("name",
+                                     "Name",
+                                     "Name",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_CONSTRUCT_ONLY |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_NAME, pspec);
+
+        /**
+         * GeocodePlace:place-type:
+         *
+         * The type of the place.
+         */
+        pspec = g_param_spec_enum ("place-type",
+                                   "PlaceType",
+                                   "Place Type",
+                                   GEOCODE_TYPE_PLACE_TYPE,
+                                   GEOCODE_PLACE_TYPE_UNKNOWN,
+                                   G_PARAM_READWRITE |
+                                   G_PARAM_CONSTRUCT_ONLY |
+                                   G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_PLACE_TYPE, pspec);
+
+        /**
+         * GeocodePlace:location:
+         *
+         * The location info for the place.
+         */
+        pspec = g_param_spec_object ("location",
+                                     "Location",
+                                     "Location Info",
+                                     GEOCODE_TYPE_LOCATION,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_LOCATION, pspec);
+
+        /**
+         * GeocodePlace:street-address:
+         *
+         * The street address.
+         */
+        pspec = g_param_spec_string ("street-address",
+                                     "StreetAddress",
+                                     "Street Address",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_STREET_ADDRESS, pspec);
+
+        /**
+         * GeocodePlace:postal-code:
+         *
+         * The postal code.
+         */
+        pspec = g_param_spec_string ("postal-code",
+                                     "PostalCode",
+                                     "Postal Code",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_POSTAL_CODE, pspec);
+
+        /**
+         * GeocodePlace:town:
+         *
+         * The town.
+         */
+        pspec = g_param_spec_string ("town",
+                                     "Town",
+                                     "Town",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_TOWN, pspec);
+
+        /**
+         * GeocodePlace:state:
+         *
+         * The state.
+         */
+        pspec = g_param_spec_string ("state",
+                                     "State",
+                                     "State",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_STATE, pspec);
+
+        /**
+         * GeocodePlace:county:
+         *
+         * The county.
+         */
+        pspec = g_param_spec_string ("county",
+                                     "County",
+                                     "County",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_COUNTY, pspec);
+
+        /**
+         * GeocodePlace:administrative-area:
+         *
+         * The local administrative area.
+         */
+        pspec = g_param_spec_string ("administrative-area",
+                                     "AdministrativeArea",
+                                     "Local administrative area",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_ADMINISTRATIVE_AREA, pspec);
+
+        /**
+         * GeocodePlace:country-code:
+         *
+         * The country code.
+         */
+        pspec = g_param_spec_string ("country-code",
+                                     "CountryCode",
+                                     "ISO Country Code",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_COUNTRY_CODE, pspec);
+
+        /**
+         * GeocodePlace:country:
+         *
+         * The country.
+         */
+        pspec = g_param_spec_string ("country",
+                                     "Country",
+                                     "Country",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_COUNTRY, pspec);
+
+        /**
+         * GeocodePlace:continent:
+         *
+         * The continent.
+         */
+        pspec = g_param_spec_string ("continent",
+                                     "Continent",
+                                     "Continent",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_CONTINENT, pspec);
+}
+
+static void
+geocode_place_init (GeocodePlace *place)
+{
+        place->priv = G_TYPE_INSTANCE_GET_PRIVATE ((place),
+                                                      GEOCODE_TYPE_PLACE,
+                                                      GeocodePlacePrivate);
+}
+
+/**
+ * geocode_place_new:
+ * @name: the name of place
+ * @place_type: the type of place
+ *
+ * Creates a new #GeocodePlace object.
+ *
+ * Returns: a new #GeocodePlace object. Use g_object_unref() when done.
+ **/
+GeocodePlace *
+geocode_place_new (const char      *name,
+                   GeocodePlaceType place_type)
+{
+        return g_object_new (GEOCODE_TYPE_PLACE,
+                             "name", name,
+                             "place-type", place_type,
+                             NULL);
+}
+
+/**
+ * geocode_place_new_with_description:
+ * @name: the name of place
+ * @place_type: the type of place
+ * @location: the location info for the place
+ *
+ * Creates a new #GeocodePlace object.
+ *
+ * Returns: a new #GeocodePlace object. Use g_object_unref() when done.
+ **/
+GeocodePlace *
+geocode_place_new_with_location (const char      *name,
+                                 GeocodePlaceType place_type,
+                                 GeocodeLocation *location)
+{
+        return g_object_new (GEOCODE_TYPE_PLACE,
+                             "name", name,
+                             "place-type", place_type,
+                             "location", location,
+                             NULL);
+}
+
+/**
+ * geocode_place_get_name:
+ * @place: A place
+ *
+ * Gets the name of the @place. This is simply a short name. You want to read
+ * the #GeocodeLocation:description property from the associated
+ * #GeocodeLocation object to get unique names for each place object in
+ * geocode_forward_search() results.
+ **/
+const char *
+geocode_place_get_name (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->name;
+}
+
+/**
+ * geocode_place_get_place_type:
+ * @place: A place
+ *
+ * Gets the type of the @place.
+ **/
+GeocodePlaceType
+geocode_place_get_place_type (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place),
+                              GEOCODE_PLACE_TYPE_UNKNOWN);
+
+        return place->priv->place_type;
+}
+
+/**
+ * geocode_place_set_location:
+ * @place: A place
+ * @location: A location
+ *
+ * Sets the location of @place to @location.
+ **/
+void
+geocode_place_set_location (GeocodePlace *place,
+                            GeocodeLocation *location)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (GEOCODE_IS_LOCATION (location));
+
+        g_clear_object (&place->priv->location);
+        place->priv->location = g_object_ref (location);
+}
+
+/**
+ * geocode_place_get_location:
+ * @place: A place
+ *
+ * Returns: (transfer none): The associated location object.
+ **/
+GeocodeLocation *
+geocode_place_get_location (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->location;
+}
+
+/**
+ * geocode_place_set_street_address:
+ * @place: A place
+ * @street_address: a street address for the place
+ *
+ * Sets the street address of @place to @street_address.
+ **/
+void
+geocode_place_set_street_address (GeocodePlace *place,
+                                  const char   *street_address)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (street_address != NULL);
+
+        g_free (place->priv->street_address);
+        place->priv->street_address = g_strdup (street_address);
+}
+
+/**
+ * geocode_place_get_street_address:
+ * @place: A place
+ *
+ * Gets the street address of the @place.
+ **/
+const char *
+geocode_place_get_street_address (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->street_address;
+}
+
+/**
+ * geocode_place_set_postal_code:
+ * @place: A place
+ * @postal_code: a postal code for the place
+ *
+ * Sets the postal code of @place to @postal_code.
+ **/
+void
+geocode_place_set_postal_code (GeocodePlace *place,
+                               const char   *postal_code)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (postal_code != NULL);
+
+        g_free (place->priv->postal_code);
+        place->priv->postal_code = g_strdup (postal_code);
+}
+
+/**
+ * geocode_place_get_postal_code:
+ * @place: A place
+ *
+ * Gets the postal code of the @place.
+ **/
+const char *
+geocode_place_get_postal_code (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->postal_code;
+}
+
+/**
+ * geocode_place_set_town:
+ * @place: A place
+ * @town: a town for the place
+ *
+ * Sets the town of @place to @town.
+ **/
+void
+geocode_place_set_town (GeocodePlace *place,
+                        const char   *town)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (town != NULL);
+
+        g_free (place->priv->town);
+        place->priv->town = g_strdup (town);
+}
+
+/**
+ * geocode_place_get_town:
+ * @place: A place
+ *
+ * Gets the town of the @place.
+ **/
+const char *
+geocode_place_get_town (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->town;
+}
+
+/**
+ * geocode_place_set_county:
+ * @place: A place
+ * @county: a county for the place
+ *
+ * Sets the county of @place to @county.
+ **/
+void
+geocode_place_set_county (GeocodePlace *place,
+                          const char   *county)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (county != NULL);
+
+        g_free (place->priv->county);
+        place->priv->county = g_strdup (county);
+}
+
+/**
+ * geocode_place_get_county:
+ * @place: A place
+ *
+ * Gets the county of the @place.
+ **/
+const char *
+geocode_place_get_county (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->county;
+}
+
+/**
+ * geocode_place_set_state:
+ * @place: A place
+ * @state: a state for the place
+ *
+ * Sets the state of @place to @state.
+ **/
+void
+geocode_place_set_state (GeocodePlace *place,
+                         const char   *state)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (state != NULL);
+
+        g_free (place->priv->state);
+        place->priv->state = g_strdup (state);
+}
+
+/**
+ * geocode_place_get_state:
+ * @place: A place
+ *
+ * Gets the state of the @place.
+ **/
+const char *
+geocode_place_get_state (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->state;
+}
+
+/**
+ * geocode_place_set_administrative_area:
+ * @place: A place
+ * @admin_area: an administrative area for the place
+ *
+ * Sets the local administrative area of @place to @admin_area.
+ **/
+void
+geocode_place_set_administrative_area (GeocodePlace *place,
+                                       const char   *admin_area)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (admin_area != NULL);
+
+        g_free (place->priv->admin_area);
+        place->priv->admin_area = g_strdup (admin_area);
+}
+
+/**
+ * geocode_place_get_administrative_area:
+ * @place: A place
+ *
+ * Gets the local administrative area of the @place.
+ **/
+const char *
+geocode_place_get_administrative_area (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->admin_area;
+}
+
+/**
+ * geocode_place_set_country_code:
+ * @place: A place
+ * @country_code: an ISO country code for the place
+ *
+ * Sets the ISO country code of @place to @country_code.
+ **/
+void
+geocode_place_set_country_code (GeocodePlace *place,
+                                const char   *country_code)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (country_code != NULL);
+
+        g_free (place->priv->country_code);
+        place->priv->country_code = g_strdup (country_code);
+}
+
+/**
+ * geocode_place_get_country_code:
+ * @place: A place
+ *
+ * Gets the ISO country code of the @place.
+ **/
+const char *
+geocode_place_get_country_code (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->country_code;
+}
+
+/**
+ * geocode_place_set_country:
+ * @place: A place
+ * @country: a country for the place
+ *
+ * Sets the country of @place to @country.
+ **/
+void
+geocode_place_set_country (GeocodePlace *place,
+                           const char   *country)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (country != NULL);
+
+        g_free (place->priv->country);
+        place->priv->country = g_strdup (country);
+}
+
+/**
+ * geocode_place_get_country:
+ * @place: A place
+ *
+ * Gets the country of the @place.
+ **/
+const char *
+geocode_place_get_country (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->country;
+}
+
+/**
+ * geocode_place_set_continent:
+ * @place: A place
+ * @continent: a continent for the place
+ *
+ * Sets the continent of @place to @continent.
+ **/
+void
+geocode_place_set_continent (GeocodePlace *place,
+                             const char   *continent)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (continent != NULL);
+
+        g_free (place->priv->continent);
+        place->priv->continent = g_strdup (continent);
+}
+
+/**
+ * geocode_place_get_continent:
+ * @place: A place
+ *
+ * Gets the continent of the @place.
+ **/
+const char *
+geocode_place_get_continent (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->continent;
+}
