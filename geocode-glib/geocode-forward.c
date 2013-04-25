@@ -98,6 +98,8 @@ _geocode_parse_single_result_json (const char  *contents,
 				   GError     **error)
 {
 	GHashTable *ht;
+        GeocodePlace *place = NULL;
+        const char *name;
 	GeocodeLocation *loc;
 	gdouble longitude;
 	gdouble latitude;
@@ -108,13 +110,17 @@ _geocode_parse_single_result_json (const char  *contents,
 
 	longitude = g_ascii_strtod (g_hash_table_lookup (ht, "longitude"), NULL);
 	latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
-	loc = geocode_location_new_with_description (longitude,
-                                                 latitude,
-                                                 GEOCODE_LOCATION_ACCURACY_UNKNOWN,
-                                                 g_hash_table_lookup (ht, "line2"));
+        name = g_hash_table_lookup (ht, "line2");
+        loc = geocode_location_new_with_description (longitude,
+                                                     latitude,
+                                                     GEOCODE_LOCATION_ACCURACY_UNKNOWN,
+                                                     name);
+        place = geocode_place_new_with_location (name, GEOCODE_PLACE_TYPE_UNKNOWN, loc);
+
+        g_object_unref (loc);
 	g_hash_table_destroy (ht);
 
-	return g_list_append (NULL, loc);
+        return g_list_append (NULL, place);
 }
 
 static struct {
@@ -472,8 +478,8 @@ geocode_forward_search_async (GeocodeForward      *forward,
  *
  * Finishes a forward geocoding operation. See geocode_forward_search_async().
  *
- * Returns: (element-type GeocodeLocation) (transfer container): A list of
- * locations or %NULL in case of errors. Free the returned list with
+ * Returns: (element-type GeocodePlace) (transfer container): A list of
+ * places or %NULL in case of errors. Free the returned list with
  * g_list_free() when done.
  **/
 GList *
@@ -533,11 +539,28 @@ insert_place_attr (GHashTable *ht,
 		json_reader_end_member (reader);
 		goto end;
 	} else if (g_str_has_suffix (element_name, " attrs")) {
-		g_debug ("Ignoring attributes element '%s'", element_name);
-		value = g_strdup (""); /* So that they're ignored */
+                if (IS_EL("placeTypeName attrs")) {
+                        char *code;
+
+                        json_reader_read_member (reader, "code");
+                        code = g_strdup_printf ("%" G_GINT64_FORMAT,
+                                                json_reader_get_int_value (reader));
+                        g_hash_table_insert (ht, g_strdup ("placeType"), code);
+                        json_reader_end_member (reader);
+                        goto end;
+                } else {
+                        g_debug ("Ignoring attributes element '%s'", element_name);
+                        value = g_strdup (""); /* So that they're ignored */
+                }
 	} else if (IS_EL("boundingBox")) {
 		g_debug ("Ignoring element '%s'", element_name);
 		value = g_strdup (""); /* So that they're ignored */
+        } else if (IS_EL("placeTypeName")) {
+                /* This string is also localized so we want the code rather
+                 * than name, so we ignore name and extract the code above.
+                 */
+                g_debug ("Ignoring element '%s'", element_name);
+                value = g_strdup (""); /* So that they're ignored */
 	} else {
 		value = g_strdup (json_reader_get_string_value (reader));
 	}
@@ -554,6 +577,36 @@ insert_place_attr (GHashTable *ht,
 
 end:
 	json_reader_end_member (reader);
+}
+
+static struct {
+        const char *yahoo_attr;
+        const char *place_prop; /* NULL to ignore */
+} yahoo_to_place_map[] = {
+        { "postal", "postal-code" },
+        { "locality1", "town" },
+        { "admin1", "state" },
+        { "admin2", "county" },
+        { "admin3", "administrative-area" },
+        { "country", "country" },
+};
+
+static void
+fill_place_from_entry (const char   *key,
+                       const char   *value,
+                       GeocodePlace *place)
+{
+        guint i;
+
+        for (i = 0; i < G_N_ELEMENTS (yahoo_to_place_map); i++) {
+                if (g_str_equal (key, yahoo_to_place_map[i].yahoo_attr)){
+                        g_object_set (G_OBJECT (place),
+                                      yahoo_to_place_map[i].place_prop,
+                                      value,
+                                      NULL);
+                        break;
+                }
+        }
 }
 
 static gboolean
@@ -580,9 +633,11 @@ static const char const *attributes[7] = {
 };
 
 static void
-insert_place_into_tree (GNode *location_tree, GHashTable *ht)
+insert_place_into_tree (GNode *place_tree, GHashTable *ht)
 {
-	GNode *start = location_tree, *child = NULL;
+	GNode *start = place_tree, *child = NULL;
+        GeocodePlaceType place_type;
+        GeocodePlace *place = NULL;
 	GeocodeLocation *loc = NULL;
 	char *attr_val = NULL;
 	char *name;
@@ -612,25 +667,41 @@ insert_place_into_tree (GNode *location_tree, GHashTable *ht)
 		start = child;
 	}
 
+        name = g_hash_table_lookup (ht, "name");
+        place_type = atoi (g_hash_table_lookup (ht, "placeType"));
+        place = geocode_place_new (name, place_type);
+
+        g_hash_table_foreach (ht, (GHFunc) fill_place_from_entry, place);
+
+        /* Yahoo API doesn't give us street addresses so we'll just have to
+         * live with only street name for now. */
+        if (place_type == GEOCODE_PLACE_TYPE_SUBURB) {
+                const char *street = g_hash_table_lookup (ht, "locality2");
+                if (street != NULL)
+                        geocode_place_set_street_address (place, street);
+        }
+
 	/* Get latitude and longitude and create GeocodeLocation object.
-	 * The leaf node of the tree is the GeocodeLocation object */
+	 * The leaf node of the tree is the GeocodePlace object, containing
+         * associated GeocodeLocation object */
 	longitude = g_ascii_strtod (g_hash_table_lookup (ht, "longitude"), NULL);
 	latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
-	name = g_hash_table_lookup (ht, "name");
 
 	loc = geocode_location_new_with_description (latitude,
                                                  longitude,
                                                  GEOCODE_LOCATION_ACCURACY_UNKNOWN,
                                                  name);
+        geocode_place_set_location (place, loc);
+        g_object_unref (loc);
 
-	g_node_insert_data (start, -1, loc);
+	g_node_insert_data (start, -1, place);
 }
 
 static void
-make_location_list_from_tree (GNode   *node,
-			      char   **s_array,
-			      GList  **location_list,
-			      int      i)
+make_place_list_from_tree (GNode  *node,
+                           char  **s_array,
+                           GList **place_list,
+                           int     i)
 {
 	GNode *child;
 	gboolean add_attribute = FALSE;
@@ -640,6 +711,7 @@ make_location_list_from_tree (GNode   *node,
 
 	if (G_NODE_IS_LEAF (node)) {
 		GPtrArray *rev_s_array;
+		GeocodePlace *place;
 		GeocodeLocation *loc;
 		const char *name;
 		char *description;
@@ -649,7 +721,8 @@ make_location_list_from_tree (GNode   *node,
 
 		/* If leaf node, then add all the attributes in the s_array
 		 * and set it to the description of the loc object */
-		loc = (GeocodeLocation *) node->data;
+		place = (GeocodePlace *) node->data;
+		loc = geocode_place_get_location (place);
 
 		name = geocode_location_get_description (loc);
 
@@ -665,7 +738,7 @@ make_location_list_from_tree (GNode   *node,
 		geocode_location_set_description (loc, description);
 		g_free (description);
 
-		*location_list = g_list_prepend (*location_list, loc);
+		*place_list = g_list_prepend (*place_list, place);
 	} else {
 		/* If there are other attributes with a different value,
 		 * add those attributes to the string to differentiate them */
@@ -680,7 +753,7 @@ make_location_list_from_tree (GNode   *node,
 	}
 
 	for (child = node->children; child != NULL; child = child->next)
-		make_location_list_from_tree (child, s_array, location_list, i);
+		make_place_list_from_tree (child, s_array, place_list, i);
 }
 
 GList *
@@ -693,7 +766,7 @@ _geocode_parse_search_json (const char *contents,
 	JsonReader *reader;
 	const GError *err = NULL;
 	int num_places, i;
-	GNode *location_tree;
+	GNode *place_tree;
 	char *s_array[N_ATTRS];
 
 	ret = NULL;
@@ -716,7 +789,7 @@ _geocode_parse_search_json (const char *contents,
 	if (num_places < 0)
 		goto parse;
 
-	location_tree = g_node_new (NULL);
+	place_tree = g_node_new (NULL);
 
 	for (i = 0; i < num_places; i++) {
 		GHashTable *ht;
@@ -733,7 +806,7 @@ _geocode_parse_search_json (const char *contents,
 			insert_place_attr (ht, reader, members[j]);
 
 		/* Populate the tree with place details */
-		insert_place_into_tree (location_tree, ht);
+		insert_place_into_tree (place_tree, ht);
 
 		g_hash_table_destroy (ht);
 		g_strfreev (members);
@@ -741,16 +814,16 @@ _geocode_parse_search_json (const char *contents,
 		json_reader_end_element (reader);
 	}
 
-	make_location_list_from_tree (location_tree, s_array, &ret, 0);
+	make_place_list_from_tree (place_tree, s_array, &ret, 0);
 
-	g_node_traverse (location_tree,
+	g_node_traverse (place_tree,
 			 G_IN_ORDER,
 			 G_TRAVERSE_ALL,
 			 -1,
 			 (GNodeTraverseFunc) node_free_func,
 			 NULL);
 
-	g_node_destroy (location_tree);
+	g_node_destroy (place_tree);
 
 	g_object_unref (parser);
 	g_object_unref (reader);
@@ -773,8 +846,8 @@ parse:
  * Gets the result of a forward geocoding
  * query using a web service.
  *
- * Returns: (element-type GeocodeLocation) (transfer container): A list of
- * locations or %NULL in case of errors. Free the returned list with
+ * Returns: (element-type GeocodePlace) (transfer container): A list of
+ * places or %NULL in case of errors. Free the returned list with
  * g_list_free() when done.
  **/
 GList *

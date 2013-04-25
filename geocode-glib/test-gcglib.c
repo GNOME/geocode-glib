@@ -22,6 +22,15 @@ print_loc (GeocodeLocation *loc)
 }
 
 static void
+print_place (GeocodePlace *place)
+{
+	/* For now just print the underlying location */
+	GeocodeLocation *loc = geocode_place_get_location (place);
+
+	print_loc (loc);
+}
+
+static void
 print_res (const char *key,
 	   const char *value,
 	   gpointer    data)
@@ -71,11 +80,11 @@ got_geocode_search_cb (GObject *source_object,
 	}
 
 	for (l = results; l != NULL; l = l->next) {
-		GeocodeLocation *loc = l->data;
+		GeocodePlace *place = l->data;
 
 		g_print ("Got geocode search answer:\n");
-		print_loc (loc);
-		g_object_unref (loc);
+		print_place (place);
+		g_object_unref (place);
 	}
 	g_list_free (results);
 
@@ -129,6 +138,7 @@ test_xep (void)
 	GHashTable *tp;
 	GeocodeForward *object;
 	GList *res;
+	GeocodePlace *place;
 	GeocodeLocation *loc;
 	GError *error = NULL;
 
@@ -155,11 +165,13 @@ test_xep (void)
 
 	g_object_unref (object);
 
-	loc = res->data;
+	place = res->data;
+	loc = geocode_place_get_location (place);
+	g_assert (loc != NULL);
 	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, -0.589669);
 	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, 51.237070);
 
-	g_object_unref (loc);
+	g_object_unref (place);
 	g_list_free (res);
 }
 
@@ -169,6 +181,7 @@ test_pub (void)
 	GeocodeForward *object;
 	GError *error = NULL;
 	GList *res;
+	GeocodePlace *place;
 	GeocodeLocation *loc;
 
 	object = geocode_forward_new_for_string ("9, old palace road, guildford, surrey");
@@ -183,12 +196,14 @@ test_pub (void)
 	g_object_unref (object);
 
 	g_assert_cmpint (g_list_length (res), ==, 1);
-	loc = res->data;
+	place = res->data;
+	loc = geocode_place_get_location (place);
+	g_assert (loc != NULL);
 
 	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, -0.589669);
 	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, 51.237070);
 
-	g_object_unref (loc);
+	g_object_unref (place);
 	g_list_free (res);
 }
 
@@ -221,14 +236,23 @@ test_search (void)
 	got_france = FALSE;
 	got_texas = FALSE;
 	for (l = results; l != NULL; l = l->next) {
-		GeocodeLocation *loc = l->data;
+		GeocodeLocation *loc;
+		GeocodePlace *place = l->data;
+		g_assert (g_strcmp0 (geocode_place_get_name (place), "Paris") == 0);
 
-		if (g_strcmp0 (geocode_location_get_description (loc), "Paris, France") == 0)
+		loc = geocode_place_get_location (place);
+		g_assert (loc != NULL);
+
+		if (g_strcmp0 (geocode_place_get_state (place), "Ile-de-France") == 0 &&
+		    g_strcmp0 (geocode_place_get_country (place), "France") == 0 &&
+		    g_strcmp0 (geocode_location_get_description (loc), "Paris, France") == 0)
 			got_france = TRUE;
-		else if (g_strcmp0 (geocode_location_get_description (loc), "Paris, Texas, United States") == 0)
+		else if (g_strcmp0 (geocode_place_get_state (place), "Texas") == 0 &&
+			 g_strcmp0 (geocode_place_get_country (place), "United States") == 0 &&
+			 g_strcmp0 (geocode_location_get_description (loc), "Paris, Texas, United States") == 0)
 			got_texas = TRUE;
 
-		g_object_unref (loc);
+		g_object_unref (place);
 
 		if (got_france && got_texas)
 			break;
@@ -248,6 +272,7 @@ test_search_lat_long (void)
 	GeocodeForward *object;
 	GError *error = NULL;
 	GList *res;
+	GeocodePlace *place;
 	GeocodeLocation *loc;
 
 	object = geocode_forward_new_for_string ("Santa María del Río");
@@ -259,9 +284,18 @@ test_search_lat_long (void)
 	g_assert (res != NULL);
 	g_object_unref (object);
 
-	loc = res->data;
+	place = res->data;
+	loc = geocode_place_get_location (place);
+	g_assert (loc != NULL);
+
 	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 21.800699, <, 0.000001);
 	g_assert_cmpfloat (geocode_location_get_longitude (loc) - -100.735626, <, 0.000001);
+	g_assert_cmpstr (geocode_place_get_name (place), ==, "Santa Maria Del Rio");
+	g_assert_cmpstr (geocode_place_get_town (place), ==, "Santa Maria Del Rio");
+	g_assert_cmpstr (geocode_place_get_state (place), ==, "San Luis Potosi");
+	g_assert_cmpstr (geocode_place_get_county (place), ==, "Santa Maria del Rio");
+	g_assert_cmpstr (geocode_place_get_country (place), ==, "Mexico");
+	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Santa Maria Del Rio, Mexico");
 
 	g_list_free_full (res, (GDestroyNotify) g_object_unref);
 }
@@ -287,6 +321,7 @@ test_locale (void)
 	GeocodeForward *object;
 	GError *error = NULL;
 	GList *res;
+	GeocodePlace *place;
 	GeocodeLocation *loc;
 	char *old_locale;
 
@@ -303,11 +338,18 @@ test_locale (void)
 	g_assert (res != NULL);
 	g_object_unref (object);
 
-	loc = res->data;
+	place = res->data;
+	g_assert_cmpstr (geocode_place_get_name (place), ==, "Moskva");
+	/* For some reason, Yahoo doesn't localise the state's name in this case */
+	g_assert_cmpstr (geocode_place_get_state (place), ==, "Moscow Federal City");
+	g_assert_cmpstr (geocode_place_get_country (place), ==, "Rusko");
+
+	loc = geocode_place_get_location (place);
+	g_assert (loc != NULL);
 	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Moskva, Rusko");
 	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 55.756950, <, 0.000001);
 	g_assert_cmpfloat (geocode_location_get_longitude (loc) - 37.614971, <, 0.000001);
-	print_loc (loc);
+	print_place (place);
 
 	g_list_free_full (res, (GDestroyNotify) g_object_unref);
 
@@ -322,9 +364,18 @@ test_locale (void)
 	g_assert (res != NULL);
 	g_object_unref (object);
 
-	loc = res->data;
+	place = res->data;
+	loc = geocode_place_get_location (place);
+	g_assert (loc != NULL);
+
+	g_assert_cmpstr (geocode_place_get_name (place), ==, "Bonneville");
+	g_assert_cmpstr (geocode_place_get_town (place), ==, "Bonneville");
+	g_assert_cmpstr (geocode_place_get_state (place), ==, "Rhône-Alpes");
+	g_assert_cmpstr (geocode_place_get_county (place), ==, "Haute-Savoie");
+	g_assert_cmpstr (geocode_place_get_administrative_area (place), ==, "Bonneville");
+	g_assert_cmpstr (geocode_place_get_country (place), ==, "France");
 	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Bonneville, Rhône-Alpes, France");
-	print_loc (loc);
+	print_place (place);
 
 	g_list_free_full (res, (GDestroyNotify) g_object_unref);
 
@@ -388,6 +439,7 @@ test_search_json (void)
 	GError *error = NULL;
 	GList *list;
 	char *contents;
+	GeocodePlace *place;
 	GeocodeLocation *loc;
 
 	if (g_file_get_contents (TEST_SRCDIR "/geoplanet-rio.json",
@@ -400,7 +452,15 @@ test_search_json (void)
 	g_assert (list != NULL);
 	g_assert_cmpint (g_list_length (list), ==, 10);
 
-	loc = list->data;
+	place = list->data;
+	loc = geocode_place_get_location (place);
+	g_assert (loc != NULL);
+
+	g_assert_cmpstr (geocode_place_get_name (place), ==, "Rio de Janeiro");
+	g_assert_cmpstr (geocode_place_get_town (place), ==, "Rio de Janeiro");
+	g_assert_cmpstr (geocode_place_get_state (place), ==, "Rio de Janeiro");
+	g_assert_cmpstr (geocode_place_get_county (place), ==, "Rio de Janeiro");
+	g_assert_cmpstr (geocode_place_get_country (place), ==, "Brazil");
 	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Rio de Janeiro, Brazil");
 
 	g_list_free_full (list, (GDestroyNotify) g_object_unref);
