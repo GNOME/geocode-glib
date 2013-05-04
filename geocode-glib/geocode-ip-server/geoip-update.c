@@ -150,7 +150,7 @@ main (int argc, char **argv)
 {
 
         GError *error = NULL;
-        const char *path, *dbpath;
+        const char *path, *dbpath = NULL;
         guint i;
         GOptionContext *context;
         const GOptionEntry entries[] = {
