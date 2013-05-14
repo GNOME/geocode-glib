@@ -1,0 +1,86 @@
+1. What does the server do?
+
+The server performs IP address and Wi-Fi based geolocation search.
+
+2. How to set up the server?
+
+After building geocode-glib, you will get a geoip-lookup binary that
+you can install as a cgi-bin script inside your web server, or use
+the test application ("launch-web-server.sh") as below.
+
+$ ./launch-web-server.sh start - to start the server
+$ ./launch-web-server.sh stop - to stop the server
+
+The script will set up the server at your http://localhost:12345.
+
+And the URL will be - http://localhost:12345/cgi-bin/geoip-lookup
+
+3. How should one query the server for IP address based Geolocation search?
+
+There are 2 ways -
+
+a. You can provide a query string in the format of "?ip=<IP address>". After
+installing the server at your localhost using the script, you can use -
+
+   http://localhost:12345/cgi-bin/geoip-lookup?ip=123.23.23.23
+
+b. If you do not provide the query string, the server will autodetect
+the client's external IP address.
+
+If you have used launch-web-server.sh script to launch the server, the script
+sets HTTP_CLIENT_IP (one of the many proxy variables checked by the server to
+guess client's IP address) and thus a simple
+http://localhost:12345/cgi-bin/geoip-lookup works.
+
+4. How should one query the server for Wi-Fi based geolocation search?
+
+The query string should be in the format of -
+
+?wifi=mac:<mac address>|ssid:<ssid>|ss:<signal strength>[&...]
+
+The server installed by the script at your localhost can be queried using the
+following URL -
+
+http://localhost:12345/cgi-bin/geoip-lookup?wifi=mac:01-24-7c-bc-51-46%7Cssid:3x2x%7Css:-37&wifi=mac:09-86-3b-31-97-b2%7Cssid:belkin.7b2%7Css:-47&wifi=mac:28-cf-da-ba-be-13%7Cssid:HERESIARCH%20NETWORK%7Css:-49&wifi=mac:2b-cf-da-ba-be-10%7Cssid:%20ARCH%20GUESTS%7Css:-52&wifi=mac:08-56-3b-2b-e1-a8%7Cssid:belkin.1a8%7Css:-59&wifi=mac:02-1e-64-fd-df-67%7Cssid:Brown%20Cow%7Css:-59&wifi=mac:2a-cf-df-ba-be-10%7Cssid:%20ARCH%20GUESTS%7Css:-59
+
+5. What is the output format of the server?
+
+The server provides Geolocation information in JSON format.
+
+An IP address based query would return -
+
+{"ip":"123.23.23.23","latitude":10.25,"longitude":105.96669769287109,
+"country_name":"Vietnam","country_code":"VN","region_name":"Phu Yen",
+"city":"Vinh Long","accuracy":"city","timezone":"Asia/Phnom_Penh",
+"attribution":"This product includes GeoLite data created by MaxMind,
+ available from http://www.maxmind.com\n"}
+
+An Wi-Fi based query would return -
+
+{"latitude":40.060449299999988,"longitude":-105.2094195,"accuracy":24}
+
+6. What are the possible error scenarios and error messages?
+
+The server gives the following errors in the following cases -
+
+a. Invalid IP address -
+{"error_code":0, "error_message":"Invalid IP address '123.23.23'"}
+
+b. Reserved IP address -
+{"error_code":1, "error_message":"Can not find the IP address '127.0.0.1' in the
+database"}
+
+c. Database not found by the server -
+{"error_code":2, "error_message":"Can not open GeoLiteCity/GeoIP Binary database.
+Set GEOIP_DATABASE_PATH env variable."}
+
+The error codes in the JSON output shown above are enum values.
+
+typedef enum {
+        INVALID_IP_ADDRESS_ERR = 0,
+        INVALID_ENTRY_ERR,
+        DATABASE_ERR
+} GeoipServerError;
+
+They are defined in
+https://git.gnome.org/browse/geocode-glib/tree/geocode-glib/geocode-ip-server/geoip-server.h
