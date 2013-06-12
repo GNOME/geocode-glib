@@ -8,7 +8,7 @@ BUILT_GIRSOURCES =
 
 lib_LTLIBRARIES = libgeocode-glib.la
 
-libgeocode_glib_la_SOURCES =				\
+libgeocode_glib_la_PUBLICSOURCES =			\
 	geocode-location.c				\
 	geocode-forward.c				\
 	geocode-reverse.c				\
@@ -16,8 +16,11 @@ libgeocode_glib_la_SOURCES =				\
 	geocode-error.c                                 \
 	geocode-ipclient.c				\
 	geocode-enum-types.c				\
-	geocode-glib-private.h				\
 	geocode-place.c
+
+libgeocode_glib_la_SOURCES =				\
+	$(libgeocode_glib_la_PUBLICSOURCES)		\
+	geocode-glib-private.h
 
 libgeocode_glib_la_LIBADD = $(GEOCODE_LIBS) $(LIBS)
 
@@ -71,7 +74,7 @@ INTROSPECTION_COMPILER_ARGS = --includedir=$(top_srcdir)
 CLEANFILES =
 
 if HAVE_INTROSPECTION
-introspection_files = $(libgeocode_glib_la_SOURCES) $(gcglib_HEADERS)
+introspection_files = $(libgeocode_glib_la_PUBLICSOURCES) $(gcglib_HEADERS)
 
 GeocodeGlib-1.0.gir: libgeocode-glib.la
 GeocodeGlib_1_0_gir_INCLUDES = GObject-2.0 Gio-2.0 Json-1.0 SoupGNOME-2.4
