@@ -146,9 +146,21 @@ void geocode_place_set_street_address             (GeocodePlace *place,
                                                    const char   *street_address);
 const char *geocode_place_get_street_address      (GeocodePlace *place);
 
+void geocode_place_set_street                     (GeocodePlace *place,
+                                                   const char   *street);
+const char *geocode_place_get_street              (GeocodePlace *place);
+
+void geocode_place_set_building                   (GeocodePlace *place,
+                                                   const char   *building);
+const char *geocode_place_get_building            (GeocodePlace *place);
+
 void geocode_place_set_postal_code                (GeocodePlace *place,
                                                    const char   *postal_code);
 const char *geocode_place_get_postal_code         (GeocodePlace *place);
+
+void geocode_place_set_area                       (GeocodePlace *place,
+                                                   const char   *area);
+const char *geocode_place_get_area                (GeocodePlace *place);
 
 void geocode_place_set_town                       (GeocodePlace *place,
                                                    const char   *town);

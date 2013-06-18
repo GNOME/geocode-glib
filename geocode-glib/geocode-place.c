@@ -41,7 +41,10 @@ struct _GeocodePlacePrivate {
         GeocodeLocation *location;
 
         char *street_address;
+        char *street;
+        char *building;
         char *postal_code;
+        char *area;
         char *town;
         char *county;
         char *state;
@@ -58,7 +61,10 @@ enum {
         PROP_PLACE_TYPE,
         PROP_LOCATION,
         PROP_STREET_ADDRESS,
+        PROP_STREET,
+        PROP_BUILDING,
         PROP_POSTAL_CODE,
+        PROP_AREA,
         PROP_TOWN,
         PROP_COUNTY,
         PROP_STATE,
@@ -99,9 +105,24 @@ geocode_place_get_property (GObject    *object,
                                     geocode_place_get_street_address (place));
                 break;
 
+        case PROP_STREET:
+                g_value_set_string (value,
+                                    geocode_place_get_street (place));
+                break;
+
+        case PROP_BUILDING:
+                g_value_set_string (value,
+                                    geocode_place_get_building (place));
+                break;
+
         case PROP_POSTAL_CODE:
                 g_value_set_string (value,
                                     geocode_place_get_postal_code (place));
+                break;
+
+        case PROP_AREA:
+                g_value_set_string (value,
+                                    geocode_place_get_area (place));
                 break;
 
         case PROP_TOWN:
@@ -171,9 +192,21 @@ geocode_place_set_property(GObject      *object,
                                                   g_value_get_string (value));
                 break;
 
+        case PROP_STREET:
+                geocode_place_set_street (place, g_value_get_string (value));
+                break;
+
+        case PROP_BUILDING:
+                geocode_place_set_building (place, g_value_get_string (value));
+                break;
+
         case PROP_POSTAL_CODE:
                 geocode_place_set_postal_code (place,
                                                g_value_get_string (value));
+                break;
+
+        case PROP_AREA:
+                geocode_place_set_area (place, g_value_get_string (value));
                 break;
 
         case PROP_TOWN:
@@ -222,7 +255,10 @@ geocode_place_dispose (GObject *gplace)
 
         g_clear_pointer (&place->priv->name, g_free);
         g_clear_pointer (&place->priv->street_address, g_free);
+        g_clear_pointer (&place->priv->street, g_free);
+        g_clear_pointer (&place->priv->building, g_free);
         g_clear_pointer (&place->priv->postal_code, g_free);
+        g_clear_pointer (&place->priv->area, g_free);
         g_clear_pointer (&place->priv->town, g_free);
         g_clear_pointer (&place->priv->county, g_free);
         g_clear_pointer (&place->priv->state, g_free);
@@ -302,6 +338,32 @@ geocode_place_class_init (GeocodePlaceClass *klass)
         g_object_class_install_property (gplace_class, PROP_STREET_ADDRESS, pspec);
 
         /**
+         * GeocodePlace:street:
+         *
+         * The street name.
+         */
+        pspec = g_param_spec_string ("street",
+                                     "Street",
+                                     "Street name",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_STREET, pspec);
+
+        /**
+         * GeocodePlace:building:
+         *
+         * A specific building on a street or in an area.
+         */
+        pspec = g_param_spec_string ("building",
+                                     "Building",
+                                     "A specific building on a street or in an area",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_BUILDING, pspec);
+
+        /**
          * GeocodePlace:postal-code:
          *
          * The postal code.
@@ -313,6 +375,19 @@ geocode_place_class_init (GeocodePlaceClass *klass)
                                      G_PARAM_READWRITE |
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (gplace_class, PROP_POSTAL_CODE, pspec);
+
+        /**
+         * GeocodePlace:area:
+         *
+         * A named area such as a campus or neighborhood.
+         */
+        pspec = g_param_spec_string ("area",
+                                     "Area",
+                                     "A named area such as a campus or neighborhood",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_AREA, pspec);
 
         /**
          * GeocodePlace:town:
@@ -552,6 +627,70 @@ geocode_place_get_street_address (GeocodePlace *place)
 }
 
 /**
+ * geocode_place_set_street:
+ * @place: A place
+ * @street: a street
+ *
+ * Sets the street of @place to @street.
+ **/
+void
+geocode_place_set_street (GeocodePlace *place,
+                          const char   *street)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (street != NULL);
+
+        g_free (place->priv->street);
+        place->priv->street = g_strdup (street);
+}
+
+/**
+ * geocode_place_get_street:
+ * @place: A place
+ *
+ * Gets the street of the @place.
+ **/
+const char *
+geocode_place_get_street (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->street;
+}
+
+/**
+ * geocode_place_set_building:
+ * @place: A place
+ * @building: a building
+ *
+ * Sets the building of @place to @building.
+ **/
+void
+geocode_place_set_building (GeocodePlace *place,
+                            const char   *building)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (building != NULL);
+
+        g_free (place->priv->building);
+        place->priv->building = g_strdup (building);
+}
+
+/**
+ * geocode_place_get_building:
+ * @place: A place
+ *
+ * Gets the building of the @place.
+ **/
+const char *
+geocode_place_get_building (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->building;
+}
+
+/**
  * geocode_place_set_postal_code:
  * @place: A place
  * @postal_code: a postal code for the place
@@ -581,6 +720,38 @@ geocode_place_get_postal_code (GeocodePlace *place)
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
         return place->priv->postal_code;
+}
+
+/**
+ * geocode_place_set_area:
+ * @place: A place
+ * @area: a area
+ *
+ * Sets the area of @place to @area.
+ **/
+void
+geocode_place_set_area (GeocodePlace *place,
+                        const char   *area)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (area != NULL);
+
+        g_free (place->priv->area);
+        place->priv->area = g_strdup (area);
+}
+
+/**
+ * geocode_place_get_area:
+ * @place: A place
+ *
+ * Gets the area of the @place.
+ **/
+const char *
+geocode_place_get_area (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->area;
 }
 
 /**
