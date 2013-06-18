@@ -31,33 +31,24 @@ print_place (GeocodePlace *place)
 }
 
 static void
-print_res (const char *key,
-	   const char *value,
-	   gpointer    data)
-{
-	g_print ("\t%s = %s\n", key, value);
-}
-
-static void
 got_geocode_cb (GObject *source_object,
 		GAsyncResult *res,
 		gpointer user_data)
 {
 	GeocodeReverse *object = (GeocodeReverse *) source_object;
-	GHashTable *ht;
+	GeocodePlace *place;
 	GError *error = NULL;
 
-	ht = geocode_reverse_resolve_finish (object, res, &error);
-	if (ht == NULL) {
+	place = geocode_reverse_resolve_finish (object, res, &error);
+	if (place == NULL) {
 		g_message ("Failed to get geocode: %s", error->message);
 		g_error_free (error);
 		exit (1);
 	}
 
 	g_print ("Got geocode answer:\n");
-	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
-	g_hash_table_destroy (ht);
-
+	print_place (place);
+	g_object_unref (place);
 	g_object_unref (object);
 
 	exit (0);
@@ -99,34 +90,34 @@ test_rev (void)
 	GeocodeLocation *loc;
 	GeocodeReverse *rev;
 	GError *error = NULL;
-	GHashTable *ht;
+	GeocodePlace *place;
 
 	loc = geocode_location_new (51.237070, -0.589669, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
 	rev = geocode_reverse_new_for_location (loc);
 	g_object_unref (loc);
 
-	ht = geocode_reverse_resolve (rev, &error);
-	if (ht == NULL) {
+	place = geocode_reverse_resolve (rev, &error);
+	if (place == NULL) {
 		g_warning ("Failed at reverse geocoding: %s", error->message);
 		g_error_free (error);
 	}
-	g_assert (ht != NULL);
+	g_assert (place != NULL);
 	g_object_unref (rev);
 
-        g_assert_cmpstr (g_hash_table_lookup (ht, "postalcode"), ==, "GU2 7UP");
-        g_assert_cmpstr (g_hash_table_lookup (ht, "area"), ==, "Guildford Park");
-        g_assert_cmpstr (g_hash_table_lookup (ht, "countrycode"), ==, "gb");
-        g_assert_cmpstr (g_hash_table_lookup (ht, "street"), ==, "Old Palace Road");
-        g_assert_cmpstr (g_hash_table_lookup (ht, "county"), ==, "Surrey");
-        g_assert_cmpstr (g_hash_table_lookup (ht, "locality"), ==, "Guildford");
-        g_assert_cmpstr (g_hash_table_lookup (ht, "pub"), ==, "The Astolat");
-        g_assert_cmpstr (g_hash_table_lookup (ht, "country"), ==, "United Kingdom");
-        g_assert_cmpstr (g_hash_table_lookup (ht, "state_district"), ==, "South East England");
-        g_assert_cmpstr (g_hash_table_lookup (ht, "region"), ==, "England");
+        g_assert_cmpstr (geocode_place_get_name (place), ==, "The Astolat");
+        g_assert_cmpstr (geocode_place_get_postal_code (place), ==, "GU2 7UP");
+        g_assert_cmpstr (geocode_place_get_area (place), ==, "Guildford Park");
+        g_assert_cmpstr (geocode_place_get_country_code (place), ==, "gb");
+        g_assert_cmpstr (geocode_place_get_street (place), ==, "Old Palace Road");
+        g_assert_cmpstr (geocode_place_get_county (place), ==, "Surrey");
+        g_assert_cmpstr (geocode_place_get_town (place), ==, "Guildford");
+        g_assert_cmpstr (geocode_place_get_country (place), ==, "United Kingdom");
+        g_assert_cmpstr (geocode_place_get_administrative_area (place), ==, "South East England");
+        g_assert_cmpstr (geocode_place_get_state (place), ==, "England");
 
 	g_print ("Got geocode answer:\n");
-	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
-	g_hash_table_destroy (ht);
+	print_place (place);
+	g_object_unref (place);
 }
 
 static void

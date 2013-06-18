@@ -236,7 +236,7 @@ resolve_json (const char *contents,
 	ret = g_hash_table_new_full (g_str_hash, g_str_equal,
 				     g_free, g_free);
 
-        _geocode_read_nominatim_attributes (reader, ret, TRUE);
+        _geocode_read_nominatim_attributes (reader, ret, FALSE);
 
 	g_object_unref (parser);
 	g_object_unref (reader);
@@ -292,7 +292,7 @@ on_cache_data_loaded (GObject      *source_object,
 	GFile *cache;
 	GError *error = NULL;
 	char *contents;
-	gpointer ret;
+	GHashTable *result;
 
 	cache = G_FILE (source_object);
 	if (g_file_load_contents_finish (cache,
@@ -314,13 +314,18 @@ on_cache_data_loaded (GObject      *source_object,
 		return;
 	}
 
-	ret = resolve_json (contents, &error);
+	result = resolve_json (contents, &error);
 	g_free (contents);
 
-	if (ret == NULL)
+	if (result == NULL) {
 		g_simple_async_result_take_error (simple, error);
-	else
-		g_simple_async_result_set_op_res_gpointer (simple, ret, NULL);
+        } else {
+                GeocodePlace *place;
+
+                place = _geocode_create_place_from_attributes (result);
+                g_hash_table_destroy (result);
+                g_simple_async_result_set_op_res_gpointer (simple, place, NULL);
+        }
 
 	g_simple_async_result_complete_in_idle (simple);
 	g_object_unref (simple);
@@ -439,12 +444,10 @@ geocode_reverse_resolve_async (GeocodeReverse       *object,
  *
  * Finishes a reverse geocoding operation. See geocode_reverse_resolve_async().
  *
- * Returns: (element-type utf8 utf8) (transfer full):
- * a #GHashTable containing the results of the query
- * or %NULL in case of errors.
- * Free the returned string with g_hash_table_destroy() when done.
+ * Returns: (transfer full): A #GeocodePlace instance, or %NULL in case of
+ * errors. Free the returned instance with #g_object_unref() when done.
  **/
-GHashTable *
+GeocodePlace *
 geocode_reverse_resolve_finish (GeocodeReverse      *object,
 				GAsyncResult        *res,
 				GError             **error)
@@ -469,18 +472,17 @@ geocode_reverse_resolve_finish (GeocodeReverse      *object,
  * Gets the result of a reverse geocoding
  * query using a web service.
  *
- * Returns: (element-type utf8 utf8) (transfer full):
- * a #GHashTable containing the results of the query
- * or %NULL in case of errors.
- * Free the returned string with g_hash_table_destroy() when done.
+ * Returns: (transfer full): A #GeocodePlace instance, or %NULL in case of
+ * errors. Free the returned instance with #g_object_unref() when done.
  **/
-GHashTable *
+GeocodePlace *
 geocode_reverse_resolve (GeocodeReverse      *object,
 			 GError             **error)
 {
 	SoupMessage *query;
 	char *contents;
-	GHashTable *ret;
+	GHashTable *result;
+	GeocodePlace *place;
 	gboolean to_cache = FALSE;
 
 	g_return_val_if_fail (GEOCODE_IS_REVERSE (object), NULL);
@@ -500,12 +502,15 @@ geocode_reverse_resolve (GeocodeReverse      *object,
 		to_cache = TRUE;
 	}
 
-	ret = resolve_json (contents, error);
-	if (to_cache && ret != NULL)
+	result = resolve_json (contents, error);
+	if (to_cache && result != NULL)
 		_geocode_glib_cache_save (query, contents);
 
 	g_free (contents);
 	g_object_unref (query);
 
-	return ret;
+        place = _geocode_create_place_from_attributes (result);
+        g_hash_table_destroy (result);
+
+	return place;
 }

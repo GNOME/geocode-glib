@@ -25,6 +25,7 @@
 
 #include <glib.h>
 #include <gio/gio.h>
+#include "geocode-place.h"
 
 G_BEGIN_DECLS
 
@@ -69,12 +70,12 @@ void geocode_reverse_resolve_async (GeocodeReverse      *object,
 				    GAsyncReadyCallback  callback,
 				    gpointer             user_data);
 
-GHashTable *geocode_reverse_resolve_finish (GeocodeReverse  *object,
-					    GAsyncResult   *res,
-					    GError        **error);
+GeocodePlace *geocode_reverse_resolve_finish (GeocodeReverse  *object,
+                                              GAsyncResult   *res,
+                                              GError        **error);
 
-GHashTable *geocode_reverse_resolve (GeocodeReverse  *object,
-				     GError        **error);
+GeocodePlace *geocode_reverse_resolve (GeocodeReverse *object,
+                                       GError        **error);
 
 G_END_DECLS
 
