@@ -20,8 +20,8 @@ static char *error_message_array [] = {
 };
 
 static void
-print_error_in_json (int        error_code,
-                     const char *extra_info)
+print_error_in_json (GeoipServerError  error_code,
+                     const char       *extra_info)
 {
         g_print ("{\"error_code\":%d, \"error_message\":\"", error_code);
         if (extra_info)
