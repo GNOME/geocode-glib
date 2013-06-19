@@ -342,6 +342,8 @@ parse_server_error (JsonObject *object, GError **error)
                 case DATABASE_ERR:
                         error_code = GEOCODE_ERROR_INTERNAL_SERVER;
                         break;
+                default:
+                        g_assert_not_reached ();
         }
 
         error_message = json_object_get_string_member (object, "error_message");
