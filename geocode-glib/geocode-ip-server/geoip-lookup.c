@@ -11,7 +11,7 @@
 
 #define WIFI_LOOKUP_BASE_URI "https://maps.googleapis.com/maps/api/browserlocation/json?browser=firefox&sensor=true"
 
-static const char *attribution_text = "This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com\n";
+static const char *attribution_text = "This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com";
 
 static char *error_message_array [] = {
         "Invalid IP address '%s'",
