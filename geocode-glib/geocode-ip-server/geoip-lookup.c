@@ -452,7 +452,7 @@ main (void)
 
         if (ipaddress) {
                 if (validate_ip_address (ipaddress) == FALSE) {
-                        print_error_in_json (INVALID_IP_ADDRESS_ERR, NULL);
+                        print_error_in_json (INVALID_IP_ADDRESS_ERR, ipaddress);
                         g_free (ipaddress);
                         return 1;
                 }
