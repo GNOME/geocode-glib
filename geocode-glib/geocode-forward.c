@@ -96,6 +96,197 @@ is_search (GObject *object)
 	return GPOINTER_TO_INT (g_object_get_data (G_OBJECT (object), "is-search"));
 }
 
+static struct {
+	const char *pf_attr;
+	const char *xep_attr;
+} rev_attrs_map[] = {
+	{ "longitude", "longitude" },
+	{ "latitude", "latitude" },
+	{ "offsetlat", NULL },
+	{ "offsetlon", NULL },
+	{ "name", "description" },
+	{ "line1", "building" },
+	{ "line2", NULL },
+	{ "line3", NULL },
+	{ "line4", NULL },
+	{ "street", "street" },
+	{ "postal", "postalcode" },
+	{ "neighborhood", "area" },
+	{ "city", "locality" },
+	{ "county", NULL },
+	{ "state", "region" },
+	{ "country", "country" },
+	{ "countrycode", "countrycode" },
+	{ "countycode", NULL },
+	{ "timezone", NULL },
+	{ "uzip", NULL },
+};
+
+static const char *
+pf_to_xep (const char *attr)
+{
+	guint i;
+
+	for (i = 0; i < G_N_ELEMENTS (rev_attrs_map); i++) {
+		if (g_str_equal (attr, rev_attrs_map[i].pf_attr))
+			return rev_attrs_map[i].xep_attr;
+	}
+
+	g_debug ("Can't convert unknown attribute '%s'", attr);
+
+	return NULL;
+}
+
+GHashTable *
+_geocode_parse_resolve_json (const char *contents,
+			     GError    **error)
+{
+	GHashTable *ret;
+	JsonParser *parser;
+	JsonNode *root;
+	JsonReader *reader;
+	gint64 err_code, found;
+	guint i;
+	const GError *err = NULL;
+	char **members;
+
+	ret = NULL;
+
+	parser = json_parser_new ();
+	if (json_parser_load_from_data (parser, contents, -1, error) == FALSE) {
+		g_object_unref (parser);
+		return ret;
+	}
+
+	root = json_parser_get_root (parser);
+	reader = json_reader_new (root);
+
+	if (json_reader_read_member (reader, "ResultSet") == FALSE)
+		goto parse;
+
+	if (json_reader_read_member (reader, "Error") == FALSE)
+		goto parse;
+
+	err_code = json_reader_get_int_value (reader);
+	json_reader_end_member (reader);
+
+	if (err_code != 0) {
+		const char *msg;
+
+		json_reader_read_member (reader, "ErrorMessage");
+		msg = json_reader_get_string_value (reader);
+		json_reader_end_member (reader);
+		if (msg && *msg == '\0')
+			msg = NULL;
+
+		switch (err_code) {
+		case 1:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Query not supported");
+			break;
+		case 100:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "No input parameters");
+			break;
+		case 102:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Address data not recognized as valid UTF-8");
+			break;
+		case 103:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Insufficient address data");
+			break;
+		case 104:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Unknown language");
+			break;
+		case 105:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "No country detected");
+			break;
+		case 106:
+			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Country not supported");
+			break;
+		default:
+			if (msg == NULL)
+				g_set_error (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, "Unknown error code %"G_GINT64_FORMAT, err_code);
+			else
+				g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, msg);
+			break;
+		}
+		g_object_unref (parser);
+		g_object_unref (reader);
+		return NULL;
+	}
+
+	/* Check for the number of results */
+	if (json_reader_read_member (reader, "Found") == FALSE)
+		goto parse;
+
+	found = json_reader_get_int_value (reader);
+	json_reader_end_member (reader);
+
+	if (!found) {
+		g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NO_MATCHES, "No matches found for request");
+		g_object_unref (parser);
+		g_object_unref (reader);
+		return NULL;
+	}
+
+	if (json_reader_read_member (reader, "Results") == FALSE)
+		goto parse;
+
+	if (json_reader_read_element (reader, 0) == FALSE)
+		goto parse;
+
+	members = json_reader_list_members (reader);
+
+	/* Yay, start adding data */
+	ret = g_hash_table_new_full (g_str_hash, g_str_equal,
+				     g_free, g_free);
+
+	for (i = 0; members[i] != NULL; i++) {
+		const char *value;
+
+		json_reader_read_member (reader, members[i]);
+
+		if (g_str_equal (members[i], "radius") ||
+		    g_str_equal (members[i], "quality") ||
+		    g_str_equal (members[i], "woeid")) {
+			gint64 num;
+
+			num = json_reader_get_int_value (reader);
+			g_hash_table_insert (ret, g_strdup (members[i]), g_strdup_printf ("%"G_GINT64_FORMAT, num));
+			json_reader_end_member (reader);
+			continue;
+		}
+
+		value = json_reader_get_string_value (reader);
+		if (value && *value == '\0')
+			value = NULL;
+
+		if (value != NULL) {
+			const char *xep_attr;
+
+			xep_attr = pf_to_xep (members[i]);
+			if (xep_attr != NULL)
+				g_hash_table_insert (ret, g_strdup (xep_attr), g_strdup (value));
+			else
+				g_hash_table_insert (ret, g_strdup (members[i]), g_strdup (value));
+		}
+		json_reader_end_member (reader);
+	}
+	g_strfreev (members);
+
+	g_object_unref (parser);
+	g_object_unref (reader);
+
+	return ret;
+
+parse:
+	if (ret != NULL)
+		g_hash_table_destroy (ret);
+	err = json_reader_get_error (reader);
+	g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, err->message);
+	g_object_unref (parser);
+	g_object_unref (reader);
+	return NULL;
+}
+
 static GList *
 _geocode_parse_single_result_json (const char  *contents,
 				   GError     **error)
@@ -398,6 +589,39 @@ get_search_query_for_params (GeocodeForward *forward,
 	return ret;
 }
 
+static SoupMessage *
+get_resolve_query_for_params (GHashTable  *orig_ht)
+{
+	SoupMessage *ret;
+	GHashTable *ht;
+	char *locale;
+	char *params, *uri;
+
+	ht = _geocode_glib_dup_hash_table (orig_ht);
+
+	g_hash_table_insert (ht, "appid", YAHOO_APPID);
+	g_hash_table_insert (ht, "flags", "QJT");
+
+	locale = NULL;
+	if (g_hash_table_lookup (ht, "locale") == NULL) {
+		locale = _geocode_object_get_lang ();
+		if (locale)
+			g_hash_table_insert (ht, "locale", locale);
+	}
+
+	params = soup_form_encode_hash (ht);
+	g_hash_table_destroy (ht);
+	g_free (locale);
+
+	uri = g_strdup_printf ("http://where.yahooapis.com/geocode?%s", params);
+	g_free (params);
+
+	ret = soup_message_new ("GET", uri);
+	g_free (uri);
+
+	return ret;
+}
+
 /**
  * geocode_forward_search_async:
  * @forward: a #GeocodeForward representing a query
@@ -433,7 +657,7 @@ geocode_forward_search_async (GeocodeForward      *forward,
 	if (forward->priv->answer_count != 1)
 		query = get_search_query_for_params (forward, &error);
 	else
-		query = _get_resolve_query_for_params (forward->priv->ht, FALSE);
+		query = get_resolve_query_for_params (forward->priv->ht);
 	if (!query) {
 		g_simple_async_result_take_error (simple, error);
 		g_simple_async_result_complete_in_idle (simple);
@@ -850,7 +1074,7 @@ geocode_forward_search (GeocodeForward      *forward,
 	if (forward->priv->answer_count != 1)
 		query = get_search_query_for_params (forward, error);
 	else
-		query = _get_resolve_query_for_params (forward->priv->ht, FALSE);
+		query = get_resolve_query_for_params (forward->priv->ht);
 
 	if (!query)
 		return NULL;

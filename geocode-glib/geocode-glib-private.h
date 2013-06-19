@@ -41,8 +41,6 @@ GHashTable *_geocode_parse_resolve_json (const char *contents,
 					 GError    **error);
 GList      *_geocode_parse_search_json  (const char *contents,
 					 GError    **error);
-SoupMessage *_get_resolve_query_for_params (GHashTable  *orig_ht,
-					    gboolean     reverse);
 GeocodeLocation *_geocode_ip_json_to_location (const char  *json,
 					       GError     **error);
 
@@ -53,6 +51,7 @@ gboolean _geocode_glib_cache_save (SoupMessage *query,
                                    const char  *contents);
 gboolean _geocode_glib_cache_load (SoupMessage *query,
                                    char       **contents);
+GHashTable *_geocode_glib_dup_hash_table (GHashTable *ht);
 
 
 G_END_DECLS

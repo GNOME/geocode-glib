@@ -113,7 +113,16 @@ test_rev (void)
 	g_assert (ht != NULL);
 	g_object_unref (rev);
 
-	g_assert (g_strcmp0 (g_hash_table_lookup (ht, "area"), "Onslow Village") == 0);
+        g_assert_cmpstr (g_hash_table_lookup (ht, "postalcode"), ==, "GU2 7UP");
+        g_assert_cmpstr (g_hash_table_lookup (ht, "area"), ==, "Guildford Park");
+        g_assert_cmpstr (g_hash_table_lookup (ht, "countrycode"), ==, "gb");
+        g_assert_cmpstr (g_hash_table_lookup (ht, "street"), ==, "Old Palace Road");
+        g_assert_cmpstr (g_hash_table_lookup (ht, "county"), ==, "Surrey");
+        g_assert_cmpstr (g_hash_table_lookup (ht, "locality"), ==, "Guildford");
+        g_assert_cmpstr (g_hash_table_lookup (ht, "pub"), ==, "The Astolat");
+        g_assert_cmpstr (g_hash_table_lookup (ht, "country"), ==, "United Kingdom");
+        g_assert_cmpstr (g_hash_table_lookup (ht, "state_district"), ==, "South East England");
+        g_assert_cmpstr (g_hash_table_lookup (ht, "region"), ==, "England");
 
 	g_print ("Got geocode answer:\n");
 	g_hash_table_foreach (ht, (GHFunc) print_res, NULL);
