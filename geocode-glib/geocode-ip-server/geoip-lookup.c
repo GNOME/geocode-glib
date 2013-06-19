@@ -13,21 +13,26 @@
 
 static const char *attribution_text = "This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com";
 
-static char *error_message_array [] = {
-        "Invalid IP address '%s'",
-        "Can not find the IP address '%s' in the database",
-        "Can not open GeoLiteCity/GeoIP Binary database. Set GEOIP_DATABASE_PATH env variable."
-};
-
 static void
 print_error_in_json (GeoipServerError  error_code,
                      const char       *extra_info)
 {
         g_print ("{\"error_code\":%d, \"error_message\":\"", error_code);
-        if (extra_info)
-                g_print (error_message_array[error_code], extra_info);
-        else
-                g_print (error_message_array[error_code]);
+
+        switch (error_code) {
+        case INVALID_IP_ADDRESS_ERR:
+                g_print ("Invalid IP address '%s'", extra_info ? extra_info : "(none)");
+                break;
+        case INVALID_ENTRY_ERR:
+                g_print ("Can not find the IP address '%s' in the database", extra_info);
+                break;
+        case DATABASE_ERR:
+                g_print ("Can not open GeoLiteCity/GeoIP Binary database. Set GEOIP_DATABASE_PATH env variable.");
+                break;
+        default:
+                g_assert_not_reached ();
+        }
+
         g_print ("\"}\n");
 }
 
