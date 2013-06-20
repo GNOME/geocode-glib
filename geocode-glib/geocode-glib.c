@@ -43,10 +43,11 @@
  **/
 
 char *
-_geocode_glib_cache_path_for_query (GFile *query)
+_geocode_glib_cache_path_for_query (SoupMessage *query)
 {
 	const char *filename;
 	char *path;
+        SoupURI *soup_uri;
 	char *uri;
 	GChecksum *sum;
 
@@ -62,7 +63,8 @@ _geocode_glib_cache_path_for_query (GFile *query)
 	g_free (path);
 
 	/* Create path for query */
-	uri = g_file_get_uri (query);
+	soup_uri = soup_message_get_uri (query);
+	uri = soup_uri_to_string (soup_uri, FALSE);
 
 	sum = g_checksum_new (G_CHECKSUM_SHA256);
 	g_checksum_update (sum, (const guchar *) uri, strlen (uri));
@@ -81,8 +83,8 @@ _geocode_glib_cache_path_for_query (GFile *query)
 }
 
 gboolean
-_geocode_glib_cache_save (GFile      *query,
-			  const char *contents)
+_geocode_glib_cache_save (SoupMessage *query,
+			  const char  *contents)
 {
 	char *path;
 	gboolean ret;
@@ -96,7 +98,7 @@ _geocode_glib_cache_save (GFile      *query,
 }
 
 gboolean
-_geocode_glib_cache_load (GFile  *query,
+_geocode_glib_cache_load (SoupMessage *query,
 			  char  **contents)
 {
 	char *path;

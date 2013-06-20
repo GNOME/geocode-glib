@@ -24,6 +24,7 @@
 #define GEOCODE_GLIB_PRIVATE_H
 
 #include <glib.h>
+#include <libsoup/soup.h>
 #include <geocode-glib/geocode-location.h>
 
 G_BEGIN_DECLS
@@ -40,18 +41,18 @@ GHashTable *_geocode_parse_resolve_json (const char *contents,
 					 GError    **error);
 GList      *_geocode_parse_search_json  (const char *contents,
 					 GError    **error);
-GFile      *_get_resolve_query_for_params (GHashTable  *orig_ht,
-					   gboolean     reverse);
+SoupMessage *_get_resolve_query_for_params (GHashTable  *orig_ht,
+					    gboolean     reverse);
 GeocodeLocation *_geocode_ip_json_to_location (const char  *json,
 					       GError     **error);
 
 char       *_geocode_object_get_lang (void);
 
-char *_geocode_glib_cache_path_for_query (GFile *query);
-gboolean _geocode_glib_cache_save (GFile      *query,
-				  const char *contents);
-gboolean _geocode_glib_cache_load (GFile  *query,
-				  char  **contents);
+char *_geocode_glib_cache_path_for_query (SoupMessage *query);
+gboolean _geocode_glib_cache_save (SoupMessage *query,
+                                   const char  *contents);
+gboolean _geocode_glib_cache_load (SoupMessage *query,
+                                   char       **contents);
 
 
 G_END_DECLS

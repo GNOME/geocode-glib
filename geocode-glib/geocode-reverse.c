@@ -42,6 +42,7 @@
 
 struct _GeocodeReversePrivate {
 	GHashTable *ht;
+        SoupSession *soup_session;
 };
 
 G_DEFINE_TYPE (GeocodeReverse, geocode_reverse, G_TYPE_OBJECT)
@@ -52,6 +53,7 @@ geocode_reverse_finalize (GObject *gobject)
 	GeocodeReverse *object = (GeocodeReverse *) gobject;
 
 	g_clear_pointer (&object->priv->ht, g_hash_table_destroy);
+        g_clear_object (&object->priv->soup_session);
 
 	G_OBJECT_CLASS (geocode_reverse_parent_class)->finalize (gobject);
 }
@@ -72,6 +74,7 @@ geocode_reverse_init (GeocodeReverse *object)
 	object->priv = G_TYPE_INSTANCE_GET_PRIVATE ((object), GEOCODE_TYPE_REVERSE, GeocodeReversePrivate);
 	object->priv->ht = g_hash_table_new_full (g_str_hash, g_str_equal,
 						  g_free, g_free);
+        object->priv->soup_session = soup_session_new ();
 }
 
 /**
@@ -293,29 +296,25 @@ parse:
 }
 
 static void
-on_query_data_loaded (GObject      *source_object,
-		      GAsyncResult *res,
-		      gpointer      user_data)
+on_query_data_loaded (SoupSession *session,
+                      SoupMessage *query,
+                      gpointer     user_data)
 {
 	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (user_data);
-	GFile *query;
 	GError *error = NULL;
 	char *contents;
 	gpointer ret;
 
-	query = G_FILE (source_object);
-	if (g_file_load_contents_finish (query,
-					 res,
-					 &contents,
-					 NULL,
-					 NULL,
-					 &error) == FALSE) {
-		g_simple_async_result_take_error (simple, error);
+        if (query->status_code != SOUP_STATUS_OK) {
+		g_set_error_literal (&error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                                     query->reason_phrase ? query->reason_phrase : "Query failed");
+                g_simple_async_result_take_error (simple, error);
 		g_simple_async_result_complete_in_idle (simple);
 		g_object_unref (simple);
 		return;
 	}
 
+        contents = g_strndup (query->response_body->data, query->response_body->length);
 	ret = _geocode_parse_resolve_json (contents, &error);
 
 	if (ret == NULL) {
@@ -341,25 +340,26 @@ on_cache_data_loaded (GObject      *source_object,
 		      gpointer      user_data)
 {
 	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (user_data);
-	GCancellable *cancellable;
 	GFile *cache;
 	GError *error = NULL;
 	char *contents;
 	gpointer ret;
 
 	cache = G_FILE (source_object);
-	cancellable = g_object_get_data (G_OBJECT (cache), "cancellable");
 	if (g_file_load_contents_finish (cache,
 					 res,
 					 &contents,
 					 NULL,
 					 NULL,
 					 NULL) == FALSE) {
-		GFile *query;
+               GObject *object;
+		SoupMessage *query;
 
+                object = g_async_result_get_source_object (G_ASYNC_RESULT (simple));
 		query = g_object_get_data (G_OBJECT (cache), "query");
-		g_file_load_contents_async (query,
-					    cancellable,
+                g_object_ref (query); /* soup_session_queue_message steals ref */
+		soup_session_queue_message (GEOCODE_REVERSE (object)->priv->soup_session,
+                                            query,
 					    on_query_data_loaded,
 					    simple);
 		return;
@@ -396,11 +396,11 @@ dup_ht (GHashTable *ht)
 	return ret;
 }
 
-GFile *
+SoupMessage *
 _get_resolve_query_for_params (GHashTable  *orig_ht,
 			      gboolean     reverse)
 {
-	GFile *ret;
+	SoupMessage *ret;
 	GHashTable *ht;
 	char *locale;
 	char *params, *uri;
@@ -426,7 +426,7 @@ _get_resolve_query_for_params (GHashTable  *orig_ht,
 	uri = g_strdup_printf ("http://where.yahooapis.com/geocode?%s", params);
 	g_free (params);
 
-	ret = g_file_new_for_uri (uri);
+	ret = soup_message_new ("GET", uri);
 	g_free (uri);
 
 	return ret;
@@ -453,9 +453,8 @@ geocode_reverse_resolve_async (GeocodeReverse       *object,
 			       gpointer             user_data)
 {
 	GSimpleAsyncResult *simple;
-	GFile *query;
+	SoupMessage *query;
 	char *cache_path;
-	GError *error = NULL;
 
 	g_return_if_fail (GEOCODE_IS_REVERSE (object));
 
@@ -465,26 +464,18 @@ geocode_reverse_resolve_async (GeocodeReverse       *object,
 					    geocode_reverse_resolve_async);
 
 	query = _get_resolve_query_for_params (object->priv->ht, TRUE);
-	if (query == NULL) {
-		g_simple_async_result_take_error (simple, error);
-		g_simple_async_result_complete_in_idle (simple);
-		g_object_unref (simple);
-		return;
-	}
 
 	cache_path = _geocode_glib_cache_path_for_query (query);
 	if (cache_path == NULL) {
-		g_file_load_contents_async (query,
-					    cancellable,
+		soup_session_queue_message (object->priv->soup_session,
+                                            query,
 					    on_query_data_loaded,
 					    simple);
-		g_object_unref (query);
 	} else {
 		GFile *cache;
 
 		cache = g_file_new_for_path (cache_path);
 		g_object_set_data_full (G_OBJECT (cache), "query", query, (GDestroyNotify) g_object_unref);
-		g_object_set_data (G_OBJECT (cache), "cancellable", cancellable);
 		g_file_load_contents_async (cache,
 					    cancellable,
 					    on_cache_data_loaded,
@@ -540,7 +531,7 @@ GHashTable *
 geocode_reverse_resolve (GeocodeReverse      *object,
 			 GError             **error)
 {
-	GFile *query;
+	SoupMessage *query;
 	char *contents;
 	GHashTable *ret;
 	gboolean to_cache = FALSE;
@@ -548,19 +539,17 @@ geocode_reverse_resolve (GeocodeReverse      *object,
 	g_return_val_if_fail (GEOCODE_IS_REVERSE (object), NULL);
 
 	query = _get_resolve_query_for_params (object->priv->ht, TRUE);
-	if (query == NULL)
-		return NULL;
 
 	if (_geocode_glib_cache_load (query, &contents) == FALSE) {
-		if (g_file_load_contents (query,
-					  NULL,
-					  &contents,
-					  NULL,
-					  NULL,
-					  error) == FALSE) {
-			g_object_unref (query);
-			return NULL;
-		}
+                if (soup_session_send_message (object->priv->soup_session,
+                                               query) != SOUP_STATUS_OK) {
+                        g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                                             query->reason_phrase ? query->reason_phrase : "Query failed");
+                        g_object_unref (query);
+                        return NULL;
+                }
+                contents = g_strndup (query->response_body->data, query->response_body->length);
+
 		to_cache = TRUE;
 	}
 
