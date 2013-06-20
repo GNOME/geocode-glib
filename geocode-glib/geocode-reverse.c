@@ -51,8 +51,7 @@ geocode_reverse_finalize (GObject *gobject)
 {
 	GeocodeReverse *object = (GeocodeReverse *) gobject;
 
-	g_hash_table_destroy (object->priv->ht);
-	object->priv->ht = NULL;
+	g_clear_pointer (&object->priv->ht, g_hash_table_destroy);
 
 	G_OBJECT_CLASS (geocode_reverse_parent_class)->finalize (gobject);
 }
