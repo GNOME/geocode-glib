@@ -482,21 +482,15 @@ geocode_forward_search_finish (GeocodeForward       *forward,
 			       GError             **error)
 {
 	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
-	GList *ret;
 
 	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), NULL);
 
 	g_warn_if_fail (g_simple_async_result_get_source_tag (simple) == geocode_forward_search_async);
 
-	ret = NULL;
-
 	if (g_simple_async_result_propagate_error (simple, error))
-		goto out;
+		return NULL;
 
-	ret = g_simple_async_result_get_op_res_gpointer (simple);
-
-out:
-	return ret;
+	return g_simple_async_result_get_op_res_gpointer (simple);
 }
 
 #define IS_EL(x) (g_str_equal (element_name, x))
