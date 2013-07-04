@@ -256,18 +256,16 @@ query_callback (GObject        *source_forward,
                                          NULL,
                                          NULL,
                                          &error) == FALSE) {
-                g_simple_async_result_set_from_error (simple, error);
+                g_simple_async_result_take_error (simple, error);
                 g_simple_async_result_complete_in_idle (simple);
                 g_object_unref (simple);
-                g_error_free (error);
                 return;
 
         }
         if (contents == NULL) {
-                g_simple_async_result_set_from_error (simple, error);
+                g_simple_async_result_take_error (simple, error);
                 g_simple_async_result_complete_in_idle (simple);
                 g_object_unref (simple);
-                g_error_free (error);
                 return;
         }
         g_simple_async_result_set_op_res_gpointer (simple, contents, NULL);

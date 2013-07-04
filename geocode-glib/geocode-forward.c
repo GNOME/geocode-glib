@@ -278,10 +278,9 @@ on_query_data_loaded (GObject      *source_forward,
 					 NULL,
 					 NULL,
 					 &error) == FALSE) {
-		g_simple_async_result_set_from_error (simple, error);
+		g_simple_async_result_take_error (simple, error);
 		g_simple_async_result_complete_in_idle (simple);
 		g_object_unref (simple);
-		g_error_free (error);
 		return;
 	}
 
@@ -291,10 +290,9 @@ on_query_data_loaded (GObject      *source_forward,
 		ret = _geocode_parse_single_result_json (contents, &error);
 
 	if (ret == NULL) {
-		g_simple_async_result_set_from_error (simple, error);
+		g_simple_async_result_take_error (simple, error);
 		g_simple_async_result_complete_in_idle (simple);
 		g_object_unref (simple);
-		g_error_free (error);
 		g_free (contents);
 		return;
 	}
@@ -347,10 +345,9 @@ on_cache_data_loaded (GObject      *source_forward,
 	g_free (contents);
 
 	if (ret == NULL) {
-		g_simple_async_result_set_from_error (simple, error);
+		g_simple_async_result_take_error (simple, error);
 		g_simple_async_result_complete_in_idle (simple);
 		g_object_unref (simple);
-		g_error_free (error);
 		return;
 	}
 
