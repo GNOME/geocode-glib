@@ -25,6 +25,9 @@ AM_INIT_AUTOMAKE([1.11 dist-xz no-dist-gzip check-news])
 GCLIB_LT_VERSION=0:0:0
 AC_SUBST(GCLIB_LT_VERSION)
 
+GCLIB_API_VERSION=1.0
+AC_SUBST(GCLIB_API_VERSION)
+
 AM_MAINTAINER_MODE([enable])
 
 # Support silent build rules, requires at least automake-1.11. Disable

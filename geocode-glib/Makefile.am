@@ -39,7 +39,7 @@ GCGLIB_HEADER_FILES = \
 	geocode-ipclient.h				\
 	geocode-place.h
 
-gcglibdir = $(pkgincludedir)
+gcglibdir = $(includedir)/$(PACKAGE)-$(GCLIB_API_VERSION)/$(PACKAGE)
 gcglib_HEADERS =					\
 	$(GCGLIB_HEADER_FILES)				\
 	geocode-enum-types.h
