@@ -344,14 +344,11 @@ on_cache_data_loaded (GObject      *source_forward,
 		ret = _geocode_parse_single_result_json (contents, &error);
 	g_free (contents);
 
-	if (ret == NULL) {
+	if (ret == NULL)
 		g_simple_async_result_take_error (simple, error);
-		g_simple_async_result_complete_in_idle (simple);
-		g_object_unref (simple);
-		return;
-	}
+	else
+		g_simple_async_result_set_op_res_gpointer (simple, ret, NULL);
 
-	g_simple_async_result_set_op_res_gpointer (simple, ret, NULL);
 	g_simple_async_result_complete_in_idle (simple);
 	g_object_unref (simple);
 }

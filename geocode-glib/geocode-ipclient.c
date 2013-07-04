@@ -257,18 +257,10 @@ query_callback (GObject        *source_forward,
                                          NULL,
                                          &error) == FALSE) {
                 g_simple_async_result_take_error (simple, error);
-                g_simple_async_result_complete_in_idle (simple);
-                g_object_unref (simple);
-                return;
+        } else {
+                g_simple_async_result_set_op_res_gpointer (simple, contents, NULL);
+        }
 
-        }
-        if (contents == NULL) {
-                g_simple_async_result_take_error (simple, error);
-                g_simple_async_result_complete_in_idle (simple);
-                g_object_unref (simple);
-                return;
-        }
-        g_simple_async_result_set_op_res_gpointer (simple, contents, NULL);
         g_simple_async_result_complete_in_idle (simple);
         g_object_unref (simple);
 }
