@@ -5,8 +5,8 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <gio/gio.h>
-#include <geocode-glib.h>
-#include <geocode-glib-private.h>
+#include <geocode-glib/geocode-glib.h>
+#include <geocode-glib/geocode-glib-private.h>
 
 static GMainLoop *loop = NULL;
 

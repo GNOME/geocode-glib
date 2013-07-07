@@ -24,7 +24,7 @@
 #define GEOCODE_GLIB_PRIVATE_H
 
 #include <glib.h>
-#include "geocode-location.h"
+#include <geocode-glib/geocode-location.h>
 
 G_BEGIN_DECLS
 

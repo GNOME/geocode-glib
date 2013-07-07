@@ -21,8 +21,8 @@
 
  */
 
-#include "geocode-place.h"
-#include "geocode-enum-types.h"
+#include <geocode-glib/geocode-place.h>
+#include <geocode-glib/geocode-enum-types.h>
 
 /**
  * SECTION:geocode-place

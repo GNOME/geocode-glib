@@ -26,10 +26,10 @@
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
-#include <geocode-glib.h>
-#include <geocode-error.h>
-#include <geocode-reverse.h>
-#include <geocode-glib-private.h>
+#include <geocode-glib/geocode-glib.h>
+#include <geocode-glib/geocode-error.h>
+#include <geocode-glib/geocode-reverse.h>
+#include <geocode-glib/geocode-glib-private.h>
 
 /**
  * SECTION:geocode-reverse

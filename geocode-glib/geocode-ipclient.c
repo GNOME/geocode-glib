@@ -25,11 +25,11 @@
 #include <libsoup/soup.h>
 #include <json-glib/json-glib.h>
 #include <string.h>
-#include "geocode-glib-private.h"
-#include "geocode-ipclient.h"
-#include "geocode-error.h"
-#include "geocode-enum-types.h"
-#include "geocode-ip-server/geoip-server.h"
+#include <geocode-glib/geocode-glib-private.h>
+#include <geocode-glib/geocode-ipclient.h>
+#include <geocode-glib/geocode-error.h>
+#include <geocode-glib/geocode-enum-types.h>
+#include <geocode-glib/geocode-ip-server/geoip-server.h>
 
 /**
  * SECTION:geocode-ipclient

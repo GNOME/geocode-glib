@@ -60,7 +60,7 @@ geocode-enum-types.h: $(GCGLIB_HEADER_FILES)
 
 geocode-enum-types.c: $(GCGLIB_HEADER_FILES) geocode-enum-types.h
 	$(AM_V_GEN) ($(GLIB_MKENUMS) \
-		--fhead "#include \"geocode-glib.h\"\n#include \"geocode-enum-types.h\"" \
+		--fhead "#include <geocode-glib/geocode-glib.h>\n#include <geocode-glib/geocode-enum-types.h>" \
 		--fprod "\n/* enumerations from \"@filename@\" */" \
 		--vhead "GType\n@enum_name@_get_type (void)\n{\n  static GType etype = 0;\n  if (etype == 0) {\n    static const G@Type@Value values[] = {" \
 		--vprod "      { @VALUENAME@, \"@VALUENAME@\", \"@valuenick@\" }," \

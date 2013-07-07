@@ -25,7 +25,7 @@
 #define GEOCODE_PLACE_H
 
 #include <glib-object.h>
-#include "geocode-location.h"
+#include <geocode-glib/geocode-location.h>
 
 G_BEGIN_DECLS
 

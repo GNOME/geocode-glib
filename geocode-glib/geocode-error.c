@@ -20,7 +20,7 @@
 
  */
 
-#include "geocode-error.h"
+#include <geocode-glib/geocode-error.h>
 
 /**
  * SECTION:geocode-error
