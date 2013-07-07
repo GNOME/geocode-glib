@@ -67,6 +67,13 @@ geocode-enum-types.c: $(GCGLIB_HEADER_FILES) geocode-enum-types.h
 		--vtail "      { 0, NULL, NULL }\n    };\n    etype = g_@type@_register_static (\"@EnumName@\", values);\n  }\n  return etype;\n}\n" $^ > xgen-$(@F) \
 		&& mv -f xgen-$(@F) $@)
 
+# Symlink geocode-glib.h into the new subdirectory. This is to avoid breaking
+# users like geoclue2 who does "#include <geocode-glib.h>" which used
+# to be fine. Drop this when everyone who didn't already has changed to
+# use "#include <geocode-glib/geocode-glib.h>" instead.
+install-exec-hook:
+	cd $(DESTDIR)/$(gcglibdir)/.. && $(LN_S) geocode-glib/geocode-glib.h
+
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =
 INTROSPECTION_SCANNER_ARGS = --warn-all --add-include-path=$(top_srcdir)
