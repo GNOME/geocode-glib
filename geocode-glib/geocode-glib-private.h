@@ -25,6 +25,7 @@
 
 #include <glib.h>
 #include <libsoup/soup.h>
+#include <json-glib/json-glib.h>
 #include <geocode-glib/geocode-location.h>
 
 G_BEGIN_DECLS
@@ -37,12 +38,14 @@ typedef enum {
 	GEOCODE_GLIB_RESOLVE_REVERSE
 } GeocodeLookupType;
 
-GHashTable *_geocode_parse_resolve_json (const char *contents,
-					 GError    **error);
 GList      *_geocode_parse_search_json  (const char *contents,
 					 GError    **error);
 GeocodeLocation *_geocode_ip_json_to_location (const char  *json,
 					       GError     **error);
+void
+_geocode_read_nominatim_attributes (JsonReader *reader,
+                                    GHashTable *ht,
+                                    gboolean    translate_to_xep);
 
 char       *_geocode_object_get_lang (void);
 

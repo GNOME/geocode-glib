@@ -142,11 +142,16 @@ nominatim_to_xep (const char *attr)
 	return NULL;
 }
 
-static void
-add_nominatim_attributes (JsonReader *reader, GHashTable *hash_table)
+void
+_geocode_read_nominatim_attributes (JsonReader *reader,
+                                    GHashTable *ht,
+                                    gboolean    translate_to_xep)
 {
 	char **members;
 	guint i;
+        gboolean is_address;
+
+	is_address = (g_strcmp0 (json_reader_get_member_name (reader), "address") == 0);
 
 	members = json_reader_list_members (reader);
 
@@ -162,17 +167,33 @@ add_nominatim_attributes (JsonReader *reader, GHashTable *hash_table)
                 if (value != NULL) {
                         const char *xep_attr;
 
-                        xep_attr = nominatim_to_xep (members[i]);
-                        if (xep_attr != NULL)
-                                g_hash_table_insert (hash_table, g_strdup (xep_attr), g_strdup (value));
+                        if (translate_to_xep)
+                            xep_attr = nominatim_to_xep (members[i]);
                         else
-                                g_hash_table_insert (hash_table, g_strdup (members[i]), g_strdup (value));
+                            xep_attr = NULL;
+
+                        if (xep_attr != NULL)
+                                g_hash_table_insert (ht, g_strdup (xep_attr), g_strdup (value));
+                        else
+                                g_hash_table_insert (ht, g_strdup (members[i]), g_strdup (value));
+
+                        if (i == 0 && is_address) {
+                                /* Since Nominatim doesn't give us a short name,
+                                 * we use the first component of address as name.
+                                 */
+                                g_hash_table_insert (ht, g_strdup ("name"), g_strdup (value));
+                        }
                 }
 
                 json_reader_end_member (reader);
         }
 
 	g_strfreev (members);
+
+	if (json_reader_read_member (reader, "address")) {
+                _geocode_read_nominatim_attributes (reader, ht, translate_to_xep);
+                json_reader_end_member (reader);
+        }
 }
 
 static GHashTable *
@@ -212,16 +233,10 @@ resolve_json (const char *contents,
 		return NULL;
 	}
 
-	/* Yay, start adding data */
 	ret = g_hash_table_new_full (g_str_hash, g_str_equal,
 				     g_free, g_free);
 
-        add_nominatim_attributes (reader, ret);
-
-	if (json_reader_read_member (reader, "address")) {
-                add_nominatim_attributes (reader, ret);
-                json_reader_end_member (reader);
-        }
+        _geocode_read_nominatim_attributes (reader, ret, TRUE);
 
 	g_object_unref (parser);
 	g_object_unref (reader);

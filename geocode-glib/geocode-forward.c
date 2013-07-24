@@ -82,241 +82,6 @@ geocode_forward_init (GeocodeForward *forward)
 	forward->priv->answer_count = DEFAULT_ANSWER_COUNT;
 }
 
-static void
-set_is_search (GeocodeForward *forward,
-	       GObject        *object)
-{
-	if (forward->priv->answer_count != 1)
-		g_object_set_data (object, "is-search", GINT_TO_POINTER (1));
-}
-
-static gboolean
-is_search (GObject *object)
-{
-	return GPOINTER_TO_INT (g_object_get_data (G_OBJECT (object), "is-search"));
-}
-
-static struct {
-	const char *pf_attr;
-	const char *xep_attr;
-} rev_attrs_map[] = {
-	{ "longitude", "longitude" },
-	{ "latitude", "latitude" },
-	{ "offsetlat", NULL },
-	{ "offsetlon", NULL },
-	{ "name", "description" },
-	{ "line1", "building" },
-	{ "line2", NULL },
-	{ "line3", NULL },
-	{ "line4", NULL },
-	{ "street", "street" },
-	{ "postal", "postalcode" },
-	{ "neighborhood", "area" },
-	{ "city", "locality" },
-	{ "county", NULL },
-	{ "state", "region" },
-	{ "country", "country" },
-	{ "countrycode", "countrycode" },
-	{ "countycode", NULL },
-	{ "timezone", NULL },
-	{ "uzip", NULL },
-};
-
-static const char *
-pf_to_xep (const char *attr)
-{
-	guint i;
-
-	for (i = 0; i < G_N_ELEMENTS (rev_attrs_map); i++) {
-		if (g_str_equal (attr, rev_attrs_map[i].pf_attr))
-			return rev_attrs_map[i].xep_attr;
-	}
-
-	g_debug ("Can't convert unknown attribute '%s'", attr);
-
-	return NULL;
-}
-
-GHashTable *
-_geocode_parse_resolve_json (const char *contents,
-			     GError    **error)
-{
-	GHashTable *ret;
-	JsonParser *parser;
-	JsonNode *root;
-	JsonReader *reader;
-	gint64 err_code, found;
-	guint i;
-	const GError *err = NULL;
-	char **members;
-
-	ret = NULL;
-
-	parser = json_parser_new ();
-	if (json_parser_load_from_data (parser, contents, -1, error) == FALSE) {
-		g_object_unref (parser);
-		return ret;
-	}
-
-	root = json_parser_get_root (parser);
-	reader = json_reader_new (root);
-
-	if (json_reader_read_member (reader, "ResultSet") == FALSE)
-		goto parse;
-
-	if (json_reader_read_member (reader, "Error") == FALSE)
-		goto parse;
-
-	err_code = json_reader_get_int_value (reader);
-	json_reader_end_member (reader);
-
-	if (err_code != 0) {
-		const char *msg;
-
-		json_reader_read_member (reader, "ErrorMessage");
-		msg = json_reader_get_string_value (reader);
-		json_reader_end_member (reader);
-		if (msg && *msg == '\0')
-			msg = NULL;
-
-		switch (err_code) {
-		case 1:
-			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Query not supported");
-			break;
-		case 100:
-			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "No input parameters");
-			break;
-		case 102:
-			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Address data not recognized as valid UTF-8");
-			break;
-		case 103:
-			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Insufficient address data");
-			break;
-		case 104:
-			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Unknown language");
-			break;
-		case 105:
-			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "No country detected");
-			break;
-		case 106:
-			g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED, msg ? msg : "Country not supported");
-			break;
-		default:
-			if (msg == NULL)
-				g_set_error (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, "Unknown error code %"G_GINT64_FORMAT, err_code);
-			else
-				g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, msg);
-			break;
-		}
-		g_object_unref (parser);
-		g_object_unref (reader);
-		return NULL;
-	}
-
-	/* Check for the number of results */
-	if (json_reader_read_member (reader, "Found") == FALSE)
-		goto parse;
-
-	found = json_reader_get_int_value (reader);
-	json_reader_end_member (reader);
-
-	if (!found) {
-		g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_NO_MATCHES, "No matches found for request");
-		g_object_unref (parser);
-		g_object_unref (reader);
-		return NULL;
-	}
-
-	if (json_reader_read_member (reader, "Results") == FALSE)
-		goto parse;
-
-	if (json_reader_read_element (reader, 0) == FALSE)
-		goto parse;
-
-	members = json_reader_list_members (reader);
-
-	/* Yay, start adding data */
-	ret = g_hash_table_new_full (g_str_hash, g_str_equal,
-				     g_free, g_free);
-
-	for (i = 0; members[i] != NULL; i++) {
-		const char *value;
-
-		json_reader_read_member (reader, members[i]);
-
-		if (g_str_equal (members[i], "radius") ||
-		    g_str_equal (members[i], "quality") ||
-		    g_str_equal (members[i], "woeid")) {
-			gint64 num;
-
-			num = json_reader_get_int_value (reader);
-			g_hash_table_insert (ret, g_strdup (members[i]), g_strdup_printf ("%"G_GINT64_FORMAT, num));
-			json_reader_end_member (reader);
-			continue;
-		}
-
-		value = json_reader_get_string_value (reader);
-		if (value && *value == '\0')
-			value = NULL;
-
-		if (value != NULL) {
-			const char *xep_attr;
-
-			xep_attr = pf_to_xep (members[i]);
-			if (xep_attr != NULL)
-				g_hash_table_insert (ret, g_strdup (xep_attr), g_strdup (value));
-			else
-				g_hash_table_insert (ret, g_strdup (members[i]), g_strdup (value));
-		}
-		json_reader_end_member (reader);
-	}
-	g_strfreev (members);
-
-	g_object_unref (parser);
-	g_object_unref (reader);
-
-	return ret;
-
-parse:
-	if (ret != NULL)
-		g_hash_table_destroy (ret);
-	err = json_reader_get_error (reader);
-	g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, err->message);
-	g_object_unref (parser);
-	g_object_unref (reader);
-	return NULL;
-}
-
-static GList *
-_geocode_parse_single_result_json (const char  *contents,
-				   GError     **error)
-{
-	GHashTable *ht;
-        GeocodePlace *place = NULL;
-        const char *name;
-	GeocodeLocation *loc;
-	gdouble longitude;
-	gdouble latitude;
-
-	ht = _geocode_parse_resolve_json (contents, error);
-	if (ht == NULL)
-		return NULL;
-
-	longitude = g_ascii_strtod (g_hash_table_lookup (ht, "longitude"), NULL);
-	latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
-        name = g_hash_table_lookup (ht, "line2");
-        loc = geocode_location_new_with_description (longitude,
-                                                     latitude,
-                                                     GEOCODE_LOCATION_ACCURACY_UNKNOWN,
-                                                     name);
-        place = geocode_place_new_with_location (name, GEOCODE_PLACE_TYPE_UNKNOWN, loc);
-
-        g_object_unref (loc);
-	g_hash_table_destroy (ht);
-
-        return g_list_append (NULL, place);
-}
-
 static struct {
 	const char *tp_attr;
 	const char *gc_attr; /* NULL to ignore */
@@ -324,17 +89,18 @@ static struct {
 	{ "countrycode", NULL },
 	{ "country", "country" },
 	{ "region", "state" },
+	{ "county", "county" },
 	{ "locality", "city" },
-	{ "area", "neighborhood" },
-	{ "postalcode", "postal" },
+	{ "area", NULL },
+	{ "postalcode", "postalcode" },
 	{ "street", "street" },
-	{ "building", "house" },
+	{ "building", NULL },
 	{ "floor", NULL },
-	{ "room", "unit" },
+	{ "room",  NULL },
 	{ "text", NULL },
 	{ "description", NULL },
 	{ "uri", NULL },
-	{ "language", "locale" },
+	{ "language", "accept-language" },
 };
 
 static const char *
@@ -395,8 +161,6 @@ geocode_forward_fill_params (GeocodeForward *forward,
  *
  * See also: <ulink url="http://xmpp.org/extensions/xep-0080.html">XEP-0080 specification</ulink>.
  *
- * Note that you will get exactly one result when doing the search.
- *
  * Returns: a new #GeocodeForward. Use g_object_unref() when done.
  **/
 GeocodeForward *
@@ -413,7 +177,6 @@ geocode_forward_new_for_params (GHashTable *params)
 
 	forward = g_object_new (GEOCODE_TYPE_FORWARD, NULL);
 	geocode_forward_fill_params (forward, params);
-	geocode_forward_set_answer_count (forward, 1);
 
 	return forward;
 }
@@ -474,10 +237,7 @@ on_query_data_loaded (SoupSession *session,
 	}
 
         contents = g_strndup (query->response_body->data, query->response_body->length);
-	if (is_search (G_OBJECT (query)))
-		ret = _geocode_parse_search_json (contents, &error);
-	else
-		ret = _geocode_parse_single_result_json (contents, &error);
+        ret = _geocode_parse_search_json (contents, &error);
 
 	if (ret == NULL) {
 		g_simple_async_result_take_error (simple, error);
@@ -519,8 +279,6 @@ on_cache_data_loaded (GObject      *source_forward,
 
                 object = g_async_result_get_source_object (G_ASYNC_RESULT (simple));
 		query = g_object_get_data (G_OBJECT (cache), "query");
-		g_object_set_data (G_OBJECT (query), "is-search",
-				   g_object_get_data (G_OBJECT (cache), "is-search"));
                 g_object_ref (query); /* soup_session_queue_message steals ref */
 		soup_session_queue_message (GEOCODE_FORWARD (object)->priv->soup_session,
                                             query,
@@ -529,10 +287,7 @@ on_cache_data_loaded (GObject      *source_forward,
 		return;
 	}
 
-	if (is_search (G_OBJECT (cache)))
-		ret = _geocode_parse_search_json (contents, &error);
-	else
-		ret = _geocode_parse_single_result_json (contents, &error);
+        ret = _geocode_parse_search_json (contents, &error);
 	g_free (contents);
 
 	if (ret == NULL)
@@ -554,66 +309,69 @@ get_search_query_for_params (GeocodeForward *forward,
 	char *params;
 	char *search_term;
 	char *uri;
-	const char *location;
+        guint8 i;
+        gboolean query_possible = FALSE;
+        char *location;
+        const char *allowed_attributes[] = { "country",
+                                             "region",
+                                             "county",
+                                             "locality",
+                                             "postalcode",
+                                             "street",
+                                             "location",
+                                             NULL };
 
-	location = g_hash_table_lookup (forward->priv->ht, "location");
-	if (location == NULL) {
-		g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_INVALID_ARGUMENTS,
-				     "No location argument set");
+        /* Make sure we have at least one parameter that Nominatim allows querying for */
+	for (i = 0; allowed_attributes[i] != NULL; i++) {
+	        if (g_hash_table_lookup (forward->priv->ht,
+                                         allowed_attributes[i]) != NULL) {
+			query_possible = TRUE;
+			break;
+		}
+	}
+
+        if (!query_possible) {
+                char *str;
+
+                str = g_strjoinv (", ", (char **) allowed_attributes);
+                g_set_error (error, GEOCODE_ERROR, GEOCODE_ERROR_INVALID_ARGUMENTS,
+                             "Only following parameters supported: %s", str);
+                g_free (str);
+
 		return NULL;
 	}
 
-	/* Prepare the search term */
-	search_term = soup_uri_encode (location, NULL);
-
 	/* Prepare the query parameters */
-	ht = g_hash_table_new (g_str_hash, g_str_equal);
-	g_hash_table_insert (ht, "appid", YAHOO_APPID);
+	ht = _geocode_glib_dup_hash_table (forward->priv->ht);
 	g_hash_table_insert (ht, "format", "json");
-	lang = _geocode_object_get_lang ();
-	if (lang)
-		g_hash_table_insert (ht, "lang", lang);
+	g_hash_table_insert (ht, "email", "zeeshanak@gnome.org");
+	g_hash_table_insert (ht, "addressdetails", "1");
 
-	params = soup_form_encode_hash (ht);
-	g_hash_table_destroy (ht);
-	g_free (lang);
-
-	uri = g_strdup_printf ("http://where.yahooapis.com/v1/places.q('%s');start=0;count=%u?%s",
-			       search_term, forward->priv->answer_count, params);
-	g_free (params);
-	g_free (search_term);
-
-	ret = soup_message_new ("GET", uri);
-	g_free (uri);
-
-	return ret;
-}
-
-static SoupMessage *
-get_resolve_query_for_params (GHashTable  *orig_ht)
-{
-	SoupMessage *ret;
-	GHashTable *ht;
-	char *locale;
-	char *params, *uri;
-
-	ht = _geocode_glib_dup_hash_table (orig_ht);
-
-	g_hash_table_insert (ht, "appid", YAHOO_APPID);
-	g_hash_table_insert (ht, "flags", "QJT");
-
-	locale = NULL;
-	if (g_hash_table_lookup (ht, "locale") == NULL) {
-		locale = _geocode_object_get_lang ();
-		if (locale)
-			g_hash_table_insert (ht, "locale", locale);
+	lang = NULL;
+	if (g_hash_table_lookup (ht, "accept-language") == NULL) {
+		lang = _geocode_object_get_lang ();
+		if (lang)
+			g_hash_table_insert (ht, "accept-language", lang);
 	}
 
+        location = g_strdup (g_hash_table_lookup (ht, "location"));
+        g_hash_table_remove (ht, "location");
 	params = soup_form_encode_hash (ht);
 	g_hash_table_destroy (ht);
-	g_free (locale);
+        if (lang)
+                g_free (lang);
 
-	uri = g_strdup_printf ("http://where.yahooapis.com/geocode?%s", params);
+        if (location != NULL) {
+	        /* Prepare the search term */
+                search_term = soup_uri_encode (location, NULL);
+                uri = g_strdup_printf ("http://nominatim.openstreetmap.org/search?q=%s&limit=%u&%s",
+                                       search_term, forward->priv->answer_count, params);
+                g_free (search_term);
+                g_free (location);
+        } else {
+                uri = g_strdup_printf ("http://nominatim.openstreetmap.org/search?limit=1&%s",
+                                       params);
+        }
 	g_free (params);
 
 	ret = soup_message_new ("GET", uri);
@@ -654,10 +412,7 @@ geocode_forward_search_async (GeocodeForward      *forward,
 					    user_data,
 					    geocode_forward_search_async);
 
-	if (forward->priv->answer_count != 1)
-		query = get_search_query_for_params (forward, &error);
-	else
-		query = get_resolve_query_for_params (forward->priv->ht);
+        query = get_search_query_for_params (forward, &error);
 	if (!query) {
 		g_simple_async_result_take_error (simple, error);
 		g_simple_async_result_complete_in_idle (simple);
@@ -667,7 +422,6 @@ geocode_forward_search_async (GeocodeForward      *forward,
 
 	cache_path = _geocode_glib_cache_path_for_query (query);
 	if (cache_path == NULL) {
-		set_is_search (forward, G_OBJECT (query));
 		soup_session_queue_message (forward->priv->soup_session,
                                             query,
 					    on_query_data_loaded,
@@ -676,7 +430,6 @@ geocode_forward_search_async (GeocodeForward      *forward,
 		GFile *cache;
 
 		cache = g_file_new_for_path (cache_path);
-		set_is_search (forward, G_OBJECT (cache));
 		g_object_set_data_full (G_OBJECT (cache), "query", query, (GDestroyNotify) g_object_unref);
 		g_file_load_contents_async (cache,
 					    cancellable,
@@ -715,90 +468,29 @@ geocode_forward_search_finish (GeocodeForward       *forward,
 	return g_simple_async_result_get_op_res_gpointer (simple);
 }
 
-#define IS_EL(x) (g_str_equal (element_name, x))
-
-static void
-insert_place_attr (GHashTable *ht,
-		   JsonReader *reader,
-		   const char *element_name)
-{
-	char *value;
-
-	if (json_reader_read_member (reader, element_name) == FALSE) {
-		json_reader_end_member (reader);
-		return;
-	}
-
-	/* FIXME: check all the member names against what Place Finder outputs */
-
-	if (IS_EL("woeid") ||
-	    IS_EL("popRank") ||
-	    IS_EL("areaRank")) {
-		value = g_strdup_printf ("%"G_GINT64_FORMAT, json_reader_get_int_value (reader));
-	} else if (IS_EL("centroid")) {
-		char str[16];
-
-		json_reader_read_member (reader, "longitude");
-		g_ascii_dtostr (str, sizeof(str), json_reader_get_double_value (reader));
-		g_hash_table_insert (ht, g_strdup ("longitude"), g_strdup (str));
-		json_reader_end_member (reader);
-
-		json_reader_read_member (reader, "latitude");
-		g_ascii_dtostr (str, sizeof(str), json_reader_get_double_value (reader));
-		g_hash_table_insert (ht, g_strdup ("latitude"), g_strdup (str));
-		json_reader_end_member (reader);
-		goto end;
-	} else if (g_str_has_suffix (element_name, " attrs")) {
-                if (IS_EL("placeTypeName attrs")) {
-                        char *code;
-
-                        json_reader_read_member (reader, "code");
-                        code = g_strdup_printf ("%" G_GINT64_FORMAT,
-                                                json_reader_get_int_value (reader));
-                        g_hash_table_insert (ht, g_strdup ("placeType"), code);
-                        json_reader_end_member (reader);
-                        goto end;
-                } else {
-                        g_debug ("Ignoring attributes element '%s'", element_name);
-                        value = g_strdup (""); /* So that they're ignored */
-                }
-	} else if (IS_EL("boundingBox")) {
-		g_debug ("Ignoring element '%s'", element_name);
-		value = g_strdup (""); /* So that they're ignored */
-        } else if (IS_EL("placeTypeName")) {
-                /* This string is also localized so we want the code rather
-                 * than name, so we ignore name and extract the code above.
-                 */
-                g_debug ("Ignoring element '%s'", element_name);
-                value = g_strdup (""); /* So that they're ignored */
-	} else {
-		value = g_strdup (json_reader_get_string_value (reader));
-	}
-
-	if (value != NULL && *value == '\0') {
-		g_clear_pointer (&value, g_free);
-		goto end;
-	}
-
-	if (value != NULL)
-		g_hash_table_insert (ht, g_strdup (element_name), value);
-	else
-		g_warning ("Ignoring element %s, don't know how to parse it", element_name);
-
-end:
-	json_reader_end_member (reader);
-}
-
 static struct {
-        const char *yahoo_attr;
+	const char *nominatim_attr;
         const char *place_prop; /* NULL to ignore */
-} yahoo_to_place_map[] = {
-        { "postal", "postal-code" },
-        { "locality1", "town" },
-        { "admin1", "state" },
-        { "admin2", "county" },
-        { "admin3", "administrative-area" },
+} nominatim_to_place_map[] = {
+        { "license", NULL },
+        { "osm_type", NULL },
+        { "osm_id", NULL },
+        { "lat", NULL },
+        { "lon", NULL },
+        { "display_name", NULL },
+        { "house_number", "building" },
+        { "road", "street" },
+        { "suburb", "area" },
+        { "city",  "town" },
+        { "village",  "town" },
+        { "county", "county" },
+        { "state_district", "administrative-area" },
+        { "state", "state" },
+        { "postcode", "postal-code" },
         { "country", "country" },
+        { "country_code", "country-code" },
+        { "continent", "continent" },
+        { "address", NULL },
 };
 
 static void
@@ -808,10 +500,10 @@ fill_place_from_entry (const char   *key,
 {
         guint i;
 
-        for (i = 0; i < G_N_ELEMENTS (yahoo_to_place_map); i++) {
-                if (g_str_equal (key, yahoo_to_place_map[i].yahoo_attr)){
+        for (i = 0; i < G_N_ELEMENTS (nominatim_to_place_map); i++) {
+                if (g_str_equal (key, nominatim_to_place_map[i].nominatim_attr)){
                         g_object_set (G_OBJECT (place),
-                                      yahoo_to_place_map[i].place_prop,
+                                      nominatim_to_place_map[i].place_prop,
                                       value,
                                       NULL);
                         break;
@@ -831,26 +523,132 @@ node_free_func (GNode    *node,
 	return FALSE;
 }
 
-#define N_ATTRS 7
-static const char const *attributes[7] = {
+#define N_ATTRS 8
+static const char const *attributes[8] = {
 	"country",
-	"admin1",
-	"admin2",
-	"admin3",
-	"postal",
-	"placeTypeName",
-	"locality1"
+	"state",
+	"county",
+	"state_district",
+	"postalcode",
+	"city",
+	"suburb",
+	"village",
 };
+
+static GeocodePlace *
+create_place_from_attributes (GHashTable *ht)
+{
+        GeocodePlace *place;
+        char *class, *type;
+        const char *name, *street, *building;
+        GeocodePlaceType place_type = GEOCODE_PLACE_TYPE_UNKNOWN;
+
+        class = g_hash_table_lookup (ht, "class");
+        type = g_hash_table_lookup (ht, "type");
+
+        if (g_strcmp0 (class, "place") == 0) {
+                if (g_strcmp0 (type, "house") == 0 ||
+                    g_strcmp0 (type, "building") == 0 ||
+                    g_strcmp0 (type, "residential") == 0 ||
+                    g_strcmp0 (type, "plaza") == 0 ||
+                    g_strcmp0 (type, "office") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_BUILDING;
+                else if (g_strcmp0 (type, "estate") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_ESTATE;
+                else if (g_strcmp0 (type, "town") == 0 ||
+                         g_strcmp0 (type, "city") == 0 ||
+                         g_strcmp0 (type, "hamlet") == 0 ||
+                         g_strcmp0 (type, "isolated_dwelling") == 0 ||
+                         g_strcmp0 (type, "village") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_TOWN;
+                else if (g_strcmp0 (type, "suburb") == 0 ||
+                         g_strcmp0 (type, "neighbourhood") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_SUBURB;
+                else if (g_strcmp0 (type, "state") == 0 ||
+                         g_strcmp0 (type, "region") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_STATE;
+                else if (g_strcmp0 (type, "farm") == 0 ||
+                         g_strcmp0 (type, "forest") == 0 ||
+                         g_strcmp0 (type, "valey") == 0 ||
+                         g_strcmp0 (type, "park") == 0 ||
+                         g_strcmp0 (type, "hill") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_LAND_FEATURE;
+                else if (g_strcmp0 (type, "island") == 0 ||
+                         g_strcmp0 (type, "islet") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_ISLAND;
+                else if (g_strcmp0 (type, "country") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_COUNTRY;
+                else if (g_strcmp0 (type, "continent") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_CONTINENT;
+                else if (g_strcmp0 (type, "lake") == 0 ||
+                         g_strcmp0 (type, "bay") == 0 ||
+                         g_strcmp0 (type, "river") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_DRAINAGE;
+                else if (g_strcmp0 (type, "sea") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_SEA;
+                else if (g_strcmp0 (type, "ocean") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_OCEAN;
+        } else if (g_strcmp0 (class, "highway") == 0) {
+                if (g_strcmp0 (type, "motorway") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_MOTORWAY;
+                else if (g_strcmp0 (type, "bus_stop") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_BUS_STOP;
+                else
+                        place_type =  GEOCODE_PLACE_TYPE_STREET;
+        } else if (g_strcmp0 (class, "railway") == 0) {
+                if (g_strcmp0 (type, "station") == 0)
+                        place_type =  GEOCODE_PLACE_TYPE_RAILWAY_STATION;
+        } else if (g_strcmp0 (class, "waterway") == 0) {
+                place_type =  GEOCODE_PLACE_TYPE_DRAINAGE;
+        } else if (g_strcmp0 (class, "boundry") == 0) {
+                if (g_strcmp0 (type, "administrative") == 0) {
+                        int rank;
+
+                        rank = atoi (g_hash_table_lookup (ht, "place_rank"));
+                        if (rank < 2)
+                                place_type =  GEOCODE_PLACE_TYPE_UNKNOWN;
+
+                        if (rank == 28)
+                                place_type =  GEOCODE_PLACE_TYPE_BUILDING;
+                        else if (rank == 16)
+                                place_type =  GEOCODE_PLACE_TYPE_TOWN;
+                        else if (rank == 12)
+                                place_type =  GEOCODE_PLACE_TYPE_COUNTY;
+                        else if (rank == 10 || rank == 8)
+                                place_type =  GEOCODE_PLACE_TYPE_STATE;
+                        else if (rank == 4)
+                                place_type =  GEOCODE_PLACE_TYPE_COUNTRY;
+                }
+        }
+
+        name = g_hash_table_lookup (ht, "name");
+        if (name == NULL)
+                name = g_hash_table_lookup (ht, "display_name");
+
+        place = geocode_place_new (name, place_type);
+
+        /* Nominatim doesn't give us street addresses as such */
+        street = g_hash_table_lookup (ht, "road");
+        building = g_hash_table_lookup (ht, "house_number");
+        if (street != NULL && building != NULL) {
+            char *address;
+
+            address = g_strjoin (" ", street, building, NULL);
+            geocode_place_set_street_address (place, address);
+            g_free (address);
+        }
+
+        return place;
+}
 
 static void
 insert_place_into_tree (GNode *place_tree, GHashTable *ht)
 {
 	GNode *start = place_tree, *child = NULL;
-        GeocodePlaceType place_type;
         GeocodePlace *place = NULL;
 	GeocodeLocation *loc = NULL;
 	char *attr_val = NULL;
-	char *name;
+	const char *name;
 	gdouble longitude, latitude;
 	guint i;
 
@@ -877,25 +675,16 @@ insert_place_into_tree (GNode *place_tree, GHashTable *ht)
 		start = child;
 	}
 
-        name = g_hash_table_lookup (ht, "name");
-        place_type = atoi (g_hash_table_lookup (ht, "placeType"));
-        place = geocode_place_new (name, place_type);
+        place = create_place_from_attributes (ht);
 
         g_hash_table_foreach (ht, (GHFunc) fill_place_from_entry, place);
-
-        /* Yahoo API doesn't give us street addresses so we'll just have to
-         * live with only street name for now. */
-        if (place_type == GEOCODE_PLACE_TYPE_SUBURB) {
-                const char *street = g_hash_table_lookup (ht, "locality2");
-                if (street != NULL)
-                        geocode_place_set_street_address (place, street);
-        }
 
 	/* Get latitude and longitude and create GeocodeLocation object.
 	 * The leaf node of the tree is the GeocodePlace object, containing
          * associated GeocodeLocation object */
-	longitude = g_ascii_strtod (g_hash_table_lookup (ht, "longitude"), NULL);
-	latitude = g_ascii_strtod (g_hash_table_lookup (ht, "latitude"), NULL);
+	longitude = g_ascii_strtod (g_hash_table_lookup (ht, "lon"), NULL);
+	latitude = g_ascii_strtod (g_hash_table_lookup (ht, "lat"), NULL);
+        name = geocode_place_get_name (place);
 
 	loc = geocode_location_new_with_description (latitude,
                                                  longitude,
@@ -914,7 +703,6 @@ make_place_list_from_tree (GNode  *node,
                            int     i)
 {
 	GNode *child;
-	gboolean add_attribute = FALSE;
 
 	if (node == NULL)
 		return;
@@ -923,8 +711,7 @@ make_place_list_from_tree (GNode  *node,
 		GPtrArray *rev_s_array;
 		GeocodePlace *place;
 		GeocodeLocation *loc;
-		const char *name;
-		char *description;
+		char *name;
 		int counter = 0;
 
 		rev_s_array = g_ptr_array_new ();
@@ -932,9 +719,8 @@ make_place_list_from_tree (GNode  *node,
 		/* If leaf node, then add all the attributes in the s_array
 		 * and set it to the description of the loc object */
 		place = (GeocodePlace *) node->data;
+		name = (char *) geocode_place_get_name (place);
 		loc = geocode_place_get_location (place);
-
-		name = geocode_location_get_description (loc);
 
 		/* To print the attributes in a meaningful manner
 		 * reverse the s_array */
@@ -942,23 +728,25 @@ make_place_list_from_tree (GNode  *node,
 		for (counter = 1; counter <= i; counter++)
 			g_ptr_array_add (rev_s_array, s_array[i - counter]);
 		g_ptr_array_add (rev_s_array, NULL);
-		description = g_strjoinv (", ", (char **) rev_s_array->pdata);
+		name = g_strjoinv (", ", (char **) rev_s_array->pdata);
 		g_ptr_array_unref (rev_s_array);
 
-		geocode_location_set_description (loc, description);
-		g_free (description);
+		geocode_place_set_name (place, name);
+		geocode_location_set_description (loc, name);
+		g_free (name);
 
 		*place_list = g_list_prepend (*place_list, place);
 	} else {
+                GNode *prev, *next;
+
+                prev = g_node_prev_sibling (node);
+                next = g_node_next_sibling (node);
+
 		/* If there are other attributes with a different value,
 		 * add those attributes to the string to differentiate them */
-		if (g_node_prev_sibling (node) ||
-		   g_node_next_sibling (node))
-			add_attribute = TRUE;
-
-		if (add_attribute) {
-			s_array[i] = node->data;
-			i++;
+		if (node->data && ((prev && prev->data) || (next && next->data))) {
+                        s_array[i] = node->data;
+                        i++;
 		}
 	}
 
@@ -990,36 +778,32 @@ _geocode_parse_search_json (const char *contents,
 	root = json_parser_get_root (parser);
 	reader = json_reader_new (root);
 
-	if (json_reader_read_member (reader, "places") == FALSE)
-		goto parse;
-	if (json_reader_read_member (reader, "place") == FALSE)
-		goto parse;
-
 	num_places = json_reader_count_elements (reader);
 	if (num_places < 0)
 		goto parse;
+        if (num_places == 0) {
+	        g_set_error_literal (error,
+                                     GEOCODE_ERROR,
+                                     GEOCODE_ERROR_NO_MATCHES,
+                                     "No matches found for request");
+		goto no_results;
+        }
 
 	place_tree = g_node_new (NULL);
 
 	for (i = 0; i < num_places; i++) {
 		GHashTable *ht;
-		char **members;
-		int j;
 
 		json_reader_read_element (reader, i);
 
-		ht = g_hash_table_new_full (g_str_hash, g_str_equal,
-					    g_free, g_free);
-
-		members = json_reader_list_members (reader);
-		for (j = 0; members != NULL && members[j] != NULL; j++)
-			insert_place_attr (ht, reader, members[j]);
+                ht = g_hash_table_new_full (g_str_hash, g_str_equal,
+				            g_free, g_free);
+                _geocode_read_nominatim_attributes (reader, ht, FALSE);
 
 		/* Populate the tree with place details */
 		insert_place_into_tree (place_tree, ht);
 
 		g_hash_table_destroy (ht);
-		g_strfreev (members);
 
 		json_reader_end_element (reader);
 	}
@@ -1043,6 +827,7 @@ _geocode_parse_search_json (const char *contents,
 parse:
 	err = json_reader_get_error (reader);
 	g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_PARSE, err->message);
+no_results:
 	g_object_unref (parser);
 	g_object_unref (reader);
 	return NULL;
@@ -1071,11 +856,7 @@ geocode_forward_search (GeocodeForward      *forward,
 
 	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), NULL);
 
-	if (forward->priv->answer_count != 1)
-		query = get_search_query_for_params (forward, error);
-	else
-		query = get_resolve_query_for_params (forward->priv->ht);
-
+        query = get_search_query_for_params (forward, error);
 	if (!query)
 		return NULL;
 
@@ -1095,10 +876,7 @@ geocode_forward_search (GeocodeForward      *forward,
 		to_cache = TRUE;
 	}
 
-	if (forward->priv->answer_count != 1)
-		ret = _geocode_parse_search_json (contents, error);
-	else
-		ret = _geocode_parse_single_result_json (contents, error);
+        ret = _geocode_parse_search_json (contents, error);
 	if (to_cache && ret != NULL)
 		_geocode_glib_cache_save (query, contents);
 

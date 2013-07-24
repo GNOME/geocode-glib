@@ -550,10 +550,7 @@ geocode_place_set_name (GeocodePlace *place,
  * geocode_place_get_name:
  * @place: A place
  *
- * Gets the name of the @place. This is simply a short name. You want to read
- * the #GeocodeLocation:description property from the associated
- * #GeocodeLocation object to get unique names for each place object in
- * geocode_forward_search() results.
+ * Gets the name of the @place.
  **/
 const char *
 geocode_place_get_name (GeocodePlace *place)

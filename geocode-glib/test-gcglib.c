@@ -153,13 +153,15 @@ test_xep (void)
 
 	tp = g_hash_table_new_full (g_str_hash, g_str_equal,
 				    g_free, g_free);
-	add_attr (tp, "country", "UK");
-	add_attr (tp, "region", "Surrey");
+        /* FIXME: Remove this comment & uncomment following line once this ticket is resolved:
+         *        https://trac.openstreetmap.org/ticket/4918
+         */
+	/*add_attr (tp, "country", "United Kingdom");*/
+	add_attr (tp, "region", "England");
+	add_attr (tp, "county", "Surrey");
 	add_attr (tp, "locality", "Guildford");
-	add_attr (tp, "postalcode", "GU2 7");
-	add_attr (tp, "street", "Old Palace Rd");
-	add_attr (tp, "building", "9");
-	add_attr (tp, "description", "My local pub");
+	add_attr (tp, "postalcode", "GU2 7UP");
+	add_attr (tp, "street", "Old Palace Road");
 
 	object = geocode_forward_new_for_params (tp);
 	g_assert (object != NULL);
@@ -177,8 +179,8 @@ test_xep (void)
 	place = res->data;
 	loc = geocode_place_get_location (place);
 	g_assert (loc != NULL);
-	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.237070);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.589669);
+	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.2371416);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.5894089);
 
 	g_object_unref (place);
 	g_list_free (res);
@@ -209,8 +211,8 @@ test_pub (void)
 	loc = geocode_place_get_location (place);
 	g_assert (loc != NULL);
 
-	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.237070);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.589669);
+	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.2371416);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.5894089);
 
 	g_object_unref (place);
 	g_list_free (res);
@@ -229,7 +231,6 @@ test_search (void)
 	setlocale (LC_MESSAGES, "en_GB.UTF-8");
 
 	forward = geocode_forward_new_for_string ("paris");
-	geocode_forward_set_answer_count (forward, 0);
 	results = geocode_forward_search (forward, &error);
 	if (results == NULL) {
 		g_warning ("Failed at geocoding: %s", error->message);
@@ -239,7 +240,7 @@ test_search (void)
 
 	g_object_unref (forward);
 
-	g_assert_cmpint (g_list_length (results), ==, 38);
+	g_assert_cmpint (g_list_length (results), ==, 10);
 
 	/* We need to find Paris in France and in Texas */
 	got_france = FALSE;
@@ -247,18 +248,20 @@ test_search (void)
 	for (l = results; l != NULL; l = l->next) {
 		GeocodeLocation *loc;
 		GeocodePlace *place = l->data;
-		g_assert (g_strcmp0 (geocode_place_get_name (place), "Paris") == 0);
 
 		loc = geocode_place_get_location (place);
 		g_assert (loc != NULL);
 
 		if (g_strcmp0 (geocode_place_get_state (place), "Ile-de-France") == 0 &&
 		    g_strcmp0 (geocode_place_get_country (place), "France") == 0 &&
+		    g_strcmp0 (geocode_place_get_name (place), "Paris, France") == 0 &&
 		    g_strcmp0 (geocode_location_get_description (loc), "Paris, France") == 0)
 			got_france = TRUE;
 		else if (g_strcmp0 (geocode_place_get_state (place), "Texas") == 0 &&
-			 g_strcmp0 (geocode_place_get_country (place), "United States") == 0 &&
-			 g_strcmp0 (geocode_location_get_description (loc), "Paris, Texas, United States") == 0)
+			 g_strcmp0 (geocode_place_get_country (place), "United States of America") == 0 &&
+		         g_strcmp0 (geocode_place_get_name (place), "Paris, Texas, United States of America") == 0 &&
+			 g_strcmp0 (geocode_location_get_description (loc),
+                                    "Paris, Texas, United States of America") == 0)
 			got_texas = TRUE;
 
 		g_object_unref (place);
@@ -293,16 +296,16 @@ test_search_lat_long (void)
 	g_assert (res != NULL);
 	g_object_unref (object);
 
-	place = res->data;
+        /* Nominatim puts the Spanish city on the top & we want the Mexican one */
+	place = res->next->data;
 	loc = geocode_place_get_location (place);
 	g_assert (loc != NULL);
 
-	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 21.800699, <, 0.000001);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc) - -100.735626, <, 0.000001);
-	g_assert_cmpstr (geocode_place_get_name (place), ==, "Santa Maria Del Rio");
+	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 21.8021297, <, 0.000001);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc) - -100.7374556, <, 0.000001);
+	g_assert_cmpstr (geocode_place_get_name (place), ==, "Santa Maria Del Rio, Mexico");
 	g_assert_cmpstr (geocode_place_get_town (place), ==, "Santa Maria Del Rio");
 	g_assert_cmpstr (geocode_place_get_state (place), ==, "San Luis Potosi");
-	g_assert_cmpstr (geocode_place_get_county (place), ==, "Santa Maria del Rio");
 	g_assert_cmpstr (geocode_place_get_country (place), ==, "Mexico");
 	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Santa Maria Del Rio, Mexico");
 
@@ -329,10 +332,11 @@ test_locale (void)
 {
 	GeocodeForward *object;
 	GError *error = NULL;
-	GList *res;
+	GList *res, *l;
 	GeocodePlace *place;
 	GeocodeLocation *loc;
 	char *old_locale;
+        gboolean found = FALSE;
 
 	old_locale = g_strdup (setlocale(LC_MESSAGES, NULL));
 
@@ -348,14 +352,13 @@ test_locale (void)
 	g_object_unref (object);
 
 	place = res->data;
-	g_assert_cmpstr (geocode_place_get_name (place), ==, "Moskva");
-	/* For some reason, Yahoo doesn't localise the state's name in this case */
-	g_assert_cmpstr (geocode_place_get_state (place), ==, "Moscow Federal City");
-	g_assert_cmpstr (geocode_place_get_country (place), ==, "Rusko");
+	g_assert_cmpstr (geocode_place_get_name (place), ==, "Moskva, Ruská federace");
+	g_assert_cmpstr (geocode_place_get_state (place), ==, "Moskva");
+	g_assert_cmpstr (geocode_place_get_country (place), ==, "Ruská federace");
 
 	loc = geocode_place_get_location (place);
 	g_assert (loc != NULL);
-	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Moskva, Rusko");
+	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Moskva, Ruská federace");
 	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 55.756950, <, 0.000001);
 	g_assert_cmpfloat (geocode_location_get_longitude (loc) - 37.614971, <, 0.000001);
 	print_place (place);
@@ -373,20 +376,24 @@ test_locale (void)
 	g_assert (res != NULL);
 	g_object_unref (object);
 
-	place = res->data;
-	loc = geocode_place_get_location (place);
-	g_assert (loc != NULL);
+	for (l = res; l != NULL; l = l->next) {
+		place = l->data;
 
-	g_assert_cmpstr (geocode_place_get_name (place), ==, "Bonneville");
-	g_assert_cmpstr (geocode_place_get_town (place), ==, "Bonneville");
-	g_assert_cmpstr (geocode_place_get_state (place), ==, "Rhône-Alpes");
-	g_assert_cmpstr (geocode_place_get_county (place), ==, "Haute-Savoie");
-	g_assert_cmpstr (geocode_place_get_administrative_area (place), ==, "Bonneville");
-	g_assert_cmpstr (geocode_place_get_country (place), ==, "France");
-	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Bonneville, Rhône-Alpes, France");
-	print_place (place);
+		loc = geocode_place_get_location (place);
+		g_assert (loc != NULL);
+
+		if (g_strcmp0 (geocode_place_get_name (place), "Bonneville, Rhône-Alpes, France métropolitaine") == 0 &&
+		    g_strcmp0 (geocode_place_get_state (place), "Rhône-Alpes") == 0 &&
+		    g_strcmp0 (geocode_place_get_country (place), "France métropolitaine") == 0 &&
+		    g_strcmp0 (geocode_location_get_description (loc),
+                               "Bonneville, Rhône-Alpes, France métropolitaine") == 0) {
+		        found = TRUE;
+                        break;
+                }
+	}
 
 	g_list_free_full (res, (GDestroyNotify) g_object_unref);
+	g_assert (found);
 
 	/* And reset the locale */
 	setlocale (LC_MESSAGES, old_locale);
@@ -396,23 +403,24 @@ test_locale (void)
 static void
 test_resolve_json (void)
 {
-	GHashTable *ht;
+	GList *list;
+	GeocodePlace *place;
 	GError *error = NULL;
 	guint i;
 	struct {
 		const char *fname;
 		const char *error;
-		const char *key;
+		const char *prop;
 		const char *value;
 	} tests[] = {
-		{ "placefinder-area.json", NULL, "area", "Onslow Village" },
-		{ "placefinder-got-error.json", "You gotz done!" },
-		{ "placefinder-no-results.json", "No matches found for request", NULL, NULL },
+		{ "nominatim-area.json", NULL, "area", "Guildford Park" },
+		{ "nominatim-no-results.json", "No matches found for request", NULL, NULL },
 	};
 
 	for (i = 0; i < G_N_ELEMENTS (tests); i++) {
 		char *contents;
 		char *filename;
+                char *value;
 
 		filename = g_strdup_printf (TEST_SRCDIR "/%s", tests[i].fname);
 		if (g_file_get_contents (filename, &contents, NULL, &error) == FALSE) {
@@ -421,24 +429,28 @@ test_resolve_json (void)
 		}
 		g_free (filename);
 
-		ht = _geocode_parse_resolve_json (contents, &error);
+                list = _geocode_parse_search_json (contents, &error);
 		g_free (contents);
 
 		if (tests[i].error) {
-			g_assert (ht == NULL);
+                        g_assert (list == NULL);
 			g_assert_cmpstr (error->message, ==, tests[i].error);
 		} else {
-			g_assert (ht != NULL);
+                        g_assert (list != NULL);
+                        g_assert_cmpint (g_list_length (list), ==, 1);
 		}
 
-		if (ht == NULL) {
+		if (list == NULL) {
 			g_error_free (error);
 			error = NULL;
 			continue;
 		}
 
-		g_assert_cmpstr (g_hash_table_lookup (ht, tests[i].key), ==, tests[i].value);
-		g_hash_table_destroy (ht);
+                place = GEOCODE_PLACE (list->data);
+                g_object_get (place, tests[i].prop, &value, NULL);
+		g_assert_cmpstr (value, ==, tests[i].value);
+                g_free (value);
+                g_list_free (list);
 	}
 }
 
@@ -446,33 +458,40 @@ static void
 test_search_json (void)
 {
 	GError *error = NULL;
-	GList *list;
+	GList *list, *l;
 	char *contents;
-	GeocodePlace *place;
-	GeocodeLocation *loc;
+        gboolean found = FALSE;
 
-	if (g_file_get_contents (TEST_SRCDIR "/geoplanet-rio.json",
+	if (g_file_get_contents (TEST_SRCDIR "/nominatim-rio.json",
 				 &contents, NULL, &error) == FALSE) {
 		g_critical ("Couldn't load contents of '%s': %s",
-			    TEST_SRCDIR "/geoplanet-rio.json", error->message);
+			    TEST_SRCDIR "/nominatim-rio.json", error->message);
 	}
 	list = _geocode_parse_search_json (contents, &error);
 
 	g_assert (list != NULL);
 	g_assert_cmpint (g_list_length (list), ==, 10);
 
-	place = list->data;
-	loc = geocode_place_get_location (place);
-	g_assert (loc != NULL);
+	for (l = list; l != NULL; l = l->next) {
+		GeocodeLocation *loc;
+		GeocodePlace *place = l->data;
 
-	g_assert_cmpstr (geocode_place_get_name (place), ==, "Rio de Janeiro");
-	g_assert_cmpstr (geocode_place_get_town (place), ==, "Rio de Janeiro");
-	g_assert_cmpstr (geocode_place_get_state (place), ==, "Rio de Janeiro");
-	g_assert_cmpstr (geocode_place_get_county (place), ==, "Rio de Janeiro");
-	g_assert_cmpstr (geocode_place_get_country (place), ==, "Brazil");
-	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Rio de Janeiro, Brazil");
+		loc = geocode_place_get_location (place);
+		g_assert (loc != NULL);
+
+		if (g_strcmp0 (geocode_place_get_name (place), "Rio de Janeiro, Rio de Janeiro, Brazil") == 0 &&
+	            g_strcmp0 (geocode_place_get_town (place), "Rio de Janeiro") == 0 &&
+		    g_strcmp0 (geocode_place_get_state (place), "Rio de Janeiro") == 0 &&
+	            g_strcmp0 (geocode_place_get_county (place), "Rio de Janeiro") == 0 &&
+		    g_strcmp0 (geocode_place_get_country (place), "Brazil") == 0 &&
+		    g_strcmp0 (geocode_location_get_description (loc), "Rio de Janeiro, Rio de Janeiro, Brazil") == 0) {
+                        found = TRUE;
+                        break;
+                }
+	}
 
 	g_list_free_full (list, (GDestroyNotify) g_object_unref);
+	g_assert (found);
 }
 
 static GeocodeLocation *
