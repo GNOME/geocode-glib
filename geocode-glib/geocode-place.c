@@ -292,7 +292,6 @@ geocode_place_class_init (GeocodePlaceClass *klass)
                                      "Name",
                                      NULL,
                                      G_PARAM_READWRITE |
-                                     G_PARAM_CONSTRUCT_ONLY |
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (gplace_class, PROP_NAME, pspec);
 
@@ -528,6 +527,23 @@ geocode_place_new_with_location (const char      *name,
                              "place-type", place_type,
                              "location", location,
                              NULL);
+}
+
+/**
+ * geocode_place_set_name:
+ * @place: A place
+ *
+ * Sets the name of the @place to @name.
+ **/
+void
+geocode_place_set_name (GeocodePlace *place,
+                        const char   *name)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (name != NULL);
+
+        g_free (place->priv->name);
+        place->priv->name = g_strdup (name);
 }
 
 /**

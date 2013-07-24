@@ -36,6 +36,7 @@ geocode_place_type_get_type
 geocode_place_new
 geocode_place_new_with_location
 geocode_place_get_name
+geocode_place_set_name
 geocode_place_get_place_type
 geocode_place_set_location
 geocode_place_get_location

@@ -134,6 +134,8 @@ GeocodePlace *geocode_place_new_with_location     (const char      *name,
                                                    GeocodePlaceType place_type,
                                                    GeocodeLocation *location);
 
+void geocode_place_set_name                       (GeocodePlace *place,
+                                                   const char   *name);
 const char *geocode_place_get_name                (GeocodePlace *place);
 
 GeocodePlaceType geocode_place_get_place_type     (GeocodePlace *place);
