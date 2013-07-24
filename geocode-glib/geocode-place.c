@@ -508,7 +508,7 @@ geocode_place_new (const char      *name,
 }
 
 /**
- * geocode_place_new_with_description:
+ * geocode_place_new_with_location:
  * @name: the name of place
  * @place_type: the type of place
  * @location: the location info for the place
