@@ -177,8 +177,8 @@ test_xep (void)
 	place = res->data;
 	loc = geocode_place_get_location (place);
 	g_assert (loc != NULL);
-	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, -0.589669);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, 51.237070);
+	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.237070);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.589669);
 
 	g_object_unref (place);
 	g_list_free (res);
@@ -209,8 +209,8 @@ test_pub (void)
 	loc = geocode_place_get_location (place);
 	g_assert (loc != NULL);
 
-	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, -0.589669);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, 51.237070);
+	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.237070);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.589669);
 
 	g_object_unref (place);
 	g_list_free (res);
