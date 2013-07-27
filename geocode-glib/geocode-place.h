@@ -66,6 +66,8 @@ struct _GeocodePlaceClass {
 /**
  * GeocodePlaceType:
  * @GEOCODE_PLACE_TYPE_UNKNOWN: Type is unknown for this place.
+ * @GEOCODE_PLACE_TYPE_BUILDING: A building or house.
+ * @GEOCODE_PLACE_TYPE_STREET: A street.
  * @GEOCODE_PLACE_TYPE_TOWN: A populated settlement such as a city, town, village.
  * @GEOCODE_PLACE_TYPE_STATE: One of the primary administrative areas within a country.
  * @GEOCODE_PLACE_TYPE_COUNTY: One of the secondary administrative areas within a country.
@@ -74,6 +76,9 @@ struct _GeocodePlaceClass {
  * @GEOCODE_PLACE_TYPE_COUNTRY: One of the countries or dependent territories defined by the ISO 3166-1 standard.
  * @GEOCODE_PLACE_TYPE_ISLAND: An island.
  * @GEOCODE_PLACE_TYPE_AIRPORT: An airport.
+ * @GEOCODE_PLACE_TYPE_RAILWAY_STATION: A railway station.
+ * @GEOCODE_PLACE_TYPE_BUS_STOP: A bus stop.
+ * @GEOCODE_PLACE_TYPE_MOTORWAY: A high capacity highways designed to safely carry fast motor traffic.
  * @GEOCODE_PLACE_TYPE_DRAINAGE: A water feature such as a river, canal, lake, bay or ocean.
  * @GEOCODE_PLACE_TYPE_LAND_FEATURE: A land feature such as a park, mountain or beach.
  * @GEOCODE_PLACE_TYPE_MISCELLANEOUS: A uncategorized place.
@@ -95,36 +100,36 @@ struct _GeocodePlaceClass {
  */
 typedef enum {
         GEOCODE_PLACE_TYPE_UNKNOWN = 0,
-        GEOCODE_PLACE_TYPE_TOWN = 7,
-        GEOCODE_PLACE_TYPE_STATE = 8,
-        GEOCODE_PLACE_TYPE_COUNTY = 9,
-        GEOCODE_PLACE_TYPE_LOCAL_ADMINISTRATIVE_AREA = 10,
-        GEOCODE_PLACE_TYPE_POSTAL_CODE = 11,
-        GEOCODE_PLACE_TYPE_COUNTRY = 12,
-        GEOCODE_PLACE_TYPE_ISLAND = 13,
-        GEOCODE_PLACE_TYPE_AIRPORT = 14,
-        GEOCODE_PLACE_TYPE_DRAINAGE = 15,
-        GEOCODE_PLACE_TYPE_LAND_FEATURE = 16,
-        GEOCODE_PLACE_TYPE_MISCELLANEOUS = 17,
-        GEOCODE_PLACE_TYPE_SUPERNAME = 19,
-        GEOCODE_PLACE_TYPE_POINT_OF_INTEREST = 20,
-        GEOCODE_PLACE_TYPE_SUBURB = 22,
-        GEOCODE_PLACE_TYPE_COLLOQUIAL = 24,
-        GEOCODE_PLACE_TYPE_ZONE = 25,
-        GEOCODE_PLACE_TYPE_HISTORICAL_STATE = 26,
-        GEOCODE_PLACE_TYPE_HISTORICAL_COUNTY = 27,
-        GEOCODE_PLACE_TYPE_CONTINENT = 29,
-        GEOCODE_PLACE_TYPE_TIME_ZONE = 31,
-        GEOCODE_PLACE_TYPE_ESTATE = 33,
-        GEOCODE_PLACE_TYPE_HISTORICAL_TOWN = 35,
-        GEOCODE_PLACE_TYPE_OCEAN = 37,
-        GEOCODE_PLACE_TYPE_SEA = 38
+        GEOCODE_PLACE_TYPE_BUILDING,
+        GEOCODE_PLACE_TYPE_STREET,
+        GEOCODE_PLACE_TYPE_TOWN,
+        GEOCODE_PLACE_TYPE_STATE,
+        GEOCODE_PLACE_TYPE_COUNTY,
+        GEOCODE_PLACE_TYPE_LOCAL_ADMINISTRATIVE_AREA,
+        GEOCODE_PLACE_TYPE_POSTAL_CODE,
+        GEOCODE_PLACE_TYPE_COUNTRY,
+        GEOCODE_PLACE_TYPE_ISLAND,
+        GEOCODE_PLACE_TYPE_AIRPORT,
+        GEOCODE_PLACE_TYPE_RAILWAY_STATION,
+        GEOCODE_PLACE_TYPE_BUS_STOP,
+        GEOCODE_PLACE_TYPE_MOTORWAY,
+        GEOCODE_PLACE_TYPE_DRAINAGE,
+        GEOCODE_PLACE_TYPE_LAND_FEATURE,
+        GEOCODE_PLACE_TYPE_MISCELLANEOUS,
+        GEOCODE_PLACE_TYPE_SUPERNAME,
+        GEOCODE_PLACE_TYPE_POINT_OF_INTEREST,
+        GEOCODE_PLACE_TYPE_SUBURB,
+        GEOCODE_PLACE_TYPE_COLLOQUIAL,
+        GEOCODE_PLACE_TYPE_ZONE,
+        GEOCODE_PLACE_TYPE_HISTORICAL_STATE,
+        GEOCODE_PLACE_TYPE_HISTORICAL_COUNTY,
+        GEOCODE_PLACE_TYPE_CONTINENT,
+        GEOCODE_PLACE_TYPE_TIME_ZONE,
+        GEOCODE_PLACE_TYPE_ESTATE,
+        GEOCODE_PLACE_TYPE_HISTORICAL_TOWN,
+        GEOCODE_PLACE_TYPE_OCEAN,
+        GEOCODE_PLACE_TYPE_SEA
 } GeocodePlaceType;
-
-/* The above values and their explanation is based on Yahoo places API:
- *
- * http://where.yahooapis.com/v1/placetypes?select=long&appid=YOUR_APP_ID
- */
 
 #define GEOCODE_TYPE_PLACE (geocode_place_get_type ())
 
