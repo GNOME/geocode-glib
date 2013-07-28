@@ -35,8 +35,8 @@
  * @short_description: Geocode forward geocoding object
  * @include: geocode-glib/geocode-glib.h
  *
- * Contains functions for forward geocoding using the
- * <ulink url="http://developer.yahoo.com/geo/geoplanet/">Yahoo! GeoPlanet APIs</ulink>.
+ * Contains functions for geocoding using the
+ * <ulink url="http://http://wiki.openstreetmap.org/wiki/Nominatim">OSM Nominatim APIs</ulink>
  **/
 
 struct _GeocodeForwardPrivate {
@@ -863,9 +863,6 @@ geocode_forward_search (GeocodeForward      *forward,
 	if (_geocode_glib_cache_load (query, &contents) == FALSE) {
                 if (soup_session_send_message (forward->priv->soup_session,
                                                query) != SOUP_STATUS_OK) {
-			/* FIXME check error value and match against
-			 * web service errors:
-			 * http://developer.yahoo.com/geo/geoplanet/guide/api_docs.html#response-errors */
                         g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
                                              query->reason_phrase ? query->reason_phrase : "Query failed");
                         g_object_unref (query);

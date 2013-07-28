@@ -37,7 +37,7 @@
  * @include: geocode-glib/geocode-glib.h
  *
  * Contains functions for reverse geocoding using the
- * <ulink url="http://developer.yahoo.com/geo/placefinder/guide/requests.html">Yahoo! Place Finder APIs</ulink>.
+ * <ulink url="http://http://wiki.openstreetmap.org/wiki/Nominatim">OSM Nominatim APIs</ulink>
  **/
 
 struct _GeocodeReversePrivate {
