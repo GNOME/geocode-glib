@@ -626,8 +626,10 @@ static GeocodePlace *
 create_place_from_attributes (GHashTable *ht)
 {
         GeocodePlace *place;
+        GeocodeLocation *loc = NULL;
         const char *name, *street, *building;
         GeocodePlaceType place_type;
+        gdouble longitude, latitude;
 
         place_type = get_place_type_from_attributes (ht);
 
@@ -648,6 +650,20 @@ create_place_from_attributes (GHashTable *ht)
             g_free (address);
         }
 
+        g_hash_table_foreach (ht, (GHFunc) fill_place_from_entry, place);
+
+        /* Get latitude and longitude and create GeocodeLocation object. */
+        longitude = g_ascii_strtod (g_hash_table_lookup (ht, "lon"), NULL);
+        latitude = g_ascii_strtod (g_hash_table_lookup (ht, "lat"), NULL);
+        name = geocode_place_get_name (place);
+
+        loc = geocode_location_new_with_description (latitude,
+                                                     longitude,
+                                                     GEOCODE_LOCATION_ACCURACY_UNKNOWN,
+                                                     name);
+        geocode_place_set_location (place, loc);
+        g_object_unref (loc);
+
         return place;
 }
 
@@ -656,10 +672,7 @@ insert_place_into_tree (GNode *place_tree, GHashTable *ht)
 {
 	GNode *start = place_tree, *child = NULL;
         GeocodePlace *place = NULL;
-	GeocodeLocation *loc = NULL;
 	char *attr_val = NULL;
-	const char *name;
-	gdouble longitude, latitude;
 	guint i;
 
 	for (i = 0; i < G_N_ELEMENTS(attributes); i++) {
@@ -687,22 +700,8 @@ insert_place_into_tree (GNode *place_tree, GHashTable *ht)
 
         place = create_place_from_attributes (ht);
 
-        g_hash_table_foreach (ht, (GHFunc) fill_place_from_entry, place);
-
-	/* Get latitude and longitude and create GeocodeLocation object.
-	 * The leaf node of the tree is the GeocodePlace object, containing
-         * associated GeocodeLocation object */
-	longitude = g_ascii_strtod (g_hash_table_lookup (ht, "lon"), NULL);
-	latitude = g_ascii_strtod (g_hash_table_lookup (ht, "lat"), NULL);
-        name = geocode_place_get_name (place);
-
-	loc = geocode_location_new_with_description (latitude,
-                                                 longitude,
-                                                 GEOCODE_LOCATION_ACCURACY_UNKNOWN,
-                                                 name);
-        geocode_place_set_location (place, loc);
-        g_object_unref (loc);
-
+        /* The leaf node of the tree is the GeocodePlace object, containing
+         * associated GeocodePlace object */
 	g_node_insert_data (start, -1, place);
 }
 
