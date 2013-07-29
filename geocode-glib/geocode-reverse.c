@@ -103,49 +103,9 @@ geocode_reverse_new_for_location (GeocodeLocation *location)
 	return object;
 }
 
-static struct {
-	const char *nominatim_attr;
-	const char *xep_attr;
-} attrs_map[] = {
-	{ "license", NULL },
-	{ "osm_type", NULL },
-	{ "osm_id", NULL },
-	{ "lat", NULL },
-	{ "lon", NULL },
-	{ "display_name", "description" },
-	{ "house_number", "building" },
-	{ "road", "street" },
-	{ "suburb", "area" },
-	{ "city",  "locality" },
-	{ "county", NULL },
-	{ "state_district", NULL },
-	{ "state", "region" },
-        { "postcode", "postalcode" },
-	{ "country", "country" },
-	{ "country_code", "countrycode" },
-	{ "continent", NULL },
-	{ "address", NULL },
-};
-
-static const char *
-nominatim_to_xep (const char *attr)
-{
-	guint i;
-
-	for (i = 0; i < G_N_ELEMENTS (attrs_map); i++) {
-		if (g_str_equal (attr, attrs_map[i].nominatim_attr))
-			return attrs_map[i].xep_attr;
-	}
-
-	g_debug ("Can't convert unknown attribute '%s'", attr);
-
-	return NULL;
-}
-
 void
 _geocode_read_nominatim_attributes (JsonReader *reader,
-                                    GHashTable *ht,
-                                    gboolean    translate_to_xep)
+                                    GHashTable *ht)
 {
 	char **members;
 	guint i;
@@ -165,17 +125,7 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
                         value = NULL;
 
                 if (value != NULL) {
-                        const char *xep_attr;
-
-                        if (translate_to_xep)
-                            xep_attr = nominatim_to_xep (members[i]);
-                        else
-                            xep_attr = NULL;
-
-                        if (xep_attr != NULL)
-                                g_hash_table_insert (ht, g_strdup (xep_attr), g_strdup (value));
-                        else
-                                g_hash_table_insert (ht, g_strdup (members[i]), g_strdup (value));
+                        g_hash_table_insert (ht, g_strdup (members[i]), g_strdup (value));
 
                         if (i == 0 && is_address) {
                                 /* Since Nominatim doesn't give us a short name,
@@ -191,7 +141,7 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
 	g_strfreev (members);
 
 	if (json_reader_read_member (reader, "address")) {
-                _geocode_read_nominatim_attributes (reader, ht, translate_to_xep);
+                _geocode_read_nominatim_attributes (reader, ht);
                 json_reader_end_member (reader);
         }
 }
@@ -236,7 +186,7 @@ resolve_json (const char *contents,
 	ret = g_hash_table_new_full (g_str_hash, g_str_equal,
 				     g_free, g_free);
 
-        _geocode_read_nominatim_attributes (reader, ret, FALSE);
+        _geocode_read_nominatim_attributes (reader, ret);
 
 	g_object_unref (parser);
 	g_object_unref (reader);

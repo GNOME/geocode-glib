@@ -807,7 +807,7 @@ _geocode_parse_search_json (const char *contents,
 
                 ht = g_hash_table_new_full (g_str_hash, g_str_equal,
 				            g_free, g_free);
-                _geocode_read_nominatim_attributes (reader, ht, FALSE);
+                _geocode_read_nominatim_attributes (reader, ht);
 
 		/* Populate the tree with place details */
 		insert_place_into_tree (place_tree, ht);

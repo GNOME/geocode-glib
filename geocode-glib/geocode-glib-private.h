@@ -45,8 +45,7 @@ GeocodeLocation *_geocode_ip_json_to_location (const char  *json,
 					       GError     **error);
 void
 _geocode_read_nominatim_attributes (JsonReader *reader,
-                                    GHashTable *ht,
-                                    gboolean    translate_to_xep);
+                                    GHashTable *ht);
 GeocodePlace *
 _geocode_create_place_from_attributes (GHashTable *ht);
 
