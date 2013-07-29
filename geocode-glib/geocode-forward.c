@@ -535,12 +535,10 @@ static const char const *attributes[8] = {
 	"village",
 };
 
-static GeocodePlace *
-create_place_from_attributes (GHashTable *ht)
+static GeocodePlaceType
+get_place_type_from_attributes (GHashTable *ht)
 {
-        GeocodePlace *place;
         char *class, *type;
-        const char *name, *street, *building;
         GeocodePlaceType place_type = GEOCODE_PLACE_TYPE_UNKNOWN;
 
         class = g_hash_table_lookup (ht, "class");
@@ -620,6 +618,18 @@ create_place_from_attributes (GHashTable *ht)
                                 place_type =  GEOCODE_PLACE_TYPE_COUNTRY;
                 }
         }
+
+        return place_type;
+}
+
+static GeocodePlace *
+create_place_from_attributes (GHashTable *ht)
+{
+        GeocodePlace *place;
+        const char *name, *street, *building;
+        GeocodePlaceType place_type;
+
+        place_type = get_place_type_from_attributes (ht);
 
         name = g_hash_table_lookup (ht, "name");
         if (name == NULL)
