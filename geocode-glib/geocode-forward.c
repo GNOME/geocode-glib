@@ -622,8 +622,8 @@ get_place_type_from_attributes (GHashTable *ht)
         return place_type;
 }
 
-static GeocodePlace *
-create_place_from_attributes (GHashTable *ht)
+GeocodePlace *
+_geocode_create_place_from_attributes (GHashTable *ht)
 {
         GeocodePlace *place;
         GeocodeLocation *loc = NULL;
@@ -698,7 +698,7 @@ insert_place_into_tree (GNode *place_tree, GHashTable *ht)
 		start = child;
 	}
 
-        place = create_place_from_attributes (ht);
+        place = _geocode_create_place_from_attributes (ht);
 
         /* The leaf node of the tree is the GeocodePlace object, containing
          * associated GeocodePlace object */

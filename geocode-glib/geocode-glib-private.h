@@ -27,6 +27,7 @@
 #include <libsoup/soup.h>
 #include <json-glib/json-glib.h>
 #include <geocode-glib/geocode-location.h>
+#include <geocode-glib/geocode-place.h>
 
 G_BEGIN_DECLS
 
@@ -46,6 +47,8 @@ void
 _geocode_read_nominatim_attributes (JsonReader *reader,
                                     GHashTable *ht,
                                     gboolean    translate_to_xep);
+GeocodePlace *
+_geocode_create_place_from_attributes (GHashTable *ht);
 
 char       *_geocode_object_get_lang (void);
 
