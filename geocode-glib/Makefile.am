@@ -109,8 +109,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 EXTRA_DIST +=					 \
 	data/freegeoip-results.json		 \
-	data/geoplanet-rio.json			 \
 	data/gglib-ip-server-results.json 	 \
-	data/placefinder-area.json		 \
-	data/placefinder-got-error.json		 \
-	data/placefinder-no-results.json
+	data/nominatim-rio.json			 \
+	data/nominatim-area.json		 \
+	data/nominatim-no-results.json
