@@ -99,7 +99,8 @@ CLEANFILES += $(gir_DATA) $(typelib_DATA)
 
 endif # HAVE_INTROSPECTION
 
-TEST_PROGS += test-gcglib test-geoip
+# Disable client-side geoip test for now as it requires server to be running
+TEST_PROGS += test-gcglib # test-geoip
 noinst_PROGRAMS = $(TEST_PROGS)
 
 test_gcglib_LDADD = libgeocode-glib.la $(GEOCODE_LIBS)
