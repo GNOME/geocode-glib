@@ -1,3 +1,36 @@
+0.99.1
+------
+
+The library has almost been completey re-written since 0.99.0 so too many
+changes to document here. Most notable changes however are:
+
+- Freeform geocoding, and reverse geocoding search API.
+- Search results are now locale aware.
+- We now use Nominatim instead of Yahoo Places API for (reverse-)geocoding.
+  Not only is Nominatim a completely open service, it is also has a lot more
+  data to offer.
+- GeoIP server and client API. WARNING: These will soon be removed in favor of
+  geoclue2 so do not use them in your application. Instead use geoclue2
+  directly.
+- More test cases.
+- Various fixes to build and installation.
+
+Dependencies changed:
+
+- gio-2.0 >= 2.34
+- json-glib-1.0 >= 0.14
+- geoip (for GeoIP server only)
+
+All contributors to this release:
+
+Andreas Henriksson <andreas@fatal.se>
+Bastien Nocera <hadess@hadess.net>
+Javier Jardón <javier.jardon@codethink.co.uk>
+Matthew Barnes <mbarnes@redhat.com>
+Ryan Lortie <desrt@desrt.ca>
+Satabdi Das <satabdidas@gmail.com>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 0.99.0
 ------
 
