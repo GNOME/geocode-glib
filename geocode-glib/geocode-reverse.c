@@ -26,6 +26,8 @@
 #include <gio/gio.h>
 #include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
+#include <config.h>
+#include <glib/gi18n-lib.h>
 #include <geocode-glib/geocode-glib.h>
 #include <geocode-glib/geocode-error.h>
 #include <geocode-glib/geocode-reverse.h>
@@ -62,6 +64,9 @@ static void
 geocode_reverse_class_init (GeocodeReverseClass *klass)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+
+        bindtextdomain (GETTEXT_PACKAGE, GEOCODE_GLIB_LOCALEDIR);
+        bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 
 	gobject_class->finalize = geocode_reverse_finalize;
 
@@ -110,6 +115,7 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
 	char **members;
 	guint i;
         gboolean is_address;
+        const char *house_number = NULL;
 
 	is_address = (g_strcmp0 (json_reader_get_member_name (reader), "address") == 0);
 
@@ -128,10 +134,17 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
                         g_hash_table_insert (ht, g_strdup (members[i]), g_strdup (value));
 
                         if (i == 0 && is_address) {
-                                /* Since Nominatim doesn't give us a short name,
-                                 * we use the first component of address as name.
-                                 */
-                                g_hash_table_insert (ht, g_strdup ("name"), g_strdup (value));
+	                        if (g_strcmp0 (members[i], "house_number") != 0)
+                                        /* Since Nominatim doesn't give us a short name,
+                                         * we use the first component of address as name.
+                                         */
+                                        g_hash_table_insert (ht, g_strdup ("name"), g_strdup (value));
+                                else
+                                        house_number = value;
+                        } else if (house_number != NULL && g_strcmp0 (members[i], "road") == 0) {
+                                /* Translators comment: number + street (e.g 221 Baker Street) */
+                                char *name = g_strdup_printf (_("%s %s"), house_number, value);
+                                g_hash_table_insert (ht, g_strdup ("name"), name);
                         }
                 }
 

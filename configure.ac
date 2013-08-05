@@ -54,6 +54,7 @@ GETTEXT_PACKAGE=geocode-glib
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE",
 					[The name of the gettext domain])
+AM_GLIB_DEFINE_LOCALEDIR(GEOCODE_GLIB_LOCALEDIR)
 
 dnl gtk-doc checks
 GTK_DOC_CHECK([1.13],[--flavour no-tmpl])
