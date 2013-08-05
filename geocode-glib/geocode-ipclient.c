@@ -47,9 +47,12 @@ enum {
 };
 
 struct _GeocodeIpclientPrivate {
+        SoupSession *soup_session;
+
         char *ip;
         char *server;
         gboolean compat_mode;
+
 };
 
 G_DEFINE_TYPE (GeocodeIpclient, geocode_ipclient, G_TYPE_OBJECT)
@@ -120,8 +123,10 @@ geocode_ipclient_finalize (GObject *gipclient)
 {
         GeocodeIpclient *ipclient = (GeocodeIpclient *) gipclient;
 
+        g_clear_object (&ipclient->priv->soup_session);
         g_free (ipclient->priv->ip);
         g_free (ipclient->priv->server);
+
         G_OBJECT_CLASS (geocode_ipclient_parent_class)->finalize (gipclient);
 }
 
@@ -162,6 +167,8 @@ static void
 geocode_ipclient_init (GeocodeIpclient *ipclient)
 {
         ipclient->priv = G_TYPE_INSTANCE_GET_PRIVATE ((ipclient), GEOCODE_TYPE_IPCLIENT, GeocodeIpclientPrivate);
+
+        ipclient->priv->soup_session = soup_session_new ();
 }
 
 /**
@@ -200,10 +207,10 @@ geocode_ipclient_new (void)
         return geocode_ipclient_new_for_ip (NULL);
 }
 
-static GFile *
+static SoupMessage *
 get_search_query (GeocodeIpclient *ipclient)
 {
-        GFile * ret;
+        SoupMessage *ret;
         GHashTable *ht;
         char *query_string;
         char *uri;
@@ -233,33 +240,32 @@ get_search_query (GeocodeIpclient *ipclient)
         } else
                 uri = g_strdup (ipclient->priv->server);
 
-        ret = g_file_new_for_uri (uri);
+        ret = soup_message_new ("GET", uri);
         g_free (uri);
 
         return ret;
 }
 
 static void
-query_callback (GObject        *source_forward,
-                GAsyncResult   *res,
-                gpointer        user_data)
+query_callback (SoupSession *session,
+                SoupMessage *query,
+                gpointer     user_data)
 {
         GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (user_data);
-        GFile *query;
         GError *error = NULL;
         char *contents;
 
-        query = G_FILE (source_forward);
-        if (g_file_load_contents_finish (query,
-                                         res,
-                                         &contents,
-                                         NULL,
-                                         NULL,
-                                         &error) == FALSE) {
+        if (query->status_code != SOUP_STATUS_OK) {
+		g_set_error_literal (&error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                                     query->reason_phrase ? query->reason_phrase : "Query failed");
                 g_simple_async_result_take_error (simple, error);
-        } else {
-                g_simple_async_result_set_op_res_gpointer (simple, contents, NULL);
-        }
+		g_simple_async_result_complete_in_idle (simple);
+		g_object_unref (simple);
+		return;
+	}
+
+        contents = g_strndup (query->response_body->data, query->response_body->length);
+        g_simple_async_result_set_op_res_gpointer (simple, contents, NULL);
 
         g_simple_async_result_complete_in_idle (simple);
         g_object_unref (simple);
@@ -286,8 +292,7 @@ geocode_ipclient_search_async (GeocodeIpclient    *ipclient,
                                gpointer            user_data)
 {
         GSimpleAsyncResult *simple;
-        GFile *query;
-        GError *error = NULL;
+        SoupMessage *query;
 
         g_return_if_fail (GEOCODE_IS_IPCLIENT (ipclient));
         g_return_if_fail (ipclient->priv->server != NULL);
@@ -298,17 +303,10 @@ geocode_ipclient_search_async (GeocodeIpclient    *ipclient,
                                             geocode_ipclient_search_async);
 
         query = get_search_query (ipclient);
-        if (!query) {
-                g_simple_async_result_take_error (simple, error);
-                g_simple_async_result_complete_in_idle (simple);
-                g_object_unref (simple);
-                return;
-        }
-        g_file_load_contents_async (query,
-                                    cancellable,
+        soup_session_queue_message (ipclient->priv->soup_session,
+                                    query,
                                     query_callback,
                                     simple);
-        g_object_unref (query);
 }
 
 static gboolean
@@ -491,7 +489,7 @@ geocode_ipclient_search (GeocodeIpclient *ipclient,
                          GError         **error)
 {
         char *contents;
-        GFile *query;
+        SoupMessage *query;
         GeocodeLocation *location;
 
         g_return_val_if_fail (GEOCODE_IS_IPCLIENT (ipclient), NULL);
@@ -499,17 +497,15 @@ geocode_ipclient_search (GeocodeIpclient *ipclient,
 
         query = get_search_query (ipclient);
 
-        if (!query)
-                return NULL;
-        if (g_file_load_contents (query,
-                                  NULL,
-                                  &contents,
-                                  NULL,
-                                  NULL,
-                                  error) == FALSE) {
+        if (soup_session_send_message (ipclient->priv->soup_session,
+                                       query) != SOUP_STATUS_OK) {
+                g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                                     query->reason_phrase ? query->reason_phrase : "Query failed");
                 g_object_unref (query);
                 return NULL;
         }
+
+        contents = g_strndup (query->response_body->data, query->response_body->length);
         g_object_unref (query);
 
         location = _geocode_ip_json_to_location (contents, error);
