@@ -43,6 +43,7 @@ add_result_attr_to_json_tree (const char *ipaddress,
         const char *timezone = NULL;
         JsonBuilder *builder;
         GeoIPRecord *gir;
+        const char *accuracy = "country";
 
         gir = GeoIP_record_by_addr (gi, ipaddress);
         if (gir == NULL) {
@@ -61,8 +62,6 @@ add_result_attr_to_json_tree (const char *ipaddress,
         json_builder_add_double_value (builder, gir->latitude);
         json_builder_set_member_name (builder, "longitude");
         json_builder_add_double_value (builder, gir->longitude);
-
-        const char *accuracy = "country";
 
         /* Country level information */
         if (gir->country_name != NULL) {

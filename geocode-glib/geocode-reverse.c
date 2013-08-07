@@ -323,15 +323,15 @@ get_resolve_query_for_params (GHashTable  *orig_ht)
 
 	ht = _geocode_glib_dup_hash_table (orig_ht);
 
-	g_hash_table_insert (ht, "format", "json");
-	g_hash_table_insert (ht, "email", "zeeshanak@gnome.org");
-	g_hash_table_insert (ht, "addressdetails", "1");
+	g_hash_table_insert (ht, (gpointer) "format", (gpointer) "json");
+	g_hash_table_insert (ht, (gpointer) "email", (gpointer) "zeeshanak@gnome.org");
+	g_hash_table_insert (ht, (gpointer) "addressdetails", (gpointer) "1");
 
 	locale = NULL;
 	if (g_hash_table_lookup (ht, "accept-language") == NULL) {
 		locale = _geocode_object_get_lang ();
 		if (locale)
-			g_hash_table_insert (ht, "accept-language", locale);
+			g_hash_table_insert (ht, (gpointer) "accept-language", locale);
 	}
 
 	params = soup_form_encode_hash (ht);

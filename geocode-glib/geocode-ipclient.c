@@ -228,7 +228,7 @@ get_search_query (GeocodeIpclient *ipclient)
                         g_free (escaped);
                 } else {
                         ht = g_hash_table_new (g_str_hash, g_str_equal);
-                        g_hash_table_insert (ht, "ip", g_strdup (ipaddress));
+                        g_hash_table_insert (ht, (gpointer) "ip", g_strdup (ipaddress));
                         query_string = soup_form_encode_hash (ht);
                         g_hash_table_destroy (ht);
 

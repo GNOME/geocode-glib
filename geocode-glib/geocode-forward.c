@@ -343,15 +343,15 @@ get_search_query_for_params (GeocodeForward *forward,
 
 	/* Prepare the query parameters */
 	ht = _geocode_glib_dup_hash_table (forward->priv->ht);
-	g_hash_table_insert (ht, "format", "json");
-	g_hash_table_insert (ht, "email", "zeeshanak@gnome.org");
-	g_hash_table_insert (ht, "addressdetails", "1");
+	g_hash_table_insert (ht, (gpointer) "format", (gpointer) "json");
+	g_hash_table_insert (ht, (gpointer) "email", (gpointer) "zeeshanak@gnome.org");
+	g_hash_table_insert (ht, (gpointer) "addressdetails", (gpointer) "1");
 
 	lang = NULL;
 	if (g_hash_table_lookup (ht, "accept-language") == NULL) {
 		lang = _geocode_object_get_lang ();
 		if (lang)
-			g_hash_table_insert (ht, "accept-language", lang);
+			g_hash_table_insert (ht, (gpointer) "accept-language", lang);
 	}
 
         location = g_strdup (g_hash_table_lookup (ht, "location"));
