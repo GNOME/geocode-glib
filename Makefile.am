@@ -6,13 +6,30 @@ EXTRA_DIST = intltool-extract.in intltool-update.in intltool-merge.in gtk-doc.ma
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc=yes --enable-introspection=yes
 
-DISTCLEANFILES = intltool-extract intltool-update intltool-merge
+DISTCLEANFILES = intltool-extract intltool-update intltool-merge gtk-doc.make
 
-MAINTAINERCLEANFILES = Makefile.in \
-	aclocal.m4 configure config.h.in config.sub config.guess \
-	ltmain.sh depcomp missing install-sh mkinstalldirs \
-	intltool-extract.in intltool-update.in intltool-merge.in \
-	geocode-glib-1.0.pc
+MAINTAINERCLEANFILES = \
+	$(GITIGNORE_MAINTAINERCLEANFILES_TOPLEVEL) \
+	$(GITIGNORE_MAINTAINERCLEANFILES_MAKEFILE_IN) \
+	$(GITIGNORE_MAINTAINERCLEANFILES_M4_LIBTOOL) \
+	build-aux/ \
+	INSTALL \
+	omf.make \
+	gtk-doc.make \
+	ABOUT-NLS \
+	config.rpath \
+	po/Makevars.template \
+	po/Rules-quot \
+	po/boldquot.sed \
+	po/en@boldquot.header \
+	po/en@quot.header \
+	po/insert-header.sin \
+	po/quot.sed \
+	po/remove-potcdate.sin \
+	m4/gtk-doc.m4 \
+	m4/intltool.m4 \
+	geocode-glib-1.0.pc \
+	$(NULL)
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = geocode-glib-1.0.pc
