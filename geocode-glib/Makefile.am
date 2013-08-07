@@ -113,3 +113,5 @@ EXTRA_DIST +=					 \
 	data/nominatim-rio.json			 \
 	data/nominatim-area.json		 \
 	data/nominatim-no-results.json
+
+-include $(top_srcdir)/git.mk

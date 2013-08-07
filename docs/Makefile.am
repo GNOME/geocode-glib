@@ -85,3 +85,5 @@ if ENABLE_GTK_DOC
 TESTS_ENVIRONMENT = cd $(srcdir) && 
 TESTS = $(GTKDOC_CHECK)
 endif
+
+-include $(top_srcdir)/git.mk

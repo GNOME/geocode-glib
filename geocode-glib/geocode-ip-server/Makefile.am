@@ -25,3 +25,5 @@ test_geoipformat_LDADD = $(GEOCODE_LIBS)
 
 MAINTAINERCLEANFILES = Makefile.in
 
+
+-include $(top_srcdir)/git.mk
