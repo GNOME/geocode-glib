@@ -59,30 +59,14 @@ AM_GLIB_DEFINE_LOCALEDIR(GEOCODE_GLIB_LOCALEDIR)
 dnl gtk-doc checks
 GTK_DOC_CHECK([1.13],[--flavour no-tmpl])
 
-AC_CHECK_LIB([m],[sin])
-
 dnl Requires for the library
 PKG_CHECK_MODULES(GEOCODE,
 		  gio-2.0 >= 2.34
 		  json-glib-1.0 >= 0.14
 		  libsoup-2.4)
 
-# Requires for the server
-PKG_CHECK_MODULES(GEOCODE_SERVER,
-		  gio-2.0 >= 2.34
-		  json-glib-1.0 >= 0.14
-		  libsoup-2.4
-                  geoip)
-
-# Requires for the database update
-PKG_CHECK_MODULES(GEOCODE_DBUPDATE,
-		  gio-2.0 >= 2.34)
-
 GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal glib-2.0`
 AC_SUBST(GLIB_GENMARSHAL)
-
-GEOIP_DATABASE_PATH=`$PKG_CONFIG --variable=databasedir geoip`
-AC_SUBST(GEOIP_DATABASE_PATH)
 
 GOBJECT_INTROSPECTION_CHECK([0.6.3])
 
@@ -111,7 +95,6 @@ AC_CONFIG_FILES([
 	  docs/version.xml
 	  geocode-glib/Makefile
 	  po/Makefile.in
-	  geocode-glib/geocode-ip-server/Makefile
 ])
 AC_OUTPUT
 

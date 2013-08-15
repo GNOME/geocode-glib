@@ -1,7 +1,5 @@
 include $(top_srcdir)/Makefile.decl
 
-SUBDIRS = geocode-ip-server
-
 EXTRA_DIST = geocode-glib.symbols
 
 BUILT_GIRSOURCES =
@@ -14,7 +12,6 @@ libgeocode_glib_la_PUBLICSOURCES =			\
 	geocode-reverse.c				\
 	geocode-glib.c					\
 	geocode-error.c                                 \
-	geocode-ipclient.c				\
 	geocode-enum-types.c				\
 	geocode-place.c
 
@@ -36,7 +33,6 @@ GCGLIB_HEADER_FILES = \
 	geocode-forward.h				\
 	geocode-reverse.h				\
 	geocode-error.h                                 \
-	geocode-ipclient.h				\
 	geocode-place.h
 
 gcglibdir = $(includedir)/$(PACKAGE)-$(GCLIB_API_VERSION)/$(PACKAGE)
@@ -99,17 +95,14 @@ CLEANFILES += $(gir_DATA) $(typelib_DATA)
 
 endif # HAVE_INTROSPECTION
 
-TEST_PROGS += test-gcglib test-geoip
+TEST_PROGS += test-gcglib
 noinst_PROGRAMS = $(TEST_PROGS)
 
 test_gcglib_LDADD = libgeocode-glib.la $(GEOCODE_LIBS)
-test_geoip_LDADD = libgeocode-glib.la $(GEOCODE_LIBS)
 
 MAINTAINERCLEANFILES = Makefile.in
 
 EXTRA_DIST +=					 \
-	data/freegeoip-results.json		 \
-	data/gglib-ip-server-results.json 	 \
 	data/nominatim-rio.json			 \
 	data/nominatim-area.json		 \
 	data/nominatim-no-results.json
