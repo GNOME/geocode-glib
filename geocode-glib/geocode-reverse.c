@@ -338,7 +338,7 @@ get_resolve_query_for_params (GHashTable  *orig_ht)
 	g_hash_table_destroy (ht);
 	g_free (locale);
 
-	uri = g_strdup_printf ("http://nominatim.openstreetmap.org/reverse?%s", params);
+	uri = g_strdup_printf ("http://nominatim.gnome.org/reverse?%s", params);
 	g_free (params);
 
 	ret = soup_message_new ("GET", uri);
