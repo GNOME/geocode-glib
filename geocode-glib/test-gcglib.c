@@ -350,8 +350,8 @@ test_locale (void)
 	loc = geocode_place_get_location (place);
 	g_assert (loc != NULL);
 	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Moskva, Ruská federace");
-	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 55.756950, <, 0.000001);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc) - 37.614971, <, 0.000001);
+	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 55.756950, <, 0.005);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc) - 37.614971, <, 0.005);
 	print_place (place);
 
 	g_list_free_full (res, (GDestroyNotify) g_object_unref);
