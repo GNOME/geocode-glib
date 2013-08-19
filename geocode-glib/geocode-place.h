@@ -25,6 +25,7 @@
 #define GEOCODE_PLACE_H
 
 #include <glib-object.h>
+#include <gio/gio.h>
 #include <geocode-glib/geocode-location.h>
 
 G_BEGIN_DECLS
@@ -196,6 +197,8 @@ const char *geocode_place_get_country             (GeocodePlace *place);
 void geocode_place_set_continent                  (GeocodePlace *place,
                                                    const char   *continent);
 const char *geocode_place_get_continent           (GeocodePlace *place);
+
+GIcon *geocode_place_get_icon                     (GeocodePlace *place);
 
 G_END_DECLS
 

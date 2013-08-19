@@ -23,6 +23,7 @@
 
 #include <geocode-glib/geocode-place.h>
 #include <geocode-glib/geocode-enum-types.h>
+#include <geocode-glib/geocode-glib-private.h>
 
 /**
  * SECTION:geocode-place
@@ -52,6 +53,7 @@ struct _GeocodePlacePrivate {
         char *country_code;
         char *country;
         char *continent;
+        GIcon *icon;
 };
 
 enum {
@@ -72,6 +74,7 @@ enum {
         PROP_COUNTRY_CODE,
         PROP_COUNTRY,
         PROP_CONTINENT,
+        PROP_ICON,
 };
 
 G_DEFINE_TYPE (GeocodePlace, geocode_place, G_TYPE_OBJECT)
@@ -160,6 +163,11 @@ geocode_place_get_property (GObject    *object,
                                     geocode_place_get_continent (place));
                 break;
 
+        case PROP_ICON:
+                g_value_set_object (value,
+                                    geocode_place_get_icon (place));
+                break;
+
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
                 break;
@@ -240,6 +248,10 @@ geocode_place_set_property(GObject      *object,
                 geocode_place_set_continent (place, g_value_get_string (value));
                 break;
 
+        case PROP_ICON:
+                _geocode_place_set_icon (place, g_value_get_object (value));
+                break;
+
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
                 break;
@@ -252,6 +264,7 @@ geocode_place_dispose (GObject *gplace)
         GeocodePlace *place = (GeocodePlace *) gplace;
 
         g_clear_object (&place->priv->location);
+        g_clear_object (&place->priv->icon);
 
         g_clear_pointer (&place->priv->name, g_free);
         g_clear_pointer (&place->priv->street_address, g_free);
@@ -478,6 +491,19 @@ geocode_place_class_init (GeocodePlaceClass *klass)
                                      G_PARAM_READWRITE |
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (gplace_class, PROP_CONTINENT, pspec);
+
+        /**
+         * GeocodePlace:icon:
+         *
+         * #GIcon representing the @GeocodePlace.
+         */
+        pspec = g_param_spec_object ("icon",
+                                     "Icon",
+                                     "An icon representing the the place",
+                                     G_TYPE_ICON,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_ICON, pspec);
 }
 
 static void
@@ -989,4 +1015,29 @@ geocode_place_get_continent (GeocodePlace *place)
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
         return place->priv->continent;
+}
+
+/**
+ * geocode_place_get_icon:
+ * @place: A place
+ *
+ * Gets the #GIcon representing the @place.
+ **/
+GIcon *
+geocode_place_get_icon (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->icon;
+}
+
+void
+_geocode_place_set_icon (GeocodePlace *place,
+                         GIcon        *icon)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (icon != NULL);
+
+        g_clear_object (&place->priv->icon);
+        place->priv->icon = g_object_ref (icon);
 }
