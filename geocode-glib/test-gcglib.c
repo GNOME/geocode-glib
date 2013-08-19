@@ -373,11 +373,11 @@ test_locale (void)
 		loc = geocode_place_get_location (place);
 		g_assert (loc != NULL);
 
-		if (g_strcmp0 (geocode_place_get_name (place), "Bonneville, Rhône-Alpes, France métropolitaine") == 0 &&
+		if (g_strcmp0 (geocode_place_get_name (place), "Bonneville, Rhône-Alpes, France") == 0 &&
 		    g_strcmp0 (geocode_place_get_state (place), "Rhône-Alpes") == 0 &&
-		    g_strcmp0 (geocode_place_get_country (place), "France métropolitaine") == 0 &&
+		    g_strcmp0 (geocode_place_get_country (place), "France") == 0 &&
 		    g_strcmp0 (geocode_location_get_description (loc),
-                               "Bonneville, Rhône-Alpes, France métropolitaine") == 0) {
+                               "Bonneville, Rhône-Alpes, France") == 0) {
 		        found = TRUE;
                         break;
                 }
