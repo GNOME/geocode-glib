@@ -23,7 +23,6 @@
 	<xi:include href="xml/geocode-location.xml"/>
 	<xi:include href="xml/geocode-place.xml"/>
 	<xi:include href="xml/geocode-reverse.xml"/>
-	<xi:include href="xml/geocode-ipclient.xml"/>
 
   </chapter>
   <index id="api-index-full">
