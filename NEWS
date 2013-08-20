@@ -1,3 +1,25 @@
+0.99.2
+------
+
+Changes since 0.99.1:
+
+- Make use of our new proxy to Nominatim at nominatim.gnome.org.
+- Better name/description for street numbers.
+- Fixes to build.
+- Drop all geoip code, which has been moved to Geoclue where it belongs.
+- Fix failing testcases.
+
+Dependencies changed:
+
+- Drop dependency on geoip.
+
+All contributors to this release:
+
+Colin Walters <walters@verbum.org>
+Philip Withnall <philip@tecnocode.co.uk>
+Satabdi Das <satabdidas@src.gnome.org>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 0.99.1
 ------
 
