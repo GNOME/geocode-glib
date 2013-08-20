@@ -17,7 +17,6 @@
 
   <chapter>
     <title>Geocode-glib</title>
-        <xi:include href="xml/geocode-glib.xml"/>
 	<xi:include href="xml/geocode-error.xml"/>
 	<xi:include href="xml/geocode-forward.xml"/>
 	<xi:include href="xml/geocode-location.xml"/>
