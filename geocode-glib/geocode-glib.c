@@ -36,7 +36,7 @@
  * @include: geocode-glib/geocode-glib.h
  *
  * Contains functions for geocoding and reverse geocoding using the
- * <ulink url="http://http://wiki.openstreetmap.org/wiki/Nominatim">OSM Nominatim APIs</ulink>
+ * <ulink url="http://wiki.openstreetmap.org/wiki/Nominatim">OSM Nominatim APIs</ulink>
  **/
 
 char *
