@@ -215,7 +215,8 @@ on_query_data_loaded (SoupSession *session,
 	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (user_data);
 	GError *error = NULL;
 	char *contents;
-	gpointer ret;
+	GeocodePlace *ret;
+	GHashTable *attributes;
 
         if (query->status_code != SOUP_STATUS_OK) {
 		g_set_error_literal (&error, G_IO_ERROR, G_IO_ERROR_FAILED,
@@ -227,9 +228,9 @@ on_query_data_loaded (SoupSession *session,
 	}
 
         contents = g_strndup (query->response_body->data, query->response_body->length);
-	ret = resolve_json (contents, &error);
+	attributes = resolve_json (contents, &error);
 
-	if (ret == NULL) {
+	if (attributes == NULL) {
 		g_simple_async_result_take_error (simple, error);
 		g_simple_async_result_complete_in_idle (simple);
 		g_object_unref (simple);
@@ -241,7 +242,10 @@ on_query_data_loaded (SoupSession *session,
 	_geocode_glib_cache_save (query, contents);
 	g_free (contents);
 
+        ret = _geocode_create_place_from_attributes (attributes);
+        g_hash_table_destroy (attributes);
 	g_simple_async_result_set_op_res_gpointer (simple, ret, NULL);
+
 	g_simple_async_result_complete_in_idle (simple);
 	g_object_unref (simple);
 }
