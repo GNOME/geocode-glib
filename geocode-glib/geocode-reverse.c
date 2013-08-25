@@ -362,10 +362,10 @@ get_resolve_query_for_params (GHashTable  *orig_ht)
  * geocode_reverse_resolve_finish() to get the result of the operation.
  **/
 void
-geocode_reverse_resolve_async (GeocodeReverse       *object,
-			       GCancellable        *cancellable,
-			       GAsyncReadyCallback  callback,
-			       gpointer             user_data)
+geocode_reverse_resolve_async (GeocodeReverse     *object,
+			       GCancellable       *cancellable,
+			       GAsyncReadyCallback callback,
+			       gpointer            user_data)
 {
 	GSimpleAsyncResult *simple;
 	SoupMessage *query;
@@ -411,9 +411,9 @@ geocode_reverse_resolve_async (GeocodeReverse       *object,
  * errors. Free the returned instance with #g_object_unref() when done.
  **/
 GeocodePlace *
-geocode_reverse_resolve_finish (GeocodeReverse      *object,
-				GAsyncResult        *res,
-				GError             **error)
+geocode_reverse_resolve_finish (GeocodeReverse *object,
+				GAsyncResult   *res,
+				GError        **error)
 {
 	GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
 
@@ -439,8 +439,8 @@ geocode_reverse_resolve_finish (GeocodeReverse      *object,
  * errors. Free the returned instance with #g_object_unref() when done.
  **/
 GeocodePlace *
-geocode_reverse_resolve (GeocodeReverse      *object,
-			 GError             **error)
+geocode_reverse_resolve (GeocodeReverse *object,
+			 GError        **error)
 {
 	SoupMessage *query;
 	char *contents;
