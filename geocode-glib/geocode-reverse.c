@@ -95,15 +95,21 @@ GeocodeReverse *
 geocode_reverse_new_for_location (GeocodeLocation *location)
 {
 	GeocodeReverse *object;
+	char coord[G_ASCII_DTOSTR_BUF_SIZE];
+	char *lat;
+	char *lon;
 
+	lat = g_strdup (g_ascii_dtostr (coord,
+	                                G_ASCII_DTOSTR_BUF_SIZE,
+	                                geocode_location_get_latitude (location)));
+
+	lon = g_strdup (g_ascii_dtostr (coord,
+	                                G_ASCII_DTOSTR_BUF_SIZE,
+	                                geocode_location_get_longitude (location)));
 	object = g_object_new (GEOCODE_TYPE_REVERSE, NULL);
 
-	g_hash_table_insert (object->priv->ht,
-			     g_strdup ("lat"),
-			     g_strdup_printf ("%g",  geocode_location_get_latitude (location)));
-	g_hash_table_insert (object->priv->ht,
-			     g_strdup ("lon"),
-			     g_strdup_printf ("%g",  geocode_location_get_longitude (location)));
+	g_hash_table_insert (object->priv->ht, g_strdup ("lat"), lat);
+	g_hash_table_insert (object->priv->ht, g_strdup ("lon"), lon);
 
 	return object;
 }
