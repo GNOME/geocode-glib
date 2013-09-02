@@ -1,3 +1,20 @@
+0.99.3
+------
+
+Changes since 0.99.2:
+
+- Fix a crash in reverse geocoding API.
+- Expose place icons when available from Nominatim.
+- Make GeocodeReverse locale safe.
+- Fix build against latest gnome-common.
+
+All contributors to this release:
+
+Jonas Danielsson <jonas@threetimestwo.org>
+Kalev Lember <kalevlember@gmail.com>
+Seán de Búrca <leftmostcat@gmail.com>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 0.99.2
 ------
 
