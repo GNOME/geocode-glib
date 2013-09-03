@@ -18,7 +18,7 @@ DOC_MAIN_SGML_FILE=$(DOC_MODULE)-docs.xml
 # gtk-doc will search all .c & .h files beneath here for inline comments
 # documenting the functions and macros.
 # e.g. DOC_SOURCE_DIR=../../../gtk
-DOC_SOURCE_DIR=../geocode-glib
+DOC_SOURCE_DIR=$(top_srcdir)/geocode-glib
 
 # Extra options to pass to gtkdoc-scangobj. Not normally needed.
 SCANGOBJ_OPTIONS=
@@ -82,7 +82,9 @@ include $(top_srcdir)/gtk-doc.make
 EXTRA_DIST += version.xml.in
 
 if ENABLE_GTK_DOC
-TESTS_ENVIRONMENT = cd $(srcdir) && 
+TESTS_ENVIRONMENT = cd $(srcdir) && \
+	DOC_MODULE=$(DOC_MODULE) DOC_MAIN_SGML_FILE=$(DOC_MAIN_SGML_FILE) \
+	SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir)
 TESTS = $(GTKDOC_CHECK)
 endif
 
