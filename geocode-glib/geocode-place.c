@@ -558,6 +558,7 @@ geocode_place_new_with_location (const char      *name,
 /**
  * geocode_place_set_name:
  * @place: A place
+ * @name: the name of place
  *
  * Sets the name of the @place to @name.
  **/
@@ -577,6 +578,8 @@ geocode_place_set_name (GeocodePlace *place,
  * @place: A place
  *
  * Gets the name of the @place.
+ *
+ * Returns: The name of the @place.
  **/
 const char *
 geocode_place_get_name (GeocodePlace *place)
@@ -591,6 +594,8 @@ geocode_place_get_name (GeocodePlace *place)
  * @place: A place
  *
  * Gets the type of the @place.
+ *
+ * Returns: The type of the @place.
  **/
 GeocodePlaceType
 geocode_place_get_place_type (GeocodePlace *place)
@@ -622,6 +627,8 @@ geocode_place_set_location (GeocodePlace *place,
 /**
  * geocode_place_get_location:
  * @place: A place
+ *
+ * Gets the associated location object.
  *
  * Returns: (transfer none): The associated location object.
  **/
@@ -656,6 +663,8 @@ geocode_place_set_street_address (GeocodePlace *place,
  * @place: A place
  *
  * Gets the street address of the @place.
+ *
+ * Returns: The street address of the @place.
  **/
 const char *
 geocode_place_get_street_address (GeocodePlace *place)
@@ -688,6 +697,8 @@ geocode_place_set_street (GeocodePlace *place,
  * @place: A place
  *
  * Gets the street of the @place.
+ *
+ * Returns: The street of the @place.
  **/
 const char *
 geocode_place_get_street (GeocodePlace *place)
@@ -720,6 +731,8 @@ geocode_place_set_building (GeocodePlace *place,
  * @place: A place
  *
  * Gets the building of the @place.
+ *
+ * Returns: The building of the @place.
  **/
 const char *
 geocode_place_get_building (GeocodePlace *place)
@@ -752,6 +765,8 @@ geocode_place_set_postal_code (GeocodePlace *place,
  * @place: A place
  *
  * Gets the postal code of the @place.
+ *
+ * Returns: The postal code of the @place.
  **/
 const char *
 geocode_place_get_postal_code (GeocodePlace *place)
@@ -784,6 +799,8 @@ geocode_place_set_area (GeocodePlace *place,
  * @place: A place
  *
  * Gets the area of the @place.
+ *
+ * Returns: The area of the @place.
  **/
 const char *
 geocode_place_get_area (GeocodePlace *place)
@@ -816,6 +833,8 @@ geocode_place_set_town (GeocodePlace *place,
  * @place: A place
  *
  * Gets the town of the @place.
+ *
+ * Returns: The town of the @place.
  **/
 const char *
 geocode_place_get_town (GeocodePlace *place)
@@ -848,6 +867,8 @@ geocode_place_set_county (GeocodePlace *place,
  * @place: A place
  *
  * Gets the county of the @place.
+ *
+ * Returns: The country of the @place.
  **/
 const char *
 geocode_place_get_county (GeocodePlace *place)
@@ -880,6 +901,8 @@ geocode_place_set_state (GeocodePlace *place,
  * @place: A place
  *
  * Gets the state of the @place.
+ *
+ * Returns: The state of the @place.
  **/
 const char *
 geocode_place_get_state (GeocodePlace *place)
@@ -912,6 +935,8 @@ geocode_place_set_administrative_area (GeocodePlace *place,
  * @place: A place
  *
  * Gets the local administrative area of the @place.
+ *
+ * Returns: The local administrative area of the @place.
  **/
 const char *
 geocode_place_get_administrative_area (GeocodePlace *place)
@@ -944,6 +969,8 @@ geocode_place_set_country_code (GeocodePlace *place,
  * @place: A place
  *
  * Gets the ISO country code of the @place.
+ *
+ * Returns: The ISO country code of the @place.
  **/
 const char *
 geocode_place_get_country_code (GeocodePlace *place)
@@ -976,6 +1003,8 @@ geocode_place_set_country (GeocodePlace *place,
  * @place: A place
  *
  * Gets the country of the @place.
+ *
+ * Returns: The country of the @place.
  **/
 const char *
 geocode_place_get_country (GeocodePlace *place)
@@ -1008,6 +1037,8 @@ geocode_place_set_continent (GeocodePlace *place,
  * @place: A place
  *
  * Gets the continent of the @place.
+ *
+ * Returns: The continent of the @place.
  **/
 const char *
 geocode_place_get_continent (GeocodePlace *place)
@@ -1022,6 +1053,8 @@ geocode_place_get_continent (GeocodePlace *place)
  * @place: A place
  *
  * Gets the #GIcon representing the @place.
+ *
+ * Returns: (transfer none): The #GIcon representing the @place.
  **/
 GIcon *
 geocode_place_get_icon (GeocodePlace *place)

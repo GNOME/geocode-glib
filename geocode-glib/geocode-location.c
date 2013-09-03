@@ -322,6 +322,7 @@ geocode_location_new_with_description (gdouble     latitude,
 
 /**
  * geocode_location_set_description:
+ * @loc: a #GeocodeLocation
  * @description: a description for the location
  *
  * Sets the description of @loc to @description.
@@ -337,6 +338,14 @@ geocode_location_set_description (GeocodeLocation *loc,
         loc->priv->description = g_strdup (description);
 }
 
+/**
+ * geocode_location_get_description:
+ * @loc: a #GeocodeLocation
+ *
+ * Gets the description of location @loc.
+ *
+ * Returns: The description of location @loc.
+ **/
 const char *
 geocode_location_get_description (GeocodeLocation *loc)
 {
@@ -345,6 +354,14 @@ geocode_location_get_description (GeocodeLocation *loc)
         return loc->priv->description;
 }
 
+/**
+ * geocode_location_get_latitude:
+ * @loc: a #GeocodeLocation
+ *
+ * Gets the latitude of location @loc.
+ *
+ * Returns: The latitude of location @loc.
+ **/
 gdouble
 geocode_location_get_latitude (GeocodeLocation *loc)
 {
@@ -353,6 +370,14 @@ geocode_location_get_latitude (GeocodeLocation *loc)
         return loc->priv->latitude;
 }
 
+/**
+ * geocode_location_get_longitude:
+ * @loc: a #GeocodeLocation
+ *
+ * Gets the longitude of location @loc.
+ *
+ * Returns: The longitude of location @loc.
+ **/
 gdouble
 geocode_location_get_longitude (GeocodeLocation *loc)
 {
@@ -361,6 +386,14 @@ geocode_location_get_longitude (GeocodeLocation *loc)
         return loc->priv->longitude;
 }
 
+/**
+ * geocode_location_get_accuracy:
+ * @loc: a #GeocodeLocation
+ *
+ * Gets the accuracy (in meters) of location @loc.
+ *
+ * Returns: The accuracy of location @loc.
+ **/
 gdouble
 geocode_location_get_accuracy (GeocodeLocation *loc)
 {
@@ -370,6 +403,14 @@ geocode_location_get_accuracy (GeocodeLocation *loc)
         return loc->priv->accuracy;
 }
 
+/**
+ * geocode_location_get_timestamp:
+ * @loc: a #GeocodeLocation
+ *
+ * Gets the timestamp (in seconds since Epoc) of location @loc.
+ *
+ * Returns: The timestamp of location @loc.
+ **/
 guint64
 geocode_location_get_timestamp (GeocodeLocation *loc)
 {

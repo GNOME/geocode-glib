@@ -62,11 +62,46 @@ struct _GeocodeLocationClass {
         GObjectClass parent_class;
 };
 
-#define GEOCODE_LOCATION_ACCURACY_UNKNOWN   -1
-#define GEOCODE_LOCATION_ACCURACY_STREET    1000    /*    1 km */
-#define GEOCODE_LOCATION_ACCURACY_CITY      15000   /*   15 km */
-#define GEOCODE_LOCATION_ACCURACY_REGION    50000   /*   50 km */
-#define GEOCODE_LOCATION_ACCURACY_COUNTRY   300000  /*  300 km */
+/**
+ * GEOCODE_LOCATION_ACCURACY_UNKNOWN:
+ *
+ * Constant representing unknown accuracy.
+ */
+#define GEOCODE_LOCATION_ACCURACY_UNKNOWN -1
+
+/**
+ * GEOCODE_LOCATION_ACCURACY_STREET:
+ *
+ * Constant representing street-level accuracy.
+ */
+#define GEOCODE_LOCATION_ACCURACY_STREET 1000 /* 1 km */
+
+/**
+ * GEOCODE_LOCATION_ACCURACY_CITY:
+ *
+ * Constant representing city-level accuracy.
+ */
+#define GEOCODE_LOCATION_ACCURACY_CITY 15000 /* 15 km */
+
+/**
+ * GEOCODE_LOCATION_ACCURACY_REGION:
+ *
+ * Constant representing region-level accuracy.
+ */
+#define GEOCODE_LOCATION_ACCURACY_REGION 50000 /* 50 km */
+
+/**
+ * GEOCODE_LOCATION_ACCURACY_COUNTRY:
+ *
+ * Constant representing country-level accuracy.
+ */
+#define GEOCODE_LOCATION_ACCURACY_COUNTRY 300000 /* 300 km */
+
+/**
+ * GEOCODE_LOCATION_ACCURACY_CONTINENT:
+ *
+ * Constant representing continent-level accuracy.
+ */
 #define GEOCODE_LOCATION_ACCURACY_CONTINENT 3000000 /* 3000 km */
 
 #define GEOCODE_TYPE_LOCATION (geocode_location_get_type ())
