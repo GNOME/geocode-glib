@@ -961,16 +961,16 @@ geocode_place_set_country_code (GeocodePlace *place,
         g_return_if_fail (country_code != NULL);
 
         g_free (place->priv->country_code);
-        place->priv->country_code = g_strdup (country_code);
+        place->priv->country_code = g_utf8_strup (country_code, -1);
 }
 
 /**
  * geocode_place_get_country_code:
  * @place: A place
  *
- * Gets the ISO country code of the @place.
+ * Gets the ISO-3166 country code of the @place.
  *
- * Returns: The ISO country code of the @place.
+ * Returns: The ISO-3166 country code of the @place, in upper case.
  **/
 const char *
 geocode_place_get_country_code (GeocodePlace *place)
