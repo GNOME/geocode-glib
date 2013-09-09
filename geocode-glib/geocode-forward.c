@@ -532,8 +532,7 @@ node_free_func (GNode    *node,
 	return FALSE;
 }
 
-#define N_ATTRS 8
-static const char const *attributes[8] = {
+static const char const *attributes[] = {
 	"country",
 	"state",
 	"county",
@@ -783,7 +782,7 @@ _geocode_parse_search_json (const char *contents,
 	const GError *err = NULL;
 	int num_places, i;
 	GNode *place_tree;
-	char *s_array[N_ATTRS];
+	char *s_array[G_N_ELEMENTS (attributes)];
 
 	ret = NULL;
 
