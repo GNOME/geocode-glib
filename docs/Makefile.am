@@ -27,6 +27,8 @@ SCANGOBJ_OPTIONS=
 # e.g. SCAN_OPTIONS=--deprecated-guards="GTK_DISABLE_DEPRECATED" 
 SCAN_OPTIONS=
 
+DOC_MODULE_VERSION=@GCLIB_API_VERSION@
+
 # Extra options to supply to gtkdoc-mkdb.
 # e.g. MKDB_OPTIONS=--sgml-mode --output-format=xml
 MKDB_OPTIONS=--sgml-mode --output-format=xml --name-space=geocode_
