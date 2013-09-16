@@ -206,7 +206,6 @@ geocode_location_class_init (GeocodeLocationClass *klass)
                                      90.0,
                                      0.0,
                                      G_PARAM_READWRITE |
-                                     G_PARAM_CONSTRUCT_ONLY |
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (glocation_class, PROP_LATITUDE, pspec);
 
@@ -222,7 +221,6 @@ geocode_location_class_init (GeocodeLocationClass *klass)
                                      180.0,
                                      0.0,
                                      G_PARAM_READWRITE |
-                                     G_PARAM_CONSTRUCT_ONLY |
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (glocation_class, PROP_LONGITUDE, pspec);
 
@@ -238,7 +236,6 @@ geocode_location_class_init (GeocodeLocationClass *klass)
                                      G_MAXDOUBLE,
                                      GEOCODE_LOCATION_ACCURACY_UNKNOWN,
                                      G_PARAM_READWRITE |
-                                     G_PARAM_CONSTRUCT_ONLY |
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (glocation_class, PROP_ACCURACY, pspec);
 
