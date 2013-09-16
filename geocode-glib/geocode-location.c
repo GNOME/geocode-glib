@@ -329,7 +329,6 @@ geocode_location_set_description (GeocodeLocation *loc,
                                   const char      *description)
 {
         g_return_if_fail (GEOCODE_IS_LOCATION (loc));
-        g_return_if_fail (description != NULL);
 
         g_free (loc->priv->description);
         loc->priv->description = g_strdup (description);
