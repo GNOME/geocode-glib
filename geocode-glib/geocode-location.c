@@ -21,8 +21,8 @@
 
  */
 
-#include <geocode-glib/geocode-location.h>
 #include <math.h>
+#include "geocode-location.h"
 
 #define EARTH_RADIUS_KM 6372.795
 
