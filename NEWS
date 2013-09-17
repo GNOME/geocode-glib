@@ -1,3 +1,24 @@
+0.99.4
+------
+
+Changes since 0.99.3:
+
+- Fixes to gobject-introspection.
+- Version documentation installation directory.
+- Documentation build fixes.
+- Explicitly link to libm.
+- Fix a leak.
+- Sync GeocodeLocation with its copy in Geoclue.
+- Ensure country codes are always in upper-case.
+- Some cleanups.
+
+All contributors to this release:
+
+Bastien Nocera <hadess@hadess.net>
+Evgeny Bobkin <evgen.ibqn@gmail.com>
+Stefan Sauer <ensonic@users.sf.net>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 0.99.3
 ------
 
