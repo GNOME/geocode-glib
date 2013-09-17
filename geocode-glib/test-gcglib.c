@@ -144,10 +144,7 @@ test_xep (void)
 
 	tp = g_hash_table_new_full (g_str_hash, g_str_equal,
 				    g_free, g_free);
-        /* FIXME: Remove this comment & uncomment following line once this ticket is resolved:
-         *        https://trac.openstreetmap.org/ticket/4918
-         */
-	/*add_attr (tp, "country", "United Kingdom");*/
+	add_attr (tp, "country", "United Kingdom");
 	add_attr (tp, "region", "England");
 	add_attr (tp, "county", "Surrey");
 	add_attr (tp, "locality", "Guildford");
