@@ -65,7 +65,7 @@ geocode_reverse_class_init (GeocodeReverseClass *klass)
 {
 	GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
-        bindtextdomain (GETTEXT_PACKAGE, GEOCODE_GLIB_LOCALEDIR);
+        bindtextdomain (GETTEXT_PACKAGE, GEOCODE_LOCALEDIR);
         bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 
 	gobject_class->finalize = geocode_reverse_finalize;

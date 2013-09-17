@@ -40,7 +40,11 @@ gcglib_HEADERS =					\
 	$(GCGLIB_HEADER_FILES)				\
 	geocode-enum-types.h
 
-AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) -DTEST_SRCDIR=\""$(srcdir)/data/"\"
+AM_CPPFLAGS = 						\
+	-I$(top_srcdir)					\
+	-I$(top_builddir) 				\
+	-DTEST_SRCDIR=\""$(srcdir)/data/"\" 		\
+	-DGEOCODE_LOCALEDIR=\"$(localedir)\"
 
 AM_CFLAGS = $(GEOCODE_CFLAGS) $(COMMON_CFLAGS) $(WARN_CFLAGS) $(DISABLE_DEPRECATED)
 
