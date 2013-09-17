@@ -107,7 +107,7 @@ test_rev (void)
         g_assert_cmpstr (geocode_place_get_name (place), ==, "The Astolat");
         g_assert_cmpstr (geocode_place_get_postal_code (place), ==, "GU2 7UP");
         g_assert_cmpstr (geocode_place_get_area (place), ==, "Guildford Park");
-        g_assert_cmpstr (geocode_place_get_country_code (place), ==, "gb");
+        g_assert_cmpstr (geocode_place_get_country_code (place), ==, "GB");
         g_assert_cmpstr (geocode_place_get_street (place), ==, "Old Palace Road");
         g_assert_cmpstr (geocode_place_get_county (place), ==, "Surrey");
         g_assert_cmpstr (geocode_place_get_town (place), ==, "Guildford");
