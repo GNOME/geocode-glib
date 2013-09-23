@@ -1,3 +1,17 @@
+3.10.0
+------
+
+Changes since 0.99.4:
+
+- Depend on json-glib >= 0.16.2 to avoid conflict w/ json-c.
+- Remove a now redundant workaround from a testcase.
+- Fix `make distcheck` against latest gtk-doc.
+
+All contributors to this release:
+
+Kalev Lember <kalevlember@gmail.com>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 0.99.4
 ------
 
