@@ -74,7 +74,7 @@ introspection_files = $(libgeocode_glib_la_PUBLICSOURCES) $(gcglib_HEADERS)
 
 GeocodeGlib-1.0.gir: libgeocode-glib.la
 GeocodeGlib_1_0_gir_INCLUDES = GObject-2.0 Gio-2.0 Json-1.0 SoupGNOME-2.4
-GeocodeGlib_1_0_gir_PACKAGES = gobject-2.0 gmodule-2.0 glib-2.0 gio-2.0 libsoup-gnome-2.4 json-glib-1.0
+GeocodeGlib_1_0_gir_PACKAGES = gobject-2.0 gmodule-2.0 glib-2.0 gio-2.0 libsoup-2.4 json-glib-1.0
 GeocodeGlib_1_0_gir_CFLAGS = -I$(top_srcdir) -I$(top_builddir)
 GeocodeGlib_1_0_gir_LIBS = libgeocode-glib.la
 GeocodeGlib_1_0_gir_SCANNERFLAGS = \
