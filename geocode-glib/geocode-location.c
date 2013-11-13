@@ -38,6 +38,7 @@
 struct _GeocodeLocationPrivate {
         gdouble longitude;
         gdouble latitude;
+        gdouble altitude;
         gdouble accuracy;
         guint64 timestamp;
         char   *description;
@@ -50,7 +51,8 @@ enum {
         PROP_LONGITUDE,
         PROP_ACCURACY,
         PROP_DESCRIPTION,
-        PROP_TIMESTAMP
+        PROP_TIMESTAMP,
+        PROP_ALTITUDE
 };
 
 G_DEFINE_TYPE (GeocodeLocation, geocode_location, G_TYPE_OBJECT)
@@ -77,6 +79,11 @@ geocode_location_get_property (GObject    *object,
         case PROP_LONGITUDE:
                 g_value_set_double (value,
                                     geocode_location_get_longitude (location));
+                break;
+
+        case PROP_ALTITUDE:
+                g_value_set_double (value,
+                                    geocode_location_get_altitude (location));
                 break;
 
         case PROP_ACCURACY:
@@ -115,6 +122,13 @@ geocode_location_set_longitude (GeocodeLocation *loc,
 }
 
 static void
+geocode_location_set_altitude (GeocodeLocation *loc,
+                               gdouble          altitude)
+{
+        loc->priv->altitude = altitude;
+}
+
+static void
 geocode_location_set_accuracy (GeocodeLocation *loc,
                                gdouble          accuracy)
 {
@@ -145,6 +159,11 @@ geocode_location_set_property(GObject      *object,
         case PROP_LONGITUDE:
                 geocode_location_set_longitude (location,
                                                 g_value_get_double (value));
+                break;
+
+        case PROP_ALTITUDE:
+                geocode_location_set_altitude (location,
+                                               g_value_get_double (value));
                 break;
 
         case PROP_ACCURACY:
@@ -225,6 +244,21 @@ geocode_location_class_init (GeocodeLocationClass *klass)
         g_object_class_install_property (glocation_class, PROP_LONGITUDE, pspec);
 
         /**
+         * GeocodeLocation:altitude:
+         *
+         * The altitude of this location in meters.
+         */
+        pspec = g_param_spec_double ("altitude",
+                                     "Altitude",
+                                     "The altitude of this location in meters",
+                                     GEOCODE_LOCATION_ALTITUDE_UNKNOWN,
+                                     G_MAXDOUBLE,
+                                     GEOCODE_LOCATION_ALTITUDE_UNKNOWN,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (glocation_class, PROP_ALTITUDE, pspec);
+
+        /**
          * GeocodeLocation:accuracy:
          *
          * The accuracy of this location in meters.
@@ -268,6 +302,7 @@ geocode_location_init (GeocodeLocation *location)
 
         g_get_current_time (&tv);
         location->priv->timestamp = tv.tv_sec;
+        location->priv->altitude = GEOCODE_LOCATION_ALTITUDE_UNKNOWN;
 }
 
 /**
@@ -380,6 +415,23 @@ geocode_location_get_longitude (GeocodeLocation *loc)
         g_return_val_if_fail (GEOCODE_IS_LOCATION (loc), 0.0);
 
         return loc->priv->longitude;
+}
+
+/**
+ * geocode_location_get_altitude:
+ * @loc: a #GeocodeLocation
+ *
+ * Gets the altitude of location @loc.
+ *
+ * Returns: The altitude of location @loc.
+ **/
+gdouble
+geocode_location_get_altitude (GeocodeLocation *loc)
+{
+        g_return_val_if_fail (GEOCODE_IS_LOCATION (loc),
+                              GEOCODE_LOCATION_ALTITUDE_UNKNOWN);
+
+        return loc->priv->altitude;
 }
 
 /**

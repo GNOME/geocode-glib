@@ -63,6 +63,13 @@ struct _GeocodeLocationClass {
 };
 
 /**
+ * GEOCODE_LOCATION_ALTITUDE_UNKNOWN:
+ *
+ * Constant representing unknown altitude.
+ */
+#define GEOCODE_LOCATION_ALTITUDE_UNKNOWN -G_MAXDOUBLE
+
+/**
  * GEOCODE_LOCATION_ACCURACY_UNKNOWN:
  *
  * Constant representing unknown accuracy.
@@ -125,6 +132,7 @@ const char *geocode_location_get_description           (GeocodeLocation *loc);
 
 gdouble geocode_location_get_latitude                  (GeocodeLocation *loc);
 gdouble geocode_location_get_longitude                 (GeocodeLocation *loc);
+gdouble geocode_location_get_altitude                  (GeocodeLocation *loc);
 gdouble geocode_location_get_accuracy                  (GeocodeLocation *loc);
 guint64 geocode_location_get_timestamp                 (GeocodeLocation *loc);
 
