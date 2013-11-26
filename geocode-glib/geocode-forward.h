@@ -65,6 +65,7 @@ struct _GeocodeForwardClass {
 
 GeocodeForward *geocode_forward_new_for_string     (const char *str);
 GeocodeForward *geocode_forward_new_for_params     (GHashTable *params);
+guint geocode_forward_get_answer_count             (GeocodeForward *forward);
 void geocode_forward_set_answer_count              (GeocodeForward *forward,
 						    guint           count);
 

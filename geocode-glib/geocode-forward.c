@@ -45,7 +45,56 @@ struct _GeocodeForwardPrivate {
 	guint       answer_count;
 };
 
+enum {
+        PROP_0,
+
+        PROP_ANSWER_COUNT
+};
+
 G_DEFINE_TYPE (GeocodeForward, geocode_forward, G_TYPE_OBJECT)
+
+static void
+geocode_forward_get_property (GObject	 *object,
+			      guint	  property_id,
+			      GValue	 *value,
+			      GParamSpec *pspec)
+{
+	GeocodeForward *forward = GEOCODE_FORWARD (object);
+
+	switch (property_id) {
+		case PROP_ANSWER_COUNT:
+			g_value_set_uint (value,
+					  geocode_forward_get_answer_count (forward));
+			break;
+
+		default:
+			/* We don't have any other property... */
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+			break;
+	}
+}
+
+static void
+geocode_forward_set_property(GObject	   *object,
+			     guint	    property_id,
+			     const GValue *value,
+			     GParamSpec   *pspec)
+{
+	GeocodeForward *forward = GEOCODE_FORWARD (object);
+
+	switch (property_id) {
+		case PROP_ANSWER_COUNT:
+			geocode_forward_set_answer_count (forward,
+							  g_value_get_uint (value));
+			break;
+
+		default:
+			/* We don't have any other property... */
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+			break;
+	}
+}
+
 
 static void geocode_forward_add (GeocodeForward *forward,
 				 const char     *key,
@@ -66,10 +115,29 @@ static void
 geocode_forward_class_init (GeocodeForwardClass *klass)
 {
 	GObjectClass *gforward_class = G_OBJECT_CLASS (klass);
+	GParamSpec *pspec;
 
 	gforward_class->finalize = geocode_forward_finalize;
+	gforward_class->get_property = geocode_forward_get_property;
+	gforward_class->set_property = geocode_forward_set_property;
+
 
 	g_type_class_add_private (klass, sizeof (GeocodeForwardPrivate));
+
+	/**
+	* GeocodeForward:answer-count:
+	*
+	* The number of requested results to a search query.
+	*/
+	pspec = g_param_spec_uint ("answer-count",
+				   "Answer count",
+				   "The number of requested results",
+				   0,
+				   G_MAXINT,
+				   DEFAULT_ANSWER_COUNT,
+				   G_PARAM_READWRITE |
+				   G_PARAM_STATIC_STRINGS);
+	g_object_class_install_property (gforward_class, PROP_ANSWER_COUNT, pspec);
 }
 
 static void
@@ -913,6 +981,19 @@ geocode_forward_set_answer_count (GeocodeForward *forward,
 {
 	g_return_if_fail (GEOCODE_IS_FORWARD (forward));
 
-	/* FIXME: make a property */
 	forward->priv->answer_count = count;
+}
+
+/**
+ * geocode_forward_get_answer_count:
+ * @forward: a #GeocodeForward representing a query
+ *
+ * Gets the number of requested results for searches.
+ **/
+guint
+geocode_forward_get_answer_count (GeocodeForward *forward)
+{
+	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), 0);
+
+	return forward->priv->answer_count;
 }
