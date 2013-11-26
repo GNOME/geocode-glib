@@ -45,13 +45,15 @@ struct _GeocodeForwardPrivate {
         SoupSession *soup_session;
 	guint       answer_count;
 	GeocodeBoundingBox *search_area;
+	gboolean bounded;
 };
 
 enum {
         PROP_0,
 
         PROP_ANSWER_COUNT,
-        PROP_SEARCH_AREA
+        PROP_SEARCH_AREA,
+        PROP_BOUNDED
 };
 
 G_DEFINE_TYPE (GeocodeForward, geocode_forward, G_TYPE_OBJECT)
@@ -73,6 +75,11 @@ geocode_forward_get_property (GObject	 *object,
 		case PROP_SEARCH_AREA:
 			g_value_set_object (value,
 					    geocode_forward_get_search_area (forward));
+			break;
+
+		case PROP_BOUNDED:
+			g_value_set_boolean (value,
+					     geocode_forward_get_bounded (forward));
 			break;
 
 		default:
@@ -99,6 +106,11 @@ geocode_forward_set_property(GObject	   *object,
 		case PROP_SEARCH_AREA:
 			geocode_forward_set_search_area (forward,
 							 g_value_get_object (value));
+			break;
+
+		case PROP_BOUNDED:
+			geocode_forward_set_bounded (forward,
+						     g_value_get_boolean (value));
 			break;
 
 		default:
@@ -156,6 +168,8 @@ geocode_forward_class_init (GeocodeForwardClass *klass)
 	* GeocodeForward:search-area:
 	*
 	* The bounding box that limits the search area.
+	* If #GeocodeForward:bounded property is set to #TRUE only results from
+	* this area is returned.
 	*/
 	pspec = g_param_spec_object ("search-area",
 				     "Search area",
@@ -164,6 +178,22 @@ geocode_forward_class_init (GeocodeForwardClass *klass)
 				     G_PARAM_READWRITE |
 				     G_PARAM_STATIC_STRINGS);
 	g_object_class_install_property (gforward_class, PROP_SEARCH_AREA, pspec);
+
+	/**
+	* GeocodeForward:bounded:
+	*
+	* If set to #TRUE then only results in the #GeocodeForward:search-area
+	* bounding box are returned.
+	* If set to #FALSE the #GeocodeForward:search-area is treated like a
+	* preferred area for results.
+	*/
+	pspec = g_param_spec_boolean ("bounded",
+				      "Bounded",
+				      "Bind search results to search-area",
+				      FALSE,
+				      G_PARAM_READWRITE |
+				      G_PARAM_STATIC_STRINGS);
+	g_object_class_install_property (gforward_class, PROP_BOUNDED, pspec);
 }
 
 static void
@@ -175,6 +205,7 @@ geocode_forward_init (GeocodeForward *forward)
         forward->priv->soup_session = soup_session_new ();
 	forward->priv->answer_count = DEFAULT_ANSWER_COUNT;
 	forward->priv->search_area = NULL;
+	forward->priv->bounded = FALSE;
 }
 
 static struct {
@@ -462,7 +493,7 @@ get_search_query_for_params (GeocodeForward *forward,
                 uri = g_strdup_printf ("http://nominatim.gnome.org/search?q=%s&limit=%u&bounded=%d&%s",
                                        search_term,
                                        forward->priv->answer_count,
-                                       forward->priv->search_area ? 1 : 0,
+                                       !!forward->priv->bounded,
                                        params);
                 g_free (search_term);
                 g_free (location);
@@ -1054,6 +1085,24 @@ geocode_forward_set_search_area (GeocodeForward     *forward,
 }
 
 /**
+ * geocode_forward_set_bounded:
+ * @forward: a #GeocodeForward representing a query
+ * @bounded: #TRUE to restrict results to only items contained within the
+ * #GeocodeForward:search-area bounding box.
+ *
+ * Set the #GeocodeForward:bounded property that regulates whether the
+ * #GeocodeForward:search-area property acts restricting or not.
+ **/
+void
+geocode_forward_set_bounded (GeocodeForward *forward,
+			     gboolean        bounded)
+{
+	g_return_if_fail (GEOCODE_IS_FORWARD (forward));
+
+	forward->priv->bounded = bounded;
+}
+
+/**
  * geocode_forward_get_answer_count:
  * @forward: a #GeocodeForward representing a query
  *
@@ -1079,4 +1128,19 @@ geocode_forward_get_search_area (GeocodeForward *forward)
 	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), NULL);
 
 	return forward->priv->search_area;
+}
+
+/**
+ * geocode_forward_get_bounded:
+ * @forward: a #GeocodeForward representing a query
+ *
+ * Gets the #GeocodeForward:bounded property that regulates whether the
+ * #GeocodeForward:search-area property acts restricting or not.
+ **/
+gboolean
+geocode_forward_get_bounded (GeocodeForward *forward)
+{
+	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), FALSE);
+
+	return forward->priv->bounded;
 }

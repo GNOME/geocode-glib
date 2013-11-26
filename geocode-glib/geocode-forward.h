@@ -72,6 +72,9 @@ void geocode_forward_set_answer_count                (GeocodeForward *forward,
 GeocodeBoundingBox * geocode_forward_get_search_area (GeocodeForward     *forward);
 void geocode_forward_set_search_area                 (GeocodeForward     *forward,
 						      GeocodeBoundingBox *box);
+gboolean geocode_forward_get_bounded                 (GeocodeForward *forward);
+void geocode_forward_set_bounded                     (GeocodeForward *forward,
+						      gboolean        bounded);
 
 void geocode_forward_search_async  (GeocodeForward       *forward,
 				    GCancellable        *cancellable,
