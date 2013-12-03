@@ -27,6 +27,7 @@
 #include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
 #include <geocode-glib/geocode-forward.h>
+#include <geocode-glib/geocode-bounding-box.h>
 #include <geocode-glib/geocode-error.h>
 #include <geocode-glib/geocode-glib-private.h>
 
@@ -43,12 +44,14 @@ struct _GeocodeForwardPrivate {
 	GHashTable *ht;
         SoupSession *soup_session;
 	guint       answer_count;
+	GeocodeBoundingBox *search_area;
 };
 
 enum {
         PROP_0,
 
-        PROP_ANSWER_COUNT
+        PROP_ANSWER_COUNT,
+        PROP_SEARCH_AREA
 };
 
 G_DEFINE_TYPE (GeocodeForward, geocode_forward, G_TYPE_OBJECT)
@@ -65,6 +68,11 @@ geocode_forward_get_property (GObject	 *object,
 		case PROP_ANSWER_COUNT:
 			g_value_set_uint (value,
 					  geocode_forward_get_answer_count (forward));
+			break;
+
+		case PROP_SEARCH_AREA:
+			g_value_set_object (value,
+					    geocode_forward_get_search_area (forward));
 			break;
 
 		default:
@@ -86,6 +94,11 @@ geocode_forward_set_property(GObject	   *object,
 		case PROP_ANSWER_COUNT:
 			geocode_forward_set_answer_count (forward,
 							  g_value_get_uint (value));
+			break;
+
+		case PROP_SEARCH_AREA:
+			geocode_forward_set_search_area (forward,
+							 g_value_get_object (value));
 			break;
 
 		default:
@@ -138,6 +151,19 @@ geocode_forward_class_init (GeocodeForwardClass *klass)
 				   G_PARAM_READWRITE |
 				   G_PARAM_STATIC_STRINGS);
 	g_object_class_install_property (gforward_class, PROP_ANSWER_COUNT, pspec);
+
+	/**
+	* GeocodeForward:search-area:
+	*
+	* The bounding box that limits the search area.
+	*/
+	pspec = g_param_spec_object ("search-area",
+				     "Search area",
+				     "The area to limit search within",
+				     GEOCODE_TYPE_BOUNDING_BOX,
+				     G_PARAM_READWRITE |
+				     G_PARAM_STATIC_STRINGS);
+	g_object_class_install_property (gforward_class, PROP_SEARCH_AREA, pspec);
 }
 
 static void
@@ -148,6 +174,7 @@ geocode_forward_init (GeocodeForward *forward)
 						   g_free, g_free);
         forward->priv->soup_session = soup_session_new ();
 	forward->priv->answer_count = DEFAULT_ANSWER_COUNT;
+	forward->priv->search_area = NULL;
 }
 
 static struct {
@@ -432,8 +459,11 @@ get_search_query_for_params (GeocodeForward *forward,
         if (location != NULL) {
 	        /* Prepare the search term */
                 search_term = soup_uri_encode (location, NULL);
-                uri = g_strdup_printf ("http://nominatim.gnome.org/search?q=%s&limit=%u&%s",
-                                       search_term, forward->priv->answer_count, params);
+                uri = g_strdup_printf ("http://nominatim.gnome.org/search?q=%s&limit=%u&bounded=%d&%s",
+                                       search_term,
+                                       forward->priv->answer_count,
+                                       forward->priv->search_area ? 1 : 0,
+                                       params);
                 g_free (search_term);
                 g_free (location);
         } else {
@@ -985,6 +1015,45 @@ geocode_forward_set_answer_count (GeocodeForward *forward,
 }
 
 /**
+ * geocode_forward_set_search_area:
+ * @forward: a #GeocodeForward representing a query
+ * @box: a bounding box to limit the search area.
+ *
+ * Sets the area to limit searches within.
+ **/
+void
+geocode_forward_set_search_area (GeocodeForward     *forward,
+				 GeocodeBoundingBox *bbox)
+{
+	char *area;
+	char top[G_ASCII_DTOSTR_BUF_SIZE];
+	char left[G_ASCII_DTOSTR_BUF_SIZE];
+	char bottom[G_ASCII_DTOSTR_BUF_SIZE];
+	char right[G_ASCII_DTOSTR_BUF_SIZE];
+
+	g_return_if_fail (GEOCODE_IS_FORWARD (forward));
+
+	forward->priv->search_area = bbox;
+
+	/* need to convert with g_ascii_dtostr to be locale safe */
+	g_ascii_dtostr (top, G_ASCII_DTOSTR_BUF_SIZE,
+	                geocode_bounding_box_get_top (bbox));
+
+	g_ascii_dtostr (bottom, G_ASCII_DTOSTR_BUF_SIZE,
+	                geocode_bounding_box_get_bottom (bbox));
+
+	g_ascii_dtostr (left, G_ASCII_DTOSTR_BUF_SIZE,
+	                geocode_bounding_box_get_left (bbox));
+
+	g_ascii_dtostr (right, G_ASCII_DTOSTR_BUF_SIZE,
+	                geocode_bounding_box_get_right (bbox));
+
+	area = g_strdup_printf ("%s,%s,%s,%s", left, top, right, bottom);
+	geocode_forward_add (forward, "viewbox", area);
+	g_free (area);
+}
+
+/**
  * geocode_forward_get_answer_count:
  * @forward: a #GeocodeForward representing a query
  *
@@ -996,4 +1065,18 @@ geocode_forward_get_answer_count (GeocodeForward *forward)
 	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), 0);
 
 	return forward->priv->answer_count;
+}
+
+/**
+ * geocode_forward_get_search_area:
+ * @forward: a #GeocodeForward representing a query
+ *
+ * Gets the area to limit searches within.
+ **/
+GeocodeBoundingBox *
+geocode_forward_get_search_area (GeocodeForward *forward)
+{
+	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), NULL);
+
+	return forward->priv->search_area;
 }
