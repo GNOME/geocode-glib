@@ -23,6 +23,7 @@
 	<xi:include href="xml/geocode-place.xml"/>
 	<xi:include href="xml/geocode-reverse.xml"/>
 	<xi:include href="xml/geocode-enum-types.xml"/>
+	<xi:include href="xml/geocode-bounding-box.xml"/>
 
   </chapter>
   <index id="api-index-full">

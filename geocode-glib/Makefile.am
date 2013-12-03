@@ -13,7 +13,8 @@ libgeocode_glib_la_PUBLICSOURCES =			\
 	geocode-glib.c					\
 	geocode-error.c                                 \
 	geocode-enum-types.c				\
-	geocode-place.c
+	geocode-place.c					\
+	geocode-bounding-box.c
 
 libgeocode_glib_la_SOURCES =				\
 	$(libgeocode_glib_la_PUBLICSOURCES)		\
@@ -33,7 +34,8 @@ GCGLIB_HEADER_FILES = \
 	geocode-forward.h				\
 	geocode-reverse.h				\
 	geocode-error.h                                 \
-	geocode-place.h
+	geocode-place.h					\
+	geocode-bounding-box.h
 
 gcglibdir = $(includedir)/$(PACKAGE)-$(GCLIB_API_VERSION)/$(PACKAGE)
 gcglib_HEADERS =					\
