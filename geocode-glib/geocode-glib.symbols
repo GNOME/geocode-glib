@@ -1,4 +1,5 @@
 geocode_location_get_type
+geocode_location_crs_get_type
 geocode_location_new
 geocode_location_new_with_description
 geocode_location_get_accuracy
@@ -7,6 +8,7 @@ geocode_location_get_distance_from
 geocode_location_get_latitude
 geocode_location_get_longitude
 geocode_location_get_altitude
+geocode_location_get_crs
 geocode_location_get_timestamp
 geocode_location_set_description
 geocode_forward_get_type

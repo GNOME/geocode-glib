@@ -21,6 +21,8 @@
 
  */
 
+#include <geocode-glib/geocode-error.h>
+#include <geocode-glib/geocode-enum-types.h>
 #include <math.h>
 #include "geocode-location.h"
 
@@ -36,12 +38,13 @@
  **/
 
 struct _GeocodeLocationPrivate {
-        gdouble longitude;
-        gdouble latitude;
-        gdouble altitude;
-        gdouble accuracy;
-        guint64 timestamp;
-        char   *description;
+        gdouble            longitude;
+        gdouble            latitude;
+        gdouble            altitude;
+        gdouble            accuracy;
+        guint64            timestamp;
+        char              *description;
+        GeocodeLocationCRS crs;
 };
 
 enum {
@@ -52,7 +55,8 @@ enum {
         PROP_ACCURACY,
         PROP_DESCRIPTION,
         PROP_TIMESTAMP,
-        PROP_ALTITUDE
+        PROP_ALTITUDE,
+        PROP_CRS,
 };
 
 G_DEFINE_TYPE (GeocodeLocation, geocode_location, G_TYPE_OBJECT)
@@ -89,6 +93,11 @@ geocode_location_get_property (GObject    *object,
         case PROP_ACCURACY:
                 g_value_set_double (value,
                                     geocode_location_get_accuracy (location));
+                break;
+
+        case PROP_CRS:
+                g_value_set_enum (value,
+                                  geocode_location_get_crs (location));
                 break;
 
         case PROP_TIMESTAMP:
@@ -138,6 +147,15 @@ geocode_location_set_accuracy (GeocodeLocation *loc,
 }
 
 static void
+geocode_location_set_crs(GeocodeLocation   *loc,
+                         GeocodeLocationCRS crs)
+{
+        g_return_if_fail (GEOCODE_IS_LOCATION (loc));
+
+        loc->priv->crs = crs;
+}
+
+static void
 geocode_location_set_property(GObject      *object,
                               guint         property_id,
                               const GValue *value,
@@ -169,6 +187,11 @@ geocode_location_set_property(GObject      *object,
         case PROP_ACCURACY:
                 geocode_location_set_accuracy (location,
                                                 g_value_get_double (value));
+                break;
+
+        case PROP_CRS:
+                geocode_location_set_crs (location,
+                                          g_value_get_enum (value));
                 break;
 
         default:
@@ -273,6 +296,23 @@ geocode_location_class_init (GeocodeLocationClass *klass)
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (glocation_class, PROP_ACCURACY, pspec);
 
+
+        /**
+         * GeocodeLocation:crs:
+         *
+         * The Coordinate Reference System Identification of this location.
+         * Only the value 'wgs84' is currently valid.
+         */
+        pspec = g_param_spec_enum ("crs",
+                                   "Coordinate Reference System Identification",
+                                   "Coordinate Reference System Identification",
+                                   GEOCODE_TYPE_LOCATION_CRS,
+                                   GEOCODE_LOCATION_CRS_WGS84,
+                                   G_PARAM_READWRITE |
+                                   G_PARAM_CONSTRUCT_ONLY |
+                                   G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (glocation_class, PROP_CRS, pspec);
+
         /**
          * GeocodeLocation:timestamp:
          *
@@ -303,6 +343,7 @@ geocode_location_init (GeocodeLocation *location)
         g_get_current_time (&tv);
         location->priv->timestamp = tv.tv_sec;
         location->priv->altitude = GEOCODE_LOCATION_ALTITUDE_UNKNOWN;
+        location->priv->crs = GEOCODE_LOCATION_CRS_WGS84;
 }
 
 /**
@@ -449,6 +490,23 @@ geocode_location_get_accuracy (GeocodeLocation *loc)
                               GEOCODE_LOCATION_ACCURACY_UNKNOWN);
 
         return loc->priv->accuracy;
+}
+
+/**
+ * geocode_location_get_crs:
+ * @loc: a #GeocodeLocation
+ *
+ * Gets the Coordinate Reference System Identification of location @loc.
+ *
+ * Returns: The CRS of location @loc.
+ **/
+GeocodeLocationCRS
+geocode_location_get_crs (GeocodeLocation *loc)
+{
+        g_return_val_if_fail (GEOCODE_IS_LOCATION (loc),
+                              GEOCODE_LOCATION_CRS_WGS84);
+
+        return loc->priv->crs;
 }
 
 /**

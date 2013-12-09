@@ -63,6 +63,16 @@ struct _GeocodeLocationClass {
 };
 
 /**
+ * GeocodeLocationCRS:
+ * @GEOCODE_LOCATION_CRS_WGS84: CRS is World Geodetic System, standard for Earth.
+ *
+ * Coordinate Reference System Identification for a location.
+ */
+typedef enum {
+	GEOCODE_LOCATION_CRS_WGS84 = 0
+} GeocodeLocationCRS;
+
+/**
  * GEOCODE_LOCATION_ALTITUDE_UNKNOWN:
  *
  * Constant representing unknown altitude.
@@ -133,6 +143,7 @@ const char *geocode_location_get_description           (GeocodeLocation *loc);
 gdouble geocode_location_get_latitude                  (GeocodeLocation *loc);
 gdouble geocode_location_get_longitude                 (GeocodeLocation *loc);
 gdouble geocode_location_get_altitude                  (GeocodeLocation *loc);
+GeocodeLocationCRS  geocode_location_get_crs           (GeocodeLocation *loc);
 gdouble geocode_location_get_accuracy                  (GeocodeLocation *loc);
 guint64 geocode_location_get_timestamp                 (GeocodeLocation *loc);
 
