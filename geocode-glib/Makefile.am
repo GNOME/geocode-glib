@@ -103,9 +103,10 @@ CLEANFILES += $(gir_DATA) $(typelib_DATA)
 
 endif # HAVE_INTROSPECTION
 
-TEST_PROGS += test-gcglib
+TEST_PROGS += test-geouri test-gcglib
 noinst_PROGRAMS = $(TEST_PROGS)
 
+test_geouri_LDADD = libgeocode-glib.la $(GEOCODE_LIBS)
 test_gcglib_LDADD = libgeocode-glib.la $(GEOCODE_LIBS)
 
 MAINTAINERCLEANFILES = Makefile.in

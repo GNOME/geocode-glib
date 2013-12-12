@@ -63,6 +63,16 @@ struct _GeocodeLocationClass {
 };
 
 /**
+ * GeocodeLocationURIScheme:
+ * @GEOCODE_LOCATION_URI_SCHEME_GEO: The 'geo' URI scheme, RFC 5870
+ *
+ * The URI scheme for this location.
+ */
+typedef enum {
+	GEOCODE_LOCATION_URI_SCHEME_GEO = 0
+} GeocodeLocationURIScheme;
+
+/**
  * GeocodeLocationCRS:
  * @GEOCODE_LOCATION_CRS_WGS84: CRS is World Geodetic System, standard for Earth.
  *
@@ -123,14 +133,21 @@ typedef enum {
 
 #define GEOCODE_TYPE_LOCATION (geocode_location_get_type ())
 
-GeocodeLocation *geocode_location_new (gdouble latitude,
-                                       gdouble longitude,
-                                       gdouble accuracy);
+GeocodeLocation *geocode_location_new                  (gdouble latitude,
+                                                        gdouble longitude,
+                                                        gdouble accuracy);
 
 GeocodeLocation *geocode_location_new_with_description (gdouble     latitude,
                                                         gdouble     longitude,
                                                         gdouble     accuracy,
                                                         const char *description);
+
+gboolean geocode_location_set_from_uri                 (GeocodeLocation *loc,
+                                                        const char      *uri,
+                                                        GError         **error);
+
+char * geocode_location_to_uri                         (GeocodeLocation *loc,
+                                                        GeocodeLocationURIScheme scheme);
 
 double geocode_location_get_distance_from              (GeocodeLocation *loca,
                                                         GeocodeLocation *locb);
