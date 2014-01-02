@@ -657,7 +657,7 @@ static const char const *attributes[] = {
 	"state",
 	"county",
 	"state_district",
-	"postalcode",
+	"postcode",
 	"city",
 	"suburb",
 	"village",
