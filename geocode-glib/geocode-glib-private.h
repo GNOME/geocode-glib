@@ -58,9 +58,6 @@ gboolean _geocode_glib_cache_load (SoupMessage *query,
                                    char       **contents);
 GHashTable *_geocode_glib_dup_hash_table (GHashTable *ht);
 
-void _geocode_place_set_icon      (GeocodePlace *place,
-                                   GIcon        *icon);
-
 G_END_DECLS
 
 #endif /* GEOCODE_GLIB_PRIVATE_H */

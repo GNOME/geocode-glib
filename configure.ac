@@ -94,6 +94,7 @@ AC_CONFIG_FILES([
 	  docs/version.xml
 	  geocode-glib/Makefile
 	  po/Makefile.in
+	  icons/Makefile
 ])
 AC_OUTPUT
 

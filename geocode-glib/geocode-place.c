@@ -21,6 +21,7 @@
 
  */
 
+#include <gio/gio.h>
 #include <geocode-glib/geocode-place.h>
 #include <geocode-glib/geocode-enum-types.h>
 #include <geocode-glib/geocode-glib-private.h>
@@ -53,7 +54,6 @@ struct _GeocodePlacePrivate {
         char *country_code;
         char *country;
         char *continent;
-        GIcon *icon;
 };
 
 enum {
@@ -249,7 +249,7 @@ geocode_place_set_property(GObject      *object,
                 break;
 
         case PROP_ICON:
-                _geocode_place_set_icon (place, g_value_get_object (value));
+                /* nothing to do */
                 break;
 
         default:
@@ -264,7 +264,6 @@ geocode_place_dispose (GObject *gplace)
         GeocodePlace *place = (GeocodePlace *) gplace;
 
         g_clear_object (&place->priv->location);
-        g_clear_object (&place->priv->icon);
 
         g_clear_pointer (&place->priv->name, g_free);
         g_clear_pointer (&place->priv->street_address, g_free);
@@ -1048,6 +1047,45 @@ geocode_place_get_continent (GeocodePlace *place)
         return place->priv->continent;
 }
 
+static char *
+get_icon_name (GeocodePlace *place)
+{
+        char *icon_name;
+
+        switch (place->priv->place_type) {
+
+        case GEOCODE_PLACE_TYPE_BUILDING:
+                icon_name = "poi-building";
+                break;
+
+        case GEOCODE_PLACE_TYPE_TOWN:
+                icon_name = "poi-town";
+                break;
+
+        case GEOCODE_PLACE_TYPE_AIRPORT:
+                icon_name = "poi-airport";
+                break;
+
+        case GEOCODE_PLACE_TYPE_RAILWAY_STATION:
+                icon_name = "poi-railway-station";
+                break;
+
+        case GEOCODE_PLACE_TYPE_BUS_STOP:
+                icon_name = "poi-bus-stop";
+                break;
+
+        case GEOCODE_PLACE_TYPE_STREET:
+                icon_name = "poi-car";
+                break;
+
+        default:
+                icon_name = "poi-marker"; /* generic marker */
+                break;
+        }
+
+        return icon_name;
+}
+
 /**
  * geocode_place_get_icon:
  * @place: A place
@@ -1059,18 +1097,11 @@ geocode_place_get_continent (GeocodePlace *place)
 GIcon *
 geocode_place_get_icon (GeocodePlace *place)
 {
+        char *icon_name;
+
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->icon;
-}
+        icon_name = get_icon_name (place);
 
-void
-_geocode_place_set_icon (GeocodePlace *place,
-                         GIcon        *icon)
-{
-        g_return_if_fail (GEOCODE_IS_PLACE (place));
-        g_return_if_fail (icon != NULL);
-
-        g_clear_object (&place->priv->icon);
-        place->priv->icon = g_object_ref (icon);
+        return g_icon_new_for_string (icon_name, NULL);
 }

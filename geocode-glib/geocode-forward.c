@@ -637,15 +637,6 @@ fill_place_from_entry (const char   *key,
                                       NULL);
                         break;
                 }
-                /* special case for icon, convert to GIcon */
-                if (g_str_equal (key, "icon")) {
-	                GFile *file = g_file_new_for_uri (value);
-	                GIcon *icon = g_file_icon_new (file);
-	                g_object_unref (file);
-
-	                g_object_set (G_OBJECT (place), "icon", icon, NULL);
-	                g_object_unref (icon);
-                }
         }
 }
 
