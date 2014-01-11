@@ -248,10 +248,6 @@ geocode_place_set_property(GObject      *object,
                 geocode_place_set_continent (place, g_value_get_string (value));
                 break;
 
-        case PROP_ICON:
-                /* nothing to do */
-                break;
-
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
                 break;
@@ -500,7 +496,7 @@ geocode_place_class_init (GeocodePlaceClass *klass)
                                      "Icon",
                                      "An icon representing the the place",
                                      G_TYPE_ICON,
-                                     G_PARAM_READWRITE |
+                                     G_PARAM_READABLE |
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (gplace_class, PROP_ICON, pspec);
 }
