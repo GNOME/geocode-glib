@@ -2,11 +2,11 @@ ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
 SUBDIRS = geocode-glib po docs icons
 
-EXTRA_DIST = intltool-extract.in intltool-update.in intltool-merge.in gtk-doc.make
+EXTRA_DIST = gtk-doc.make
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc=yes --enable-introspection=yes
 
-DISTCLEANFILES = intltool-extract intltool-update intltool-merge gtk-doc.make
+DISTCLEANFILES = gtk-doc.make
 
 MAINTAINERCLEANFILES = \
 	$(GITIGNORE_MAINTAINERCLEANFILES_TOPLEVEL) \
