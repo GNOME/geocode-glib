@@ -1,3 +1,22 @@
+3.11.4
+------
+
+Changes since 3.10.0:
+
+- Do not depend on intltool, use upstream gettext instead.
+- Check for libsoup not libsoup-gnome in Makefile.am.
+- Add parsing of geo URI to GeocodeLocation (RFC 5870).
+- Add altitude and CRS (Coordinate Reference System) property to GeocodeLocation.
+- Allow specifying a bounding-box search-area for GeocodeForward searches.
+- Replace the Nominatim place icons with place type derived icons, using the BSD
+  licensed Maki point-of-interest icon set.
+
+All contributors to this release:
+
+Javier Jardón <jjardon@gnome.org>
+Jonas Danielsson <jonas@threetimestwo.org>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 3.10.0
 ------
 
