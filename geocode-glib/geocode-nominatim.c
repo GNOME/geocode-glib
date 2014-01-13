@@ -510,23 +510,22 @@ insert_place_into_tree (GNode *place_tree, GHashTable *ht)
 		GNode *child = NULL;
 
 		attr_val = g_hash_table_lookup (ht, place_attributes[i]);
-		if (!attr_val) {
-			/* Add a dummy node if the attribute value is not
-			 * available for the place */
-			child = g_node_insert_data (start, -1, NULL);
-		} else {
-			/* If the attr value (eg for country United States)
-			 * already exists, then keep on adding other attributes under that node. */
-			child = g_node_first_child (start);
-			while (child &&
-			       child->data &&
-			       g_ascii_strcasecmp (child->data, attr_val) != 0) {
-				child = g_node_next_sibling (child);
+		/* If the attr value (eg for country United States or missing completely)
+		 * already exists, then keep on adding other attributes under that node. */
+		child = g_node_first_child (start);
+		while (child) {
+			if (!attr_val) {
+				if (!child->data)
+					break;
+			} else if (child->data) {
+				if (g_ascii_strcasecmp (child->data, attr_val) == 0)
+					break;
 			}
-			if (!child) {
-				/* create a new node */
-				child = g_node_insert_data (start, -1, g_strdup (attr_val));
-			}
+			child = g_node_next_sibling (child);
+		}
+		if (!child) {
+			/* create a new node */
+			child = g_node_insert_data (start, -1, g_strdup (attr_val));
 		}
 		start = child;
 	}
