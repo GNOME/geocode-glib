@@ -41,6 +41,12 @@ update-icon-cache:
 	fi
 
 EXTRA_DIST = \
-	$(public_icons)
+	maki/scalable_places_poi-airport.svg \
+	maki/scalable_places_poi-building.svg \
+	maki/scalable_places_poi-bus-stop.svg \
+	maki/scalable_places_poi-car.svg \
+	maki/scalable_places_poi-marker.svg \
+	maki/scalable_places_poi-railway-station.svg \
+	maki/scalable_places_poi-town.svg
 
 -include $(top_srcdir)/git.mk
