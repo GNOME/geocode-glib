@@ -1,11 +1,11 @@
 public_icons = \
-	maki/scalable_places_poi-airport.svg \
-	maki/scalable_places_poi-building.svg \
-	maki/scalable_places_poi-bus-stop.svg \
-	maki/scalable_places_poi-car.svg \
-	maki/scalable_places_poi-marker.svg \
-	maki/scalable_places_poi-railway-station.svg \
-	maki/scalable_places_poi-town.svg
+	scalable_places_poi-airport.svg \
+	scalable_places_poi-building.svg \
+	scalable_places_poi-bus-stop.svg \
+	scalable_places_poi-car.svg \
+	scalable_places_poi-marker.svg \
+	scalable_places_poi-railway-station.svg \
+	scalable_places_poi-town.svg
 
 gtk_update_icon_cache = gtk-update-icon-cache -f -t
 
@@ -21,7 +21,7 @@ install-icons:
 		ICONDIR=`dirname $$ICON`; \
 		mkdir -p $(DESTDIR)$(datadir)/icons/gnome/$$ICONDIR; \
 		echo INSTALL $(DESTDIR)$(datadir)/icons/gnome/$$ICON; \
-		$(INSTALL_DATA) $(srcdir)/$$icon $(DESTDIR)$(datadir)/icons/gnome/$$ICON; \
+		$(INSTALL_DATA) $(srcdir)/maki/$$icon $(DESTDIR)$(datadir)/icons/gnome/$$ICON; \
 	done;
 
 uninstall-icons:
