@@ -41,8 +41,6 @@ typedef enum {
 
 GList      *_geocode_parse_search_json  (const char *contents,
 					 GError    **error);
-GeocodeLocation *_geocode_ip_json_to_location (const char  *json,
-					       GError     **error);
 void
 _geocode_read_nominatim_attributes (JsonReader *reader,
                                     GHashTable *ht);
