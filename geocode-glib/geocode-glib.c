@@ -24,10 +24,7 @@
 #include <errno.h>
 #include <locale.h>
 #include <gio/gio.h>
-#include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
-#include <geocode-glib/geocode-glib.h>
-#include <geocode-glib/geocode-error.h>
 #include <geocode-glib/geocode-glib-private.h>
 
 /**
