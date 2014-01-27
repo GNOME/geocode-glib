@@ -23,6 +23,7 @@
 
 #include <gio/gio.h>
 #include <geocode-glib/geocode-place.h>
+#include <geocode-glib/geocode-bounding-box.h>
 #include <geocode-glib/geocode-enum-types.h>
 #include <geocode-glib/geocode-glib-private.h>
 
@@ -41,6 +42,7 @@ struct _GeocodePlacePrivate {
         char *name;
         GeocodePlaceType place_type;
         GeocodeLocation *location;
+        GeocodeBoundingBox *bbox;
 
         char *street_address;
         char *street;
@@ -75,6 +77,7 @@ enum {
         PROP_COUNTRY,
         PROP_CONTINENT,
         PROP_ICON,
+        PROP_BBOX
 };
 
 G_DEFINE_TYPE (GeocodePlace, geocode_place, G_TYPE_OBJECT)
@@ -168,6 +171,11 @@ geocode_place_get_property (GObject    *object,
                                     geocode_place_get_icon (place));
                 break;
 
+        case PROP_BBOX:
+                g_value_set_object (value,
+                                    geocode_place_get_bounding_box (place));
+                break;
+
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
                 break;
@@ -248,6 +256,10 @@ geocode_place_set_property(GObject      *object,
                 geocode_place_set_continent (place, g_value_get_string (value));
                 break;
 
+        case PROP_BBOX:
+                place->priv->bbox = g_value_dup_object (value);
+                break;
+
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
                 break;
@@ -260,6 +272,7 @@ geocode_place_dispose (GObject *gplace)
         GeocodePlace *place = (GeocodePlace *) gplace;
 
         g_clear_object (&place->priv->location);
+        g_clear_object (&place->priv->bbox);
 
         g_clear_pointer (&place->priv->name, g_free);
         g_clear_pointer (&place->priv->street_address, g_free);
@@ -499,6 +512,19 @@ geocode_place_class_init (GeocodePlaceClass *klass)
                                      G_PARAM_READABLE |
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (gplace_class, PROP_ICON, pspec);
+
+        /**
+         * GeocodePlace:bounding-box:
+         *
+         * The bounding box for the place.
+         */
+        pspec = g_param_spec_object ("bounding-box",
+                                     "Bounding Box",
+                                     "The bounding box for the place",
+                                     GEOCODE_TYPE_BOUNDING_BOX,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_BBOX, pspec);
 }
 
 static void
@@ -507,6 +533,7 @@ geocode_place_init (GeocodePlace *place)
         place->priv = G_TYPE_INSTANCE_GET_PRIVATE ((place),
                                                       GEOCODE_TYPE_PLACE,
                                                       GeocodePlacePrivate);
+        place->priv->bbox = NULL;
 }
 
 /**
@@ -1100,4 +1127,40 @@ geocode_place_get_icon (GeocodePlace *place)
         icon_name = get_icon_name (place);
 
         return g_icon_new_for_string (icon_name, NULL);
+}
+
+/**
+ * geocode_place_get_bounding_box:
+ * @place: A place
+ *
+ * Gets the bounding box for the place @place.
+ *
+ * Returns: (transfer none): A #GeocodeBoundingBox, or NULL if boundaries are
+ * unknown.
+ **/
+GeocodeBoundingBox *
+geocode_place_get_bounding_box (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->bbox;
+}
+
+/**
+ * geocode_place_set_bounding_box:
+ * @place: A place
+ * @bbox: A #GeocodeBoundingBox for the place
+ *
+ * Sets the #GeocodeBoundingBox for the place @place.
+ *
+ **/
+void
+geocode_place_set_bounding_box (GeocodePlace       *place,
+                                GeocodeBoundingBox *bbox)
+{
+        g_return_if_fail (GEOCODE_IS_PLACE (place));
+        g_return_if_fail (GEOCODE_IS_BOUNDING_BOX (bbox));
+
+        g_clear_object (&place->priv->bbox);
+        place->priv->bbox = g_object_ref (bbox);
 }
