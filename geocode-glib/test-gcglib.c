@@ -84,6 +84,25 @@ got_geocode_search_cb (GObject *source_object,
 	exit (0);
 }
 
+static gboolean
+bbox_includes_location (GeocodeBoundingBox *bbox,
+                       GeocodeLocation *loc)
+{
+	if (geocode_bounding_box_get_left (bbox) > geocode_location_get_longitude (loc))
+		return FALSE;
+
+	if (geocode_bounding_box_get_right (bbox) < geocode_location_get_longitude (loc))
+		return FALSE;
+
+	if (geocode_bounding_box_get_bottom (bbox) > geocode_location_get_latitude (loc))
+		return FALSE;
+
+	if (geocode_bounding_box_get_top (bbox) < geocode_location_get_latitude (loc))
+		return FALSE;
+
+	return TRUE;
+}
+
 static void
 test_rev (void)
 {
@@ -274,6 +293,7 @@ test_search_lat_long (void)
 	GList *res;
 	GeocodePlace *place;
 	GeocodeLocation *loc;
+	GeocodeBoundingBox *bbox;
 
 	object = geocode_forward_new_for_string ("Santa María del Río");
 	res = geocode_forward_search (object, &error);
@@ -289,8 +309,12 @@ test_search_lat_long (void)
 	loc = geocode_place_get_location (place);
 	g_assert (loc != NULL);
 
+	bbox = geocode_place_get_bounding_box (place);
+	g_assert (bbox != NULL);
+
 	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 21.8021297, <, 0.000001);
 	g_assert_cmpfloat (geocode_location_get_longitude (loc) - -100.7374556, <, 0.000001);
+	g_assert (bbox_includes_location (bbox, geocode_place_get_location (place)));
 	g_assert_cmpstr (geocode_place_get_name (place), ==, "Santa Maria Del Rio, Mexico");
 	g_assert_cmpstr (geocode_place_get_town (place), ==, "Santa Maria Del Rio");
 	g_assert_cmpstr (geocode_place_get_state (place), ==, "San Luis Potosi");

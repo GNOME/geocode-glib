@@ -128,13 +128,15 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
 	members = json_reader_list_members (reader);
 
 	for (i = 0; members[i] != NULL; i++) {
-                const char *value;
+                const char *value = NULL;
 
                 json_reader_read_member (reader, members[i]);
 
-                value = json_reader_get_string_value (reader);
-                if (value && *value == '\0')
-                        value = NULL;
+                if (json_reader_is_value (reader)) {
+                        value = json_reader_get_string_value (reader);
+                        if (value && *value == '\0')
+                                value = NULL;
+                }
 
                 if (value != NULL) {
                         g_hash_table_insert (ht, g_strdup (members[i]), g_strdup (value));
@@ -152,8 +154,29 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
                                 char *name = g_strdup_printf (_("%s %s"), house_number, value);
                                 g_hash_table_insert (ht, g_strdup ("name"), name);
                         }
-                }
+                } else if (g_strcmp0 (members[i], "boundingbox") == 0) {
+                        const char *bbox_val;
 
+                        json_reader_read_element (reader, 0);
+                        bbox_val = json_reader_get_string_value (reader);
+                        g_hash_table_insert(ht, g_strdup ("boundingbox-bottom"), g_strdup (bbox_val));
+                        json_reader_end_element (reader);
+
+                        json_reader_read_element (reader, 1);
+                        bbox_val = json_reader_get_string_value (reader);
+                        g_hash_table_insert(ht, g_strdup ("boundingbox-top"), g_strdup (bbox_val));
+                        json_reader_end_element (reader);
+
+                        json_reader_read_element (reader, 2);
+                        bbox_val = json_reader_get_string_value (reader);
+                        g_hash_table_insert(ht, g_strdup ("boundingbox-left"), g_strdup (bbox_val));
+                        json_reader_end_element (reader);
+
+                        json_reader_read_element (reader, 3);
+                        bbox_val = json_reader_get_string_value (reader);
+                        g_hash_table_insert(ht, g_strdup ("boundingbox-right"), g_strdup (bbox_val));
+                        json_reader_end_element (reader);
+                }
                 json_reader_end_member (reader);
         }
 

@@ -755,7 +755,7 @@ _geocode_create_place_from_attributes (GHashTable *ht)
 {
         GeocodePlace *place;
         GeocodeLocation *loc = NULL;
-        const char *name, *street, *building;
+        const char *name, *street, *building, *bbox_corner;
         GeocodePlaceType place_type;
         gdouble longitude, latitude;
 
@@ -766,6 +766,28 @@ _geocode_create_place_from_attributes (GHashTable *ht)
                 name = g_hash_table_lookup (ht, "display_name");
 
         place = geocode_place_new (name, place_type);
+
+        /* If one corner exists, then all exists */
+        bbox_corner = g_hash_table_lookup (ht, "boundingbox-top");
+        if (bbox_corner != NULL) {
+            GeocodeBoundingBox *bbox;
+            gdouble top, bottom, left, right;
+
+            top = g_ascii_strtod (bbox_corner, NULL);
+
+            bbox_corner = g_hash_table_lookup (ht, "boundingbox-bottom");
+            bottom = g_ascii_strtod (bbox_corner, NULL);
+
+            bbox_corner = g_hash_table_lookup (ht, "boundingbox-left");
+            left = g_ascii_strtod (bbox_corner, NULL);
+
+            bbox_corner = g_hash_table_lookup (ht, "boundingbox-right");
+            right = g_ascii_strtod (bbox_corner, NULL);
+
+            bbox = geocode_bounding_box_new (top, bottom, left, right);
+            geocode_place_set_bounding_box (place, bbox);
+            g_object_unref (bbox);
+        }
 
         /* Nominatim doesn't give us street addresses as such */
         street = g_hash_table_lookup (ht, "road");
