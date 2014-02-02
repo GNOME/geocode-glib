@@ -469,7 +469,7 @@ get_search_query_for_params (GeocodeForward *forward,
 
 	/* Prepare the query parameters */
 	ht = _geocode_glib_dup_hash_table (forward->priv->ht);
-	g_hash_table_insert (ht, (gpointer) "format", (gpointer) "json");
+	g_hash_table_insert (ht, (gpointer) "format", (gpointer) "jsonv2");
 	g_hash_table_insert (ht, (gpointer) "email", (gpointer) "zeeshanak@gnome.org");
 	g_hash_table_insert (ht, (gpointer) "addressdetails", (gpointer) "1");
 
@@ -666,13 +666,13 @@ static const char const *attributes[] = {
 static GeocodePlaceType
 get_place_type_from_attributes (GHashTable *ht)
 {
-        char *class, *type;
+        char *category, *type;
         GeocodePlaceType place_type = GEOCODE_PLACE_TYPE_UNKNOWN;
 
-        class = g_hash_table_lookup (ht, "class");
+        category = g_hash_table_lookup (ht, "category");
         type = g_hash_table_lookup (ht, "type");
 
-        if (g_strcmp0 (class, "place") == 0) {
+        if (g_strcmp0 (category, "place") == 0) {
                 if (g_strcmp0 (type, "house") == 0 ||
                     g_strcmp0 (type, "building") == 0 ||
                     g_strcmp0 (type, "residential") == 0 ||
@@ -714,19 +714,19 @@ get_place_type_from_attributes (GHashTable *ht)
                         place_type =  GEOCODE_PLACE_TYPE_SEA;
                 else if (g_strcmp0 (type, "ocean") == 0)
                         place_type =  GEOCODE_PLACE_TYPE_OCEAN;
-        } else if (g_strcmp0 (class, "highway") == 0) {
+        } else if (g_strcmp0 (category, "highway") == 0) {
                 if (g_strcmp0 (type, "motorway") == 0)
                         place_type =  GEOCODE_PLACE_TYPE_MOTORWAY;
                 else if (g_strcmp0 (type, "bus_stop") == 0)
                         place_type =  GEOCODE_PLACE_TYPE_BUS_STOP;
                 else
                         place_type =  GEOCODE_PLACE_TYPE_STREET;
-        } else if (g_strcmp0 (class, "railway") == 0) {
+        } else if (g_strcmp0 (category, "railway") == 0) {
                 if (g_strcmp0 (type, "station") == 0)
                         place_type =  GEOCODE_PLACE_TYPE_RAILWAY_STATION;
-        } else if (g_strcmp0 (class, "waterway") == 0) {
+        } else if (g_strcmp0 (category, "waterway") == 0) {
                 place_type =  GEOCODE_PLACE_TYPE_DRAINAGE;
-        } else if (g_strcmp0 (class, "boundry") == 0) {
+        } else if (g_strcmp0 (category, "boundary") == 0) {
                 if (g_strcmp0 (type, "administrative") == 0) {
                         int rank;
 
