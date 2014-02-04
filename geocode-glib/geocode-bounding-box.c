@@ -251,6 +251,10 @@ geocode_bounding_box_init (GeocodeBoundingBox *bbox)
 
 /**
  * geocode_bounding_box_new:
+ * @top: The left coordinate
+ * @bottom: The bottom coordinate
+ * @left: The left coordinate
+ * @right: The right coordinate
  *
  * Creates a new #GeocodeBoundingBox object.
  *
