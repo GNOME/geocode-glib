@@ -1,3 +1,16 @@
+3.11.5
+------
+
+Changes since 3.11.4.1:
+
+- API to expose bounding box of places from Nominatim.
+- Switch to jsonv2 format of Nominatim API to get all needed info.
+
+All contributors to this release:
+
+Jonas Danielsson <jonas@threetimestwo.org>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 3.11.4.1
 --------
 

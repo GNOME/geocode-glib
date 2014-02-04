@@ -2,11 +2,10 @@ AC_PREREQ([2.63])
 
 m4_define(gclib_version_major, 3)
 m4_define(gclib_version_minor, 11)
-m4_define(gclib_version_micro, 4)
-m4_define(gclib_version_nano, 1)
+m4_define(gclib_version_micro, 5)
 
 AC_INIT([geocode-glib],
-        [gclib_version_major.gclib_version_minor.gclib_version_micro.gclib_version_nano],
+        [gclib_version_major.gclib_version_minor.gclib_version_micro],
         [http://bugzilla.gnome.org/enter_bug.cgi?product=geocode-glib],
         [geocode-glib])
 
