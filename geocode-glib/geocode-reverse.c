@@ -133,9 +133,12 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
                 json_reader_read_member (reader, members[i]);
 
                 if (json_reader_is_value (reader)) {
-                        value = json_reader_get_string_value (reader);
-                        if (value && *value == '\0')
-                                value = NULL;
+                        JsonNode *node = json_reader_get_value (reader);
+                        if (json_node_get_value_type (node) == G_TYPE_STRING) {
+                                value = json_node_get_string (node);
+                                if (value && *value == '\0')
+                                        value = NULL;
+                        }
                 }
 
                 if (value != NULL) {
@@ -182,10 +185,9 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
 
 	g_strfreev (members);
 
-	if (json_reader_read_member (reader, "address")) {
+        if (json_reader_read_member (reader, "address"))
                 _geocode_read_nominatim_attributes (reader, ht);
-                json_reader_end_member (reader);
-        }
+        json_reader_end_member (reader);
 }
 
 static GHashTable *
