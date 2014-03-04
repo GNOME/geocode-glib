@@ -1,3 +1,16 @@
+3.11.91
+-------
+
+Changes since 3.11.5:
+
+- Adapt to fixed behavior of json-glib. Without this we get a crash on parsing
+  search results.
+- Require json-glib >= 0.99.2
+
+All contributors to this release:
+
+Jonas Danielsson <jonas@threetimestwo.org>
+
 3.11.5
 ------
 
