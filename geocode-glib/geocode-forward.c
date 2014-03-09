@@ -820,8 +820,12 @@ _geocode_create_place_from_attributes (GHashTable *ht)
         building = g_hash_table_lookup (ht, "house_number");
         if (street != NULL && building != NULL) {
             char *address;
+            gboolean number_after;
 
-            address = g_strjoin (" ", street, building, NULL);
+            number_after = _geocode_object_is_number_after_street ();
+            address = g_strdup_printf ("%s %s",
+                                       number_after ? street : building,
+                                       number_after ? building : street);
             geocode_place_set_street_address (place, address);
             g_free (address);
         }

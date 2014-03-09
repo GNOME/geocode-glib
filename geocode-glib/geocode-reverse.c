@@ -153,8 +153,13 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
                                 else
                                         house_number = value;
                         } else if (house_number != NULL && g_strcmp0 (members[i], "road") == 0) {
-                                /* Translators comment: number + street (e.g 221 Baker Street) */
-                                char *name = g_strdup_printf (_("%s %s"), house_number, value);
+                                gboolean number_after;
+                                char *name;
+
+                                number_after = _geocode_object_is_number_after_street ();
+                                name = g_strdup_printf ("%s %s",
+                                                        number_after ? value : house_number,
+                                                        number_after ? house_number : value);
                                 g_hash_table_insert (ht, g_strdup ("name"), name);
                         }
                 } else if (g_strcmp0 (members[i], "boundingbox") == 0) {
