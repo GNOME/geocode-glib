@@ -119,7 +119,6 @@ geocode_reverse_new_for_location (GeocodeLocation *location)
 static gboolean
 is_number_after_street (void)
 {
-#ifdef HAVE_NL_LANGINFO
   gchar *addr_format;
   gchar *s;
   gchar *h;
@@ -133,9 +132,6 @@ is_number_after_street (void)
   } else {
     return FALSE;
   }
-#else
-  return FALSE;
-#endif
 }
 
 void
