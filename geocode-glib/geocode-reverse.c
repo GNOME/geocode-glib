@@ -127,11 +127,10 @@ is_number_after_street (void)
   s = g_strstr_len (addr_format, -1, "%s");
   h = g_strstr_len (addr_format, -1, "%h");
 
-  if (s != NULL && h != NULL) {
+  if (s != NULL && h != NULL)
     return h > s;
-  } else {
+  else
     return FALSE;
-  }
 }
 
 void
