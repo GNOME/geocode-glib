@@ -27,8 +27,6 @@
 #include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
 #include <config.h>
-#include <langinfo.h>
-#include <glib/gprintf.h>
 #include <glib/gi18n-lib.h>
 #include <geocode-glib/geocode-glib.h>
 #include <geocode-glib/geocode-error.h>
@@ -116,23 +114,6 @@ geocode_reverse_new_for_location (GeocodeLocation *location)
 	return object;
 }
 
-static gboolean
-is_number_after_street (void)
-{
-  gchar *addr_format;
-  gchar *s;
-  gchar *h;
-
-  addr_format = nl_langinfo (_NL_ADDRESS_POSTAL_FMT);
-  s = g_strstr_len (addr_format, -1, "%s");
-  h = g_strstr_len (addr_format, -1, "%h");
-
-  if (s != NULL && h != NULL)
-    return h > s;
-  else
-    return FALSE;
-}
-
 void
 _geocode_read_nominatim_attributes (JsonReader *reader,
                                     GHashTable *ht)
@@ -172,10 +153,8 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
                                 else
                                         house_number = value;
                         } else if (house_number != NULL && g_strcmp0 (members[i], "road") == 0) {
-				gboolean number_after = is_number_after_street ();
-				char *name = g_strdup_printf ("%s %s",
-							      number_after? value : house_number,
-							      number_after? house_number : value);
+                                /* Translators comment: number + street (e.g 221 Baker Street) */
+                                char *name = g_strdup_printf (_("%s %s"), house_number, value);
                                 g_hash_table_insert (ht, g_strdup ("name"), name);
                         }
                 } else if (g_strcmp0 (members[i], "boundingbox") == 0) {
