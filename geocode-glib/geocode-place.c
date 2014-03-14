@@ -56,6 +56,7 @@ struct _GeocodePlacePrivate {
         char *country_code;
         char *country;
         char *continent;
+        char *osm_id;
 };
 
 enum {
@@ -77,7 +78,8 @@ enum {
         PROP_COUNTRY,
         PROP_CONTINENT,
         PROP_ICON,
-        PROP_BBOX
+        PROP_BBOX,
+        PROP_OSM_ID
 };
 
 G_DEFINE_TYPE (GeocodePlace, geocode_place, G_TYPE_OBJECT)
@@ -176,6 +178,11 @@ geocode_place_get_property (GObject    *object,
                                     geocode_place_get_bounding_box (place));
                 break;
 
+        case PROP_OSM_ID:
+                g_value_set_string (value,
+                                    geocode_place_get_osm_id (place));
+                break;
+
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
                 break;
@@ -260,6 +267,10 @@ geocode_place_set_property(GObject      *object,
                 place->priv->bbox = g_value_dup_object (value);
                 break;
 
+        case PROP_OSM_ID:
+                place->priv->osm_id = g_value_dup_string (value);
+                break;
+
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
                 break;
@@ -275,6 +286,7 @@ geocode_place_dispose (GObject *gplace)
         g_clear_object (&place->priv->bbox);
 
         g_clear_pointer (&place->priv->name, g_free);
+        g_clear_pointer (&place->priv->osm_id, g_free);
         g_clear_pointer (&place->priv->street_address, g_free);
         g_clear_pointer (&place->priv->street, g_free);
         g_clear_pointer (&place->priv->building, g_free);
@@ -525,6 +537,20 @@ geocode_place_class_init (GeocodePlaceClass *klass)
                                      G_PARAM_READWRITE |
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (gplace_class, PROP_BBOX, pspec);
+
+        /**
+         * GeocodePlace:osm-id:
+         *
+         * The OpenStreetMap id of the place.
+         */
+        pspec = g_param_spec_string ("osm-id",
+                                     "OSM ID",
+                                     "The OpenStreetMap ID of the place",
+                                     NULL,
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_OSM_ID, pspec);
+
 }
 
 static void
@@ -609,6 +635,7 @@ geocode_place_get_name (GeocodePlace *place)
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
         return place->priv->name;
+
 }
 
 /**
@@ -1163,4 +1190,20 @@ geocode_place_set_bounding_box (GeocodePlace       *place,
 
         g_clear_object (&place->priv->bbox);
         place->priv->bbox = g_object_ref (bbox);
+}
+
+/**
+ * geocode_place_get_osm_id:
+ * @place: A place
+ *
+ * Gets the OpenStreetMap ID of the @place.
+ *
+ * Returns: The osm ID of the @place.
+ **/
+const char *
+geocode_place_get_osm_id (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
+
+        return place->priv->osm_id;
 }

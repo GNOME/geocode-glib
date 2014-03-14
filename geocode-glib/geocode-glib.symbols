@@ -73,6 +73,7 @@ geocode_place_get_continent
 geocode_place_get_icon
 geocode_place_get_bounding_box
 geocode_place_set_bounding_box
+geocode_place_get_osm_id
 geocode_bounding_box_get_type
 geocode_bounding_box_new
 geocode_bounding_box_get_top

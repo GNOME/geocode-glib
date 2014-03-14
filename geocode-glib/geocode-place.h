@@ -206,6 +206,8 @@ const char *geocode_place_get_continent            (GeocodePlace *place);
 
 GIcon *geocode_place_get_icon                      (GeocodePlace *place);
 
+const char *geocode_place_get_osm_id               (GeocodePlace *place);
+
 G_END_DECLS
 
 #endif /* GEOCODE_PLACE_H */

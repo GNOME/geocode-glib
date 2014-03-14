@@ -603,7 +603,7 @@ static struct {
 } nominatim_to_place_map[] = {
         { "license", NULL },
         { "osm_type", NULL },
-        { "osm_id", NULL },
+        { "osm_id", "osm-id" },
         { "lat", NULL },
         { "lon", NULL },
         { "display_name", NULL },
