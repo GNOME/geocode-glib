@@ -1,3 +1,17 @@
+3.11.92
+-------
+
+Changes since 3.11.91:
+
+- Add osm-id property to GeocodePlace.
+
+All contributors to this release:
+
+Jonas Danielsson <jonas@threetimestwo.org>
+Marcus Lundblad <ml@update.uu.se>
+Ryan Lortie <desrt@desrt.ca>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 3.11.91
 -------
 
