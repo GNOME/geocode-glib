@@ -3,6 +3,7 @@ AC_PREREQ([2.63])
 m4_define(gclib_version_major, 3)
 m4_define(gclib_version_minor, 11)
 m4_define(gclib_version_micro, 92)
+m4_define(gclib_version_nano, 1)
 
 AC_INIT([geocode-glib],
         [gclib_version_major.gclib_version_minor.gclib_version_micro],

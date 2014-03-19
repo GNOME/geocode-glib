@@ -1,3 +1,14 @@
+3.11.92.1
+-------
+
+Changes since 3.11.92:
+
+- Fix typo in Nominatim search result attribute.
+
+All contributors to this release:
+
+Jonas Danielsson <jonas@threetimestwo.org>
+
 3.11.92
 -------
 
