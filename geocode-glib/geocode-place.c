@@ -1128,6 +1128,22 @@ get_icon_name (GeocodePlace *place)
                 icon_name = "poi-car";
                 break;
 
+        case GEOCODE_PLACE_TYPE_SCHOOL:
+                icon_name = "poi-school";
+                break;
+
+        case GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP:
+                icon_name = "poi-place-of-worship";
+                break;
+
+        case GEOCODE_PLACE_TYPE_RESTAURANT:
+                icon_name = "poi-restaurant";
+                break;
+
+        case GEOCODE_PLACE_TYPE_BAR:
+                icon_name = "poi-bar";
+                break;
+
         default:
                 icon_name = "poi-marker"; /* generic marker */
                 break;

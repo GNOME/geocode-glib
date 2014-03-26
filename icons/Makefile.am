@@ -5,7 +5,11 @@ public_icons = \
 	scalable_places_poi-car.svg \
 	scalable_places_poi-marker.svg \
 	scalable_places_poi-railway-station.svg \
-	scalable_places_poi-town.svg
+	scalable_places_poi-town.svg \
+	scalable_places_poi-school.svg \
+	scalable_places_poi-place-of-worship.svg \
+	scalable_places_poi-restaurant.svg \
+	scalable_places_poi-bar.svg
 
 gtk_update_icon_cache = gtk-update-icon-cache -f -t
 
