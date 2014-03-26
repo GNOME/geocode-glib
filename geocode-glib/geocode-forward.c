@@ -745,6 +745,16 @@ get_place_type_from_attributes (GHashTable *ht)
                         else if (rank == 4)
                                 place_type =  GEOCODE_PLACE_TYPE_COUNTRY;
                 }
+        } else if (g_strcmp0 (category, "amenity") == 0) {
+                if (g_strcmp0 (type, "school") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_SCHOOL;
+                else if (g_strcmp0 (type, "place_of_worship") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP;
+                else if (g_strcmp0 (type, "restaurant") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_RESTAURANT;
+                else if (g_strcmp0 (type, "bar") == 0 ||
+                         g_strcmp0 (type, "pub") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_BAR;
         }
 
         return place_type;

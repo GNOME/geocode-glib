@@ -97,6 +97,10 @@ struct _GeocodePlaceClass {
  * @GEOCODE_PLACE_TYPE_HISTORICAL_TOWN: A historical populated settlement that is no longer known by its original name.
  * @GEOCODE_PLACE_TYPE_OCEAN: One of the five major bodies of water on the Earth.
  * @GEOCODE_PLACE_TYPE_SEA: An area of open water smaller than an ocean.
+ * @GEOCODE_PLACE_TYPE_SCHOOL: Institution designed for learning under the supervision of teachers.
+ * @GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP: All places of worship independently of the religion or denomination.
+ * @GEOCODE_PLACE_TYPE_RESTAURANT: Generally formal place with sit-down facilities selling full meals served by waiters.
+ * @GEOCODE_PLACE_TYPE_BAR: A bar or pub.
  *
  * Type of the place.
  */
@@ -130,7 +134,11 @@ typedef enum {
         GEOCODE_PLACE_TYPE_ESTATE,
         GEOCODE_PLACE_TYPE_HISTORICAL_TOWN,
         GEOCODE_PLACE_TYPE_OCEAN,
-        GEOCODE_PLACE_TYPE_SEA
+        GEOCODE_PLACE_TYPE_SEA,
+        GEOCODE_PLACE_TYPE_SCHOOL,
+        GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP,
+        GEOCODE_PLACE_TYPE_RESTAURANT,
+        GEOCODE_PLACE_TYPE_BAR
 } GeocodePlaceType;
 
 #define GEOCODE_TYPE_PLACE (geocode_place_get_type ())
