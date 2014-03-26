@@ -755,6 +755,9 @@ get_place_type_from_attributes (GHashTable *ht)
                 else if (g_strcmp0 (type, "bar") == 0 ||
                          g_strcmp0 (type, "pub") == 0)
                         place_type = GEOCODE_PLACE_TYPE_BAR;
+        } else if (g_strcmp0 (category, "aeroway") == 0) {
+                if (g_strcmp0 (type, "aerodrome") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_AIRPORT;
         }
 
         return place_type;
