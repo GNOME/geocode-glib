@@ -9,7 +9,8 @@ public_icons = \
 	scalable_places_poi-school.svg \
 	scalable_places_poi-place-of-worship.svg \
 	scalable_places_poi-restaurant.svg \
-	scalable_places_poi-bar.svg
+	scalable_places_poi-bar.svg \
+	scalable_places_poi-airport.svg
 
 gtk_update_icon_cache = gtk-update-icon-cache -f -t
 
