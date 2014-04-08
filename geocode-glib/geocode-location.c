@@ -648,6 +648,17 @@ geocode_location_new_with_description (gdouble     latitude,
  *
  * Initialize a #GeocodeLocation object with the given @uri.
  *
+ * The URI should be in the geo scheme (RFC 5870) which in its simplest form
+ * looks like:
+ *
+ * - geo:latitude,longitude
+ *
+ * An <ulink
+ * url="http://developer.android.com/guide/components/intents-common.html#Maps">
+ * Android extension</ulink> to set a description is also supported in the form of:
+ *
+ * - geo:0,0?q=latitude,longitude(description)
+ *
  * Returns: %TRUE on success and %FALSE on error.
  **/
 gboolean
