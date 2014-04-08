@@ -202,6 +202,57 @@ geocode_location_set_property(GObject      *object,
         }
 }
 
+static void
+parse_geo_uri_special_parameters (GeocodeLocation *loc,
+                                  const char      *params,
+                                  GError         **error)
+{
+        char *end_ptr;
+        char *next_token;
+        char *description;
+        char *token_end;
+        int description_len;
+
+        if (loc->priv->latitude != 0 || loc->priv->longitude != 0)
+            goto err;
+
+        if (strncmp (params, "q=", 2) != 0)
+                goto err;
+
+        next_token = ((char *)params) + 2;
+
+        loc->priv->latitude = g_ascii_strtod (next_token, &end_ptr);
+        if (*end_ptr != ',' || *end_ptr == *params)
+                goto err;
+        next_token = end_ptr + 1;
+
+        loc->priv->longitude = g_ascii_strtod (next_token, &end_ptr);
+        if (*end_ptr == *next_token)
+                goto err;
+
+        if (*end_ptr != '(' || *end_ptr == *next_token)
+                goto err;
+        next_token = end_ptr + 1;
+
+        if ((token_end = strchr (next_token, ')')) == NULL)
+                goto err;
+
+        description_len = token_end - next_token;
+        if (description_len <= 0)
+            goto err;
+
+        description = g_strndup (next_token, description_len);
+        geocode_location_set_description (loc, description);
+        g_free (description);
+        return;
+
+ err:
+       g_set_error_literal (error,
+                            GEOCODE_ERROR,
+                            GEOCODE_ERROR_PARSE,
+                            "Failed to parse geo URI parameters");
+}
+
 /*
   From RFC 5870:
       Both 'crs' and 'u' parameters MUST NOT appear more than once each.
@@ -352,6 +403,10 @@ parse_geo_uri (GeocodeLocation *loc,
         if (*end_ptr == ';') {
                 next_token = end_ptr + 1;
                 parse_geo_uri_parameters (loc, next_token, error);
+                return;
+        } else if (*end_ptr == '?') {
+                next_token = end_ptr + 1;
+                parse_geo_uri_special_parameters (loc, next_token, error);
                 return;
         } else if (*end_ptr == '\0') {
                 return;
