@@ -735,8 +735,9 @@ get_place_type_from_attributes (GHashTable *ht)
                 else
                         place_type =  GEOCODE_PLACE_TYPE_STREET;
         } else if (g_strcmp0 (category, "railway") == 0) {
-                if (g_strcmp0 (type, "station") == 0)
-                        place_type =  GEOCODE_PLACE_TYPE_RAILWAY_STATION;
+                if (g_strcmp0 (type, "station") == 0 ||
+                    g_strcmp0 (type, "halt") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_RAILWAY_STATION;
         } else if (g_strcmp0 (category, "waterway") == 0) {
                 place_type =  GEOCODE_PLACE_TYPE_DRAINAGE;
         } else if (g_strcmp0 (category, "boundary") == 0) {
