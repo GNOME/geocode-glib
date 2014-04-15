@@ -1169,6 +1169,10 @@ get_icon_name (GeocodePlace *place)
                 icon_name = "poi-bar";
                 break;
 
+        case GEOCODE_PLACE_TYPE_LIGHT_RAIL_STATION:
+                icon_name = "poi-light-rail-station";
+                break;
+
         default:
                 icon_name = "poi-marker"; /* generic marker */
                 break;

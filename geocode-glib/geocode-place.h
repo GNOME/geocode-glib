@@ -101,6 +101,7 @@ struct _GeocodePlaceClass {
  * @GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP: All places of worship independently of the religion or denomination.
  * @GEOCODE_PLACE_TYPE_RESTAURANT: Generally formal place with sit-down facilities selling full meals served by waiters.
  * @GEOCODE_PLACE_TYPE_BAR: A bar or pub.
+ * @GEOCODE_PLACE_TYPE_LIGHT_RAIL_STATION: A light rail station or tram stop.
  *
  * Type of the place.
  */
@@ -138,7 +139,8 @@ typedef enum {
         GEOCODE_PLACE_TYPE_SCHOOL,
         GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP,
         GEOCODE_PLACE_TYPE_RESTAURANT,
-        GEOCODE_PLACE_TYPE_BAR
+        GEOCODE_PLACE_TYPE_BAR,
+        GEOCODE_PLACE_TYPE_LIGHT_RAIL_STATION
 } GeocodePlaceType;
 
 
