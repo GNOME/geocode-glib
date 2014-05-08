@@ -89,11 +89,12 @@ test_valid_uri (void)
                 if (uris[i].valid) {
                         g_assert (success);
                         g_assert (error == NULL);
-                        g_object_unref (loc);
                 } else {
                         g_assert (!success);
                         g_assert (error != NULL);
+                        g_error_free (error);
                 }
+                g_object_unref (loc);
         }
 }
 
