@@ -262,13 +262,16 @@ parse_geo_uri_parameters (GeocodeLocation *loc,
                 if (g_strcmp0 (val, "wgs84"))
                         goto err;
         }
-        return;
+        goto out;
 
  err:
        g_set_error_literal (error,
                             GEOCODE_ERROR,
                             GEOCODE_ERROR_PARSE,
                             "Failed to parse geo URI parameters");
+
+ out:
+       g_strfreev (parameters);
 }
 
 /*
@@ -374,18 +377,19 @@ parse_uri (GeocodeLocation *location,
         if (scheme == NULL)
                 goto err;
 
-        if (g_strcmp0 (scheme, "geo") == 0)
+        if (g_strcmp0 (scheme, "geo") == 0) {
                 parse_geo_uri (location, uri, error);
-        else
+                goto out;
+        } else
                 goto err;
-
-        return;
 
  err:
         g_set_error_literal (error,
                              GEOCODE_ERROR,
                              GEOCODE_ERROR_NOT_SUPPORTED,
                              "Unsupported or invalid URI scheme");
+ out:
+        g_free (scheme);
 }
 
 static void
