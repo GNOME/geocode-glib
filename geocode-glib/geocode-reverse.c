@@ -412,6 +412,7 @@ geocode_reverse_resolve_async (GeocodeReverse     *object,
 					    callback,
 					    user_data,
 					    geocode_reverse_resolve_async);
+	g_simple_async_result_set_check_cancellable (simple, cancellable);
 
 	query = get_resolve_query_for_params (object->priv->ht);
 

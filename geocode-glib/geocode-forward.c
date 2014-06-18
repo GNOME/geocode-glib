@@ -540,6 +540,7 @@ geocode_forward_search_async (GeocodeForward      *forward,
 					    callback,
 					    user_data,
 					    geocode_forward_search_async);
+	g_simple_async_result_set_check_cancellable (simple, cancellable);
 
         query = get_search_query_for_params (forward, &error);
 	if (!query) {
