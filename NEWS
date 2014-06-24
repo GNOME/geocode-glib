@@ -1,3 +1,19 @@
+3.13.3
+------
+
+Changes since 3.12.0:
+
+- Add types and icons for more amenity place types
+- Fix memory leaks in geo uri handling
+- Add description extension to geo uri
+- Add cancellable check to all GSimpleAsyncResult
+
+All contributors to this release:
+
+Frédéric Péters <fpeters@0d.be>
+Giovanni Campagna <gcampagna@src.gnome.org>
+Jonas Danielsson <jonas@threetimestwo.org>
+
 3.12.0
 ------
 
