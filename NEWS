@@ -1,3 +1,15 @@
+3.14.0
+------
+
+Changes since 3.13.3:
+
+- Add category and programming language to doap file
+
+All contributors to this release:
+
+Olav Vitters <olav@vitters.nl>
+Andre Klapper <a9016009@gmx.de>
+
 3.13.3
 ------
 
