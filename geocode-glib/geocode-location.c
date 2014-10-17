@@ -241,7 +241,9 @@ parse_geo_uri_special_parameters (GeocodeLocation *loc,
         if (description_len <= 0)
             goto err;
 
-        description = g_strndup (next_token, description_len);
+        description = g_uri_unescape_segment (next_token,
+                                              next_token + description_len,
+                                              NULL);
         geocode_location_set_description (loc, description);
         g_free (description);
         return TRUE;

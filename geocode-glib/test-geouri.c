@@ -99,6 +99,20 @@ test_valid_uri (void)
 }
 
 static void
+test_unescape_uri (void)
+{
+        GeocodeLocation *loc;
+        char *uri = "geo:0,0?q=57.038,12.3982(Parkvägen%202,%20Tvååker)";
+
+        loc = geocode_location_new (0, 0, 0);
+        g_assert (geocode_location_set_from_uri (loc, uri, NULL));
+        g_assert_cmpstr (geocode_location_get_description(loc),
+                         ==,
+                         "Parkvägen 2, Tvååker");
+        g_object_unref (loc);
+}
+
+static void
 test_convert_from_to_location (void)
 {
         GeocodeLocation *loc;
@@ -156,6 +170,7 @@ int main (int argc, char **argv)
 
         g_test_add_func ("/geouri/parse_uri", test_parse_uri);
         g_test_add_func ("/geouri/valid_uri", test_valid_uri);
+        g_test_add_func ("/geouri/unescape_uri", test_unescape_uri);
         g_test_add_func ("/geouri/convert_uri", test_convert_from_to_location);
 
         return g_test_run ();
