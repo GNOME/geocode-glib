@@ -202,7 +202,7 @@ geocode_location_set_property(GObject      *object,
         }
 }
 
-static void
+static gboolean
 parse_geo_uri_special_parameters (GeocodeLocation *loc,
                                   const char      *params,
                                   GError         **error)
@@ -244,13 +244,14 @@ parse_geo_uri_special_parameters (GeocodeLocation *loc,
         description = g_strndup (next_token, description_len);
         geocode_location_set_description (loc, description);
         g_free (description);
-        return;
+        return TRUE;
 
  err:
-       g_set_error_literal (error,
-                            GEOCODE_ERROR,
-                            GEOCODE_ERROR_PARSE,
-                            "Failed to parse geo URI parameters");
+        g_set_error_literal (error,
+                             GEOCODE_ERROR,
+                             GEOCODE_ERROR_PARSE,
+                             "Failed to parse geo URI parameters");
+        return FALSE;
 }
 
 /*
@@ -260,7 +261,7 @@ parse_geo_uri_special_parameters (GeocodeLocation *loc,
       parameters that may be defined in future extensions.  The 'crs'
       parameter MUST be given first if both 'crs' and 'u' are used.
  */
-static void
+static gboolean
 parse_geo_uri_parameters (GeocodeLocation *loc,
                           const char      *params,
                           GError         **error)
@@ -270,6 +271,7 @@ parse_geo_uri_parameters (GeocodeLocation *loc,
         char *val;
         char *u = NULL;
         char *crs = NULL;
+        int ret = TRUE;
 
         parameters = g_strsplit (params, ";", 2);
         if (parameters[0] == NULL)
@@ -316,13 +318,14 @@ parse_geo_uri_parameters (GeocodeLocation *loc,
         goto out;
 
  err:
-       g_set_error_literal (error,
-                            GEOCODE_ERROR,
-                            GEOCODE_ERROR_PARSE,
-                            "Failed to parse geo URI parameters");
-
+        ret = FALSE;
+        g_set_error_literal (error,
+                             GEOCODE_ERROR,
+                             GEOCODE_ERROR_PARSE,
+                             "Failed to parse geo URI parameters");
  out:
        g_strfreev (parameters);
+       return ret;
 }
 
 /*
@@ -366,7 +369,7 @@ parse_geo_uri_parameters (GeocodeLocation *loc,
                         "'" / "(" / ")"
        pct-encoded   = "%" HEXDIG HEXDIG
 */
-static void
+static gboolean
 parse_geo_uri (GeocodeLocation *loc,
                const char      *uri,
                GError         **error)
@@ -405,46 +408,56 @@ parse_geo_uri (GeocodeLocation *loc,
         }
         if (*end_ptr == ';') {
                 next_token = end_ptr + 1;
-                parse_geo_uri_parameters (loc, next_token, error);
-                return;
+                return parse_geo_uri_parameters (loc, next_token, error);
         } else if (*end_ptr == '?') {
                 next_token = end_ptr + 1;
-                parse_geo_uri_special_parameters (loc, next_token, error);
-                return;
+                return parse_geo_uri_special_parameters (loc,
+                                                         next_token,
+                                                         error);
         } else if (*end_ptr == '\0') {
-                return;
+                return TRUE;
         }
  err:
         g_set_error_literal (error,
                              GEOCODE_ERROR,
                              GEOCODE_ERROR_PARSE,
                              "Failed to parse geo URI");
+        return FALSE;
 }
 
-static void
+static gboolean
 parse_uri (GeocodeLocation *location,
            const char      *uri,
            GError         **error)
 {
         char *scheme;
+        int ret = TRUE;
 
         scheme = g_uri_parse_scheme (uri);
-        if (scheme == NULL)
+        if (scheme == NULL) {
+                ret = FALSE;
                 goto err;
+        }
 
         if (g_strcmp0 (scheme, "geo") == 0) {
-                parse_geo_uri (location, uri, error);
+                if (!parse_geo_uri (location, uri, error))
+                        ret = FALSE;
                 goto out;
-        } else
+        } else {
+                ret = FALSE;
                 goto err;
+        }
 
  err:
-        g_set_error_literal (error,
-                             GEOCODE_ERROR,
-                             GEOCODE_ERROR_NOT_SUPPORTED,
-                             "Unsupported or invalid URI scheme");
+        if (error) {
+                g_set_error_literal (error,
+                                     GEOCODE_ERROR,
+                                     GEOCODE_ERROR_NOT_SUPPORTED,
+                                     "Unsupported or invalid URI scheme");
+        }
  out:
         g_free (scheme);
+        return ret;
 }
 
 static void
@@ -666,11 +679,7 @@ geocode_location_set_from_uri (GeocodeLocation *loc,
                                const char      *uri,
                                GError         **error)
 {
-        parse_uri (loc, uri, error);
-        if (*error != NULL)
-                return FALSE;
-
-        return TRUE;
+        return parse_uri (loc, uri, error);
 }
 
 /**
