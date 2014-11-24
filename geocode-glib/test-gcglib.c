@@ -111,7 +111,7 @@ test_rev (void)
 	GError *error = NULL;
 	GeocodePlace *place;
 
-	loc = geocode_location_new (51.237070, -0.589669, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
+	loc = geocode_location_new (51.2370361, -0.5894834, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
 	rev = geocode_reverse_new_for_location (loc);
 	g_object_unref (loc);
 
@@ -124,14 +124,13 @@ test_rev (void)
 	g_object_unref (rev);
 
         g_assert_cmpstr (geocode_place_get_name (place), ==, "The Astolat");
-        g_assert_cmpstr (geocode_place_get_postal_code (place), ==, "GU2 7UP");
+        g_assert_cmpstr (geocode_place_get_postal_code (place), ==, "GU2 7NU");
         g_assert_cmpstr (geocode_place_get_area (place), ==, "Guildford Park");
         g_assert_cmpstr (geocode_place_get_country_code (place), ==, "GB");
         g_assert_cmpstr (geocode_place_get_street (place), ==, "Old Palace Road");
         g_assert_cmpstr (geocode_place_get_county (place), ==, "Surrey");
-        g_assert_cmpstr (geocode_place_get_town (place), ==, "Guildford");
         g_assert_cmpstr (geocode_place_get_country (place), ==, "United Kingdom");
-        g_assert_cmpstr (geocode_place_get_administrative_area (place), ==, "South East England");
+        g_assert_cmpstr (geocode_place_get_administrative_area (place), ==, "South East");
         g_assert_cmpstr (geocode_place_get_state (place), ==, "England");
 
 	g_print ("Got geocode answer:\n");
@@ -167,7 +166,7 @@ test_xep (void)
 	add_attr (tp, "region", "England");
 	add_attr (tp, "county", "Surrey");
 	add_attr (tp, "locality", "Guildford");
-	add_attr (tp, "postalcode", "GU2 7UP");
+	add_attr (tp, "postalcode", "GU2 7NU");
 	add_attr (tp, "street", "Old Palace Road");
 
 	object = geocode_forward_new_for_params (tp);
@@ -187,7 +186,7 @@ test_xep (void)
 	loc = geocode_place_get_location (place);
 	g_assert (loc != NULL);
 	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.2371416);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.5894089);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.5894088);
 
 	g_object_unref (place);
 	g_list_free (res);
@@ -218,8 +217,8 @@ test_pub (void)
 	loc = geocode_place_get_location (place);
 	g_assert (loc != NULL);
 
-	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.2371416);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.5894089);
+	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.2368747);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.5912356);
 
 	g_object_unref (place);
 	g_list_free (res);
@@ -317,8 +316,8 @@ test_search_lat_long (void)
 	bbox = geocode_place_get_bounding_box (place);
 	g_assert (bbox != NULL);
 
-	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 21.8021297, <, 0.000001);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc) - -100.7374556, <, 0.000001);
+	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 21.801729, <, 0.000001);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc) - -100.737418, <, 0.000001);
 	g_assert (bbox_includes_location (bbox, geocode_place_get_location (place)));
 	g_assert_cmpstr (geocode_place_get_name (place), ==, "Santa Maria Del Rio, Mexico");
 	g_assert_cmpstr (geocode_place_get_town (place), ==, "Santa Maria Del Rio");
