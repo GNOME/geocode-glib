@@ -328,6 +328,38 @@ test_search_lat_long (void)
 	g_list_free_full (res, (GDestroyNotify) g_object_unref);
 }
 
+static void
+test_osm_type (void)
+{
+	GeocodeForward *object;
+	GError *error = NULL;
+	GList *res;
+	GeocodePlace *place;
+	guint i;
+	struct {
+		char *search_string;
+		GeocodePlaceOsmType osm_type;
+	} types[] = {
+		{ "Drottning Christinas väg", GEOCODE_PLACE_OSM_TYPE_WAY },
+		{ "North dakota", GEOCODE_PLACE_OSM_TYPE_RELATION },
+		{ "Grand canyon", GEOCODE_PLACE_OSM_TYPE_NODE }
+	};
+	for (i = 0; i < G_N_ELEMENTS (types); i++) {
+		object = geocode_forward_new_for_string (types[i].search_string);
+		res = geocode_forward_search (object, &error);
+		if (res == NULL) {
+			g_warning ("Failed at geocoding: %s", error->message);
+			g_error_free (error);
+		}
+		g_assert (res != NULL);
+		g_object_unref (object);
+
+		place = res->data;
+		g_assert (geocode_place_get_osm_type (place) == types[i].osm_type);
+		g_list_free_full (res, (GDestroyNotify) g_object_unref);
+	}
+}
+
 /* Test case from:
  * http://andrew.hedges.name/experiments/haversine/ */
 static void
@@ -569,6 +601,7 @@ int main (int argc, char **argv)
 		g_test_add_func ("/geocode/search", test_search);
 		g_test_add_func ("/geocode/search_lat_long", test_search_lat_long);
 		g_test_add_func ("/geocode/distance", test_distance);
+		g_test_add_func ("/geocode/osm_type", test_osm_type);
 		return g_test_run ();
 	}
 

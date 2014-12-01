@@ -603,7 +603,6 @@ static struct {
         const char *place_prop; /* NULL to ignore */
 } nominatim_to_place_map[] = {
         { "license", NULL },
-        { "osm_type", NULL },
         { "osm_id", "osm-id" },
         { "lat", NULL },
         { "lon", NULL },
@@ -638,6 +637,19 @@ fill_place_from_entry (const char   *key,
                                       NULL);
                         break;
                 }
+        }
+
+        if (g_str_equal (key, "osm_type")) {
+                gpointer ref = g_type_class_ref (geocode_place_osm_type_get_type ());
+                GEnumClass *class = G_ENUM_CLASS (ref);
+                GEnumValue *evalue = g_enum_get_value_by_nick (class, value);
+
+                if (evalue)
+                        g_object_set (G_OBJECT (place), "osm-type", evalue->value, NULL);
+                else
+                        g_warning ("Unsupported osm-type %s", value);
+
+                g_type_class_unref (ref);
         }
 }
 

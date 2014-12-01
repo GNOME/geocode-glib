@@ -57,6 +57,7 @@ struct _GeocodePlacePrivate {
         char *country;
         char *continent;
         char *osm_id;
+        GeocodePlaceOsmType osm_type;
 };
 
 enum {
@@ -79,7 +80,8 @@ enum {
         PROP_CONTINENT,
         PROP_ICON,
         PROP_BBOX,
-        PROP_OSM_ID
+        PROP_OSM_ID,
+        PROP_OSM_TYPE
 };
 
 G_DEFINE_TYPE (GeocodePlace, geocode_place, G_TYPE_OBJECT)
@@ -183,6 +185,11 @@ geocode_place_get_property (GObject    *object,
                                     geocode_place_get_osm_id (place));
                 break;
 
+        case PROP_OSM_TYPE:
+                g_value_set_enum (value,
+                                  geocode_place_get_osm_type (place));
+                break;
+
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
                 break;
@@ -269,6 +276,10 @@ geocode_place_set_property(GObject      *object,
 
         case PROP_OSM_ID:
                 place->priv->osm_id = g_value_dup_string (value);
+                break;
+
+        case PROP_OSM_TYPE:
+                place->priv->osm_type = g_value_get_enum (value);
                 break;
 
         default:
@@ -551,6 +562,19 @@ geocode_place_class_init (GeocodePlaceClass *klass)
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (gplace_class, PROP_OSM_ID, pspec);
 
+        /**
+         * GeocodePlace:osm-type:
+         *
+         * The OpenStreetMap type of the place.
+         */
+        pspec = g_param_spec_enum ("osm-type",
+                                   "OSM Type",
+                                   "The OpenStreetMap type of the place",
+                                   GEOCODE_TYPE_PLACE_OSM_TYPE,
+                                   GEOCODE_PLACE_OSM_TYPE_UNKNOWN,
+                                   G_PARAM_READWRITE |
+                                   G_PARAM_STATIC_STRINGS);
+        g_object_class_install_property (gplace_class, PROP_OSM_TYPE, pspec);
 }
 
 static void
@@ -560,6 +584,7 @@ geocode_place_init (GeocodePlace *place)
                                                       GEOCODE_TYPE_PLACE,
                                                       GeocodePlacePrivate);
         place->priv->bbox = NULL;
+        place->priv->osm_type = GEOCODE_PLACE_OSM_TYPE_UNKNOWN;
 }
 
 /**
@@ -1222,4 +1247,20 @@ geocode_place_get_osm_id (GeocodePlace *place)
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
         return place->priv->osm_id;
+}
+
+/**
+ * geocode_place_get_osm_type:
+ * @place: A place
+ *
+ * Gets the OpenStreetMap type of the @place.
+ *
+ * Returns: The osm type of the @place.
+ **/
+GeocodePlaceOsmType
+geocode_place_get_osm_type (GeocodePlace *place)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (place), GEOCODE_PLACE_OSM_TYPE_UNKNOWN);
+
+        return place->priv->osm_type;
 }

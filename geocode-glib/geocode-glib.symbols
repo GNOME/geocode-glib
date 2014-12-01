@@ -39,6 +39,7 @@ _geocode_read_nominatim_attributes
 _geocode_create_place_from_attributes
 geocode_place_get_type
 geocode_place_type_get_type
+geocode_place_osm_type_get_type
 geocode_place_new
 geocode_place_new_with_location
 geocode_place_get_area
@@ -74,6 +75,7 @@ geocode_place_get_icon
 geocode_place_get_bounding_box
 geocode_place_set_bounding_box
 geocode_place_get_osm_id
+geocode_place_get_osm_type
 geocode_bounding_box_get_type
 geocode_bounding_box_new
 geocode_bounding_box_get_top
