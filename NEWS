@@ -1,3 +1,15 @@
+3.15.3
+------
+
+Changes since 3.15.2:
+
+- Add osm_type property to geocode place
+
+All contributors to this release:
+
+Jonas Danielsson <jonas@threetimestwo.org>
+
+
 3.15.2
 ------
 
