@@ -1,3 +1,15 @@
+3.15.3.1
+------
+
+Changes since 3.15.3:
+
+- Switch to https:// and fix the geocode cache
+- Fix gtkdoc-check errors
+
+All contributors to this release:
+
+Jonas Danielsson <jonas@threetimestwo.org>
+
 3.15.3
 ------
 
