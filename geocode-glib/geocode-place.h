@@ -144,6 +144,7 @@ typedef enum {
 
 /**
  * GeocodePlaceOsmType:
+ * @GEOCODE_PLACE_OSM_TYPE_UNKNOWN: Unknown type
  * @GEOCODE_PLACE_OSM_TYPE_NODE: Defines a point in space.
  * @GEOCODE_PLACE_OSM_TYPE_RELATION: Used to explain how other elements work together.
  * @GEOCODE_PLACE_OSM_TYPE_WAY: Defines a linear feature and area boundaries.
