@@ -490,7 +490,7 @@ get_search_query_for_params (GeocodeForward *forward,
         if (location != NULL) {
 	        /* Prepare the search term */
                 search_term = soup_uri_encode (location, NULL);
-                uri = g_strdup_printf ("http://nominatim.gnome.org/search?q=%s&limit=%u&bounded=%d&%s",
+                uri = g_strdup_printf ("https://nominatim.gnome.org/search?q=%s&limit=%u&bounded=%d&%s",
                                        search_term,
                                        forward->priv->answer_count,
                                        !!forward->priv->bounded,
@@ -498,7 +498,7 @@ get_search_query_for_params (GeocodeForward *forward,
                 g_free (search_term);
                 g_free (location);
         } else {
-                uri = g_strdup_printf ("http://nominatim.gnome.org/search?limit=1&%s",
+                uri = g_strdup_printf ("https://nominatim.gnome.org/search?limit=1&%s",
                                        params);
         }
 	g_free (params);
