@@ -190,6 +190,7 @@ _geocode_object_get_lang (void)
 	return geocode_object_get_lang_for_locale (setlocale (LC_MESSAGES, NULL));
 }
 
+#ifdef __GNUC__
 static gpointer
 is_number_after_street (gpointer data)
 {
@@ -217,6 +218,7 @@ is_number_after_street (gpointer data)
  out:
 	return GINT_TO_POINTER (retval);
 }
+#endif
 
 gboolean
 _geocode_object_is_number_after_street (void)
