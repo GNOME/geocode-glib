@@ -376,7 +376,39 @@ test_distance (void)
 }
 
 static void
-test_locale (void)
+test_locale_format (void)
+{
+	GeocodeForward *object;
+	GError *error = NULL;
+	GList *res;
+	GeocodePlace *place;
+	char *old_locale;
+
+	old_locale = g_strdup (setlocale(LC_ADDRESS, NULL));
+
+	/* Set to a locale that has number after street */
+	setlocale (LC_ADDRESS, "sv_SE.utf8");
+
+	object = geocode_forward_new_for_string ("Université libre de Bruxelles");
+	res = geocode_forward_search (object, &error);
+	if (res == NULL) {
+		g_warning ("Failed at geocoding: %s", error->message);
+		g_error_free (error);
+	}
+	g_assert (res != NULL);
+	place = res->data;
+	g_assert_cmpstr (geocode_place_get_street_address (place),
+			 ==,
+			 "Avenue Franklin Roosevelt - Franklin Rooseveltlaan 50");
+	g_object_unref (object);
+	g_list_free_full (res, (GDestroyNotify) g_object_unref);
+
+	setlocale (LC_ADDRESS, old_locale);
+	g_free (old_locale);
+}
+
+static void
+test_locale_name (void)
 {
 	GeocodeForward *object;
 	GError *error = NULL;
@@ -597,7 +629,8 @@ int main (int argc, char **argv)
 		g_test_add_func ("/geocode/reverse", test_rev);
 		g_test_add_func ("/geocode/pub", test_pub);
 		g_test_add_func ("/geocode/xep-0080", test_xep);
-		g_test_add_func ("/geocode/locale", test_locale);
+		g_test_add_func ("/geocode/locale_name", test_locale_name);
+		g_test_add_func ("/geocode/locale_format", test_locale_format);
 		g_test_add_func ("/geocode/search", test_search);
 		g_test_add_func ("/geocode/search_lat_long", test_search_lat_long);
 		g_test_add_func ("/geocode/distance", test_distance);
