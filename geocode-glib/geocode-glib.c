@@ -190,7 +190,7 @@ _geocode_object_get_lang (void)
 	return geocode_object_get_lang_for_locale (setlocale (LC_MESSAGES, NULL));
 }
 
-#ifdef __GNUC__
+#ifdef __GLIBC__
 static gpointer
 is_number_after_street (gpointer data)
 {
@@ -223,7 +223,7 @@ is_number_after_street (gpointer data)
 gboolean
 _geocode_object_is_number_after_street (void)
 {
-#ifndef __GNUC__
+#ifndef __GLIBC__
 	return FALSE;
 #else
 	static GOnce once = G_ONCE_INIT;

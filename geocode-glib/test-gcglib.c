@@ -378,6 +378,7 @@ test_distance (void)
 static void
 test_locale_format (void)
 {
+#ifdef __GLIBC__
 	GeocodeForward *object;
 	GError *error = NULL;
 	GList *res;
@@ -405,6 +406,7 @@ test_locale_format (void)
 
 	setlocale (LC_ADDRESS, old_locale);
 	g_free (old_locale);
+#endif
 }
 
 static void
