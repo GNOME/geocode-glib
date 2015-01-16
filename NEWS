@@ -1,3 +1,20 @@
+3.15.4
+------
+
+Changes since 3.15.3.1:
+
+- Derive the order of street name and street number
+  from locale. (GLIBC only)
+
+All contributors to this release:
+Jonas Danielsson <jonas@threetimestwo.org>
+Marcus Lundblad <ml@update.uu.se>
+
+
+All contributors to this release:
+
+Jonas Danielsson <jonas@threetimestwo.org>
+
 3.15.3.1
 ------
 
