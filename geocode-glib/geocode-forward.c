@@ -850,12 +850,14 @@ _geocode_create_place_from_attributes (GHashTable *ht)
 static void
 insert_place_into_tree (GNode *place_tree, GHashTable *ht)
 {
-	GNode *start = place_tree, *child = NULL;
+	GNode *start = place_tree;
         GeocodePlace *place = NULL;
 	char *attr_val = NULL;
 	guint i;
 
 	for (i = 0; i < G_N_ELEMENTS(attributes); i++) {
+		GNode *child = NULL;
+
 		attr_val = g_hash_table_lookup (ht, attributes[i]);
 		if (!attr_val) {
 			/* Add a dummy node if the attribute value is not
