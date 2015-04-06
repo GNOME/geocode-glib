@@ -126,6 +126,10 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
 	is_address = (g_strcmp0 (json_reader_get_member_name (reader), "address") == 0);
 
 	members = json_reader_list_members (reader);
+        if (members == NULL) {
+                json_reader_end_member (reader);
+                return;
+        }
 
 	for (i = 0; members[i] != NULL; i++) {
                 const char *value = NULL;
