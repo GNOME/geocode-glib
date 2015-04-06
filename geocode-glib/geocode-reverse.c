@@ -513,8 +513,11 @@ geocode_reverse_resolve (GeocodeReverse *object,
 	g_free (contents);
 	g_object_unref (query);
 
-        place = _geocode_create_place_from_attributes (result);
-        g_hash_table_destroy (result);
+	if (result == NULL)
+		return NULL;
+
+	place = _geocode_create_place_from_attributes (result);
+	g_hash_table_destroy (result);
 
 	return place;
 }
