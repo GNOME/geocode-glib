@@ -139,6 +139,25 @@ test_rev (void)
 }
 
 static void
+test_rev_fail (void)
+{
+	GeocodeLocation *loc;
+	GeocodeReverse *rev;
+	GError *error = NULL;
+	GeocodePlace *place;
+
+	loc = geocode_location_new (-90, -180, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
+	rev = geocode_reverse_new_for_location (loc);
+	g_object_unref (loc);
+
+	place = geocode_reverse_resolve (rev, &error);
+	g_assert (place == NULL);
+	g_assert_error (error, GEOCODE_ERROR, GEOCODE_ERROR_NOT_SUPPORTED);
+	g_error_free (error);
+	g_object_unref (rev);
+}
+
+static void
 add_attr (GHashTable *ht,
 	  const char *key,
 	  const char *s)
@@ -629,6 +648,7 @@ int main (int argc, char **argv)
 		g_test_add_func ("/geocode/resolve_json", test_resolve_json);
 		g_test_add_func ("/geocode/search_json", test_search_json);
 		g_test_add_func ("/geocode/reverse", test_rev);
+		g_test_add_func ("/geocode/reverse_fail", test_rev_fail);
 		g_test_add_func ("/geocode/pub", test_pub);
 		g_test_add_func ("/geocode/xep-0080", test_xep);
 		g_test_add_func ("/geocode/locale_name", test_locale_name);
