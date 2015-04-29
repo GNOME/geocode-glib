@@ -1,3 +1,14 @@
+3.17.1
+------
+
+Changes since 3.16.0:
+
+- Make error handling of reverse geocode more robust
+
+All contributors to this release:
+Bastien Nocera <hadess@hadess.net>
+Jonas Danielsson <jonas@thretimestwo.org>
+
 3.16.0
 ------
 
