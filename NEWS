@@ -1,3 +1,16 @@
+3.16.2
+------
+
+Changes since 3.16.0:
+
+- Fix bugs in reverse geocode
+
+All contributors to this release:
+Bastien Nocera <hadess@hadess.net>
+Jonas Danielsson <jonas@threetimestwo.org>
+
+No changes
+
 3.16.0
 ------
 
