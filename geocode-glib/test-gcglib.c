@@ -361,7 +361,7 @@ test_osm_type (void)
 	} types[] = {
 		{ "Drottning Christinas väg", GEOCODE_PLACE_OSM_TYPE_WAY },
 		{ "North dakota", GEOCODE_PLACE_OSM_TYPE_RELATION },
-		{ "Grand canyon", GEOCODE_PLACE_OSM_TYPE_NODE }
+		{ "Grand canyon, USA", GEOCODE_PLACE_OSM_TYPE_NODE }
 	};
 	for (i = 0; i < G_N_ELEMENTS (types); i++) {
 		object = geocode_forward_new_for_string (types[i].search_string);
@@ -374,7 +374,8 @@ test_osm_type (void)
 		g_object_unref (object);
 
 		place = res->data;
-		g_assert (geocode_place_get_osm_type (place) == types[i].osm_type);
+		g_test_message ("Location: %s", types[i].search_string);
+		g_assert_cmpint (geocode_place_get_osm_type (place), ==, types[i].osm_type);
 		g_list_free_full (res, (GDestroyNotify) g_object_unref);
 	}
 }
