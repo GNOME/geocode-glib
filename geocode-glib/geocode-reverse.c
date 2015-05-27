@@ -114,6 +114,32 @@ geocode_reverse_new_for_location (GeocodeLocation *location)
 	return object;
 }
 
+static void
+insert_bounding_box_element (GHashTable *ht,
+			     GType       value_type,
+			     const char *name,
+			     JsonReader *reader)
+{
+	if (value_type == G_TYPE_STRING) {
+		const char *bbox_val;
+
+		bbox_val = json_reader_get_string_value (reader);
+		g_hash_table_insert (ht, g_strdup (name), g_strdup (bbox_val));
+	} else if (value_type == G_TYPE_DOUBLE) {
+		gdouble bbox_val;
+
+		bbox_val = json_reader_get_double_value (reader);
+		g_hash_table_insert(ht, g_strdup (name), g_strdup_printf ("%lf", bbox_val));
+	} else if (value_type == G_TYPE_INT64) {
+		gint64 bbox_val;
+
+		bbox_val = json_reader_get_double_value (reader);
+		g_hash_table_insert(ht, g_strdup (name), g_strdup_printf ("%"G_GINT64_FORMAT, bbox_val));
+	} else {
+		g_debug ("Unhandled node type %s for %s", g_type_name (value_type), name);
+	}
+}
+
 void
 _geocode_read_nominatim_attributes (JsonReader *reader,
                                     GHashTable *ht)
@@ -168,25 +194,26 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
                         }
                 } else if (g_strcmp0 (members[i], "boundingbox") == 0) {
                         const char *bbox_val;
+                        JsonNode *node;
+                        GType value_type;
 
                         json_reader_read_element (reader, 0);
-                        bbox_val = json_reader_get_string_value (reader);
-                        g_hash_table_insert(ht, g_strdup ("boundingbox-bottom"), g_strdup (bbox_val));
+                        node = json_reader_get_value (reader);
+                        value_type = json_node_get_value_type (node);
+
+                        insert_bounding_box_element (ht, value_type, "boundingbox-bottom", reader);
                         json_reader_end_element (reader);
 
                         json_reader_read_element (reader, 1);
-                        bbox_val = json_reader_get_string_value (reader);
-                        g_hash_table_insert(ht, g_strdup ("boundingbox-top"), g_strdup (bbox_val));
+                        insert_bounding_box_element (ht, value_type, "boundingbox-top", reader);
                         json_reader_end_element (reader);
 
                         json_reader_read_element (reader, 2);
-                        bbox_val = json_reader_get_string_value (reader);
-                        g_hash_table_insert(ht, g_strdup ("boundingbox-left"), g_strdup (bbox_val));
+                        insert_bounding_box_element (ht, value_type, "boundingbox-left", reader);
                         json_reader_end_element (reader);
 
                         json_reader_read_element (reader, 3);
-                        bbox_val = json_reader_get_string_value (reader);
-                        g_hash_table_insert(ht, g_strdup ("boundingbox-right"), g_strdup (bbox_val));
+                        insert_bounding_box_element (ht, value_type, "boundingbox-right", reader);
                         json_reader_end_element (reader);
                 }
                 json_reader_end_member (reader);
