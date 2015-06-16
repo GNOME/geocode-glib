@@ -193,7 +193,6 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
                                 g_hash_table_insert (ht, g_strdup ("name"), name);
                         }
                 } else if (g_strcmp0 (members[i], "boundingbox") == 0) {
-                        const char *bbox_val;
                         JsonNode *node;
                         GType value_type;
 
