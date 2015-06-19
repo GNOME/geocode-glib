@@ -31,7 +31,6 @@
 
 G_BEGIN_DECLS
 
-#define YAHOO_APPID "zznSbDjV34HRU5CXQc4D3qE1DzCsJTaKvWTLhNJxbvI_JTp1hIncJ4xTSJFRgjE-"
 #define DEFAULT_ANSWER_COUNT 10
 
 typedef enum {
