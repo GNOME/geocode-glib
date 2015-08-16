@@ -816,9 +816,18 @@ geocode_location_get_timestamp (GeocodeLocation *loc)
         return loc->priv->timestamp;
 }
 
+static gdouble
+round_coord_n (gdouble coord, guint n)
+{
+  gdouble fac = pow (10, n);
+
+  return round (coord * fac) / fac;
+}
+
 static char *
 geo_uri_from_location (GeocodeLocation *loc)
 {
+        guint precision = 6; /* 0.1 meter precision */
         char *uri;
         char *coords;
         char *params;
@@ -830,8 +839,14 @@ geo_uri_from_location (GeocodeLocation *loc)
 
         g_return_val_if_fail (GEOCODE_IS_LOCATION (loc), NULL);
 
-        g_ascii_dtostr (lat, G_ASCII_DTOSTR_BUF_SIZE, loc->priv->latitude);
-        g_ascii_dtostr (lon, G_ASCII_DTOSTR_BUF_SIZE, loc->priv->longitude);
+        g_ascii_formatd (lat,
+                         G_ASCII_DTOSTR_BUF_SIZE,
+                         "%.6f",
+                         round_coord_n (loc->priv->latitude, precision));
+        g_ascii_formatd (lon,
+                         G_ASCII_DTOSTR_BUF_SIZE,
+                         "%.6f",
+                         round_coord_n (loc->priv->longitude, precision));
 
         if (loc->priv->altitude != GEOCODE_LOCATION_ALTITUDE_UNKNOWN) {
                 g_ascii_dtostr (alt, G_ASCII_DTOSTR_BUF_SIZE,
