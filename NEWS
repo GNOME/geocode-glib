@@ -1,3 +1,19 @@
+3.17.90
+------
+
+Changes since 3.17.1:
+
+- Update unit tests
+- Add workaround for Nominatim boundingbox bug (bgo#749963)
+- Update project description
+- Add Jonas Danielsson as maintainer
+- Prettify Geo URI generation
+
+All contributors to this release:
+Bastien Nocera <hadess@hadess.net>
+Jonas Danielsson <jonas@thretimestwo.org>
+Philip Withnall <philip.withnall@collabora.co.uk>
+
 3.17.1
 ------
 
