@@ -157,6 +157,28 @@ geocode_location_set_crs(GeocodeLocation   *loc,
 }
 
 static void
+geocode_location_set_timestamp (GeocodeLocation *loc,
+                                guint64          timestamp)
+{
+        g_return_if_fail (GEOCODE_IS_LOCATION (loc));
+
+        loc->priv->timestamp = timestamp;
+}
+
+static void
+geocode_location_constructed (GObject *object)
+{
+        GeocodeLocation *location = GEOCODE_LOCATION (object);
+        GTimeVal tv;
+
+        if (location->priv->timestamp != 0)
+                return;
+
+        g_get_current_time (&tv);
+        geocode_location_set_timestamp (location, tv.tv_sec);
+}
+
+static void
 geocode_location_set_property(GObject      *object,
                               guint         property_id,
                               const GValue *value,
@@ -193,6 +215,11 @@ geocode_location_set_property(GObject      *object,
         case PROP_CRS:
                 geocode_location_set_crs (location,
                                           g_value_get_enum (value));
+                break;
+
+        case PROP_TIMESTAMP:
+                geocode_location_set_timestamp (location,
+                                                g_value_get_uint64 (value));
                 break;
 
         default:
@@ -481,6 +508,7 @@ geocode_location_class_init (GeocodeLocationClass *klass)
         glocation_class->finalize = geocode_location_finalize;
         glocation_class->get_property = geocode_location_get_property;
         glocation_class->set_property = geocode_location_set_property;
+        glocation_class->constructed = geocode_location_constructed;
 
         g_type_class_add_private (klass, sizeof (GeocodeLocationPrivate));
 
@@ -579,6 +607,8 @@ geocode_location_class_init (GeocodeLocationClass *klass)
          *
          * A timestamp in seconds since
          * <ulink url="http://en.wikipedia.org/wiki/Unix_epoch">Epoch</ulink>.
+         *
+         * A value of 0 (zero) will be interpreted as the current time.
          */
         pspec = g_param_spec_uint64 ("timestamp",
                                      "Timestamp",
@@ -587,7 +617,8 @@ geocode_location_class_init (GeocodeLocationClass *klass)
                                      0,
                                      G_MAXINT64,
                                      0,
-                                     G_PARAM_READABLE |
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_CONSTRUCT_ONLY |
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (glocation_class, PROP_TIMESTAMP, pspec);
 }
@@ -595,14 +626,10 @@ geocode_location_class_init (GeocodeLocationClass *klass)
 static void
 geocode_location_init (GeocodeLocation *location)
 {
-        GTimeVal tv;
-
         location->priv = G_TYPE_INSTANCE_GET_PRIVATE ((location),
                                                       GEOCODE_TYPE_LOCATION,
                                                       GeocodeLocationPrivate);
 
-        g_get_current_time (&tv);
-        location->priv->timestamp = tv.tv_sec;
         location->priv->altitude = GEOCODE_LOCATION_ALTITUDE_UNKNOWN;
         location->priv->accuracy = GEOCODE_LOCATION_ACCURACY_UNKNOWN;
         location->priv->crs = GEOCODE_LOCATION_CRS_WGS84;
