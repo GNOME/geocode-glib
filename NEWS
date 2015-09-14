@@ -1,3 +1,15 @@
+3.17.92
+------
+
+Changes since 3.17.90:
+
+- Fix compilation under MacOS X
+- Make location timestamp writable on construction
+
+All contributors to this release:
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+Tom Schoonjans <Tom.Schoonjans@bam.de>
+
 3.17.90
 ------
 
