@@ -335,11 +335,11 @@ test_search_lat_long (void)
 	bbox = geocode_place_get_bounding_box (place);
 	g_assert (bbox != NULL);
 
-	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 21.801729, <, 0.000001);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc) - -100.737418, <, 0.000001);
+	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 21.803641, <, 0.000001);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc) - -100.736292, <, 0.000001);
 	g_assert (bbox_includes_location (bbox, geocode_place_get_location (place)));
-	g_assert_cmpstr (geocode_place_get_name (place), ==, "Santa Mar\303\255a del Rio, Santa Mar\303\255a del Rio");
-	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Santa Mar\303\255a del Rio, Santa Mar\303\255a del Rio");
+	g_assert_cmpstr (geocode_place_get_name (place), ==, "Santa Maria Del Rio, Santa Mar\303\255a del Rio");
+	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Santa Maria Del Rio, Santa Mar\303\255a del Rio");
 
 	g_list_free_full (res, (GDestroyNotify) g_object_unref);
 }
