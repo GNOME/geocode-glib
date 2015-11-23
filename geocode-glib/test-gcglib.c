@@ -204,8 +204,8 @@ test_xep (void)
 	place = res->data;
 	loc = geocode_place_get_location (place);
 	g_assert (loc != NULL);
-	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.2371416);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.5894088);
+	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.2371333);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.5894036);
 
 	g_object_unref (place);
 	g_list_free (res);
@@ -237,7 +237,7 @@ test_pub (void)
 	g_assert (loc != NULL);
 
 	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.2368747);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.5912356);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.5912357);
 
 	g_object_unref (place);
 	g_list_free (res);
@@ -338,8 +338,8 @@ test_search_lat_long (void)
 	g_assert_cmpfloat (geocode_location_get_latitude (loc) - 21.803641, <, 0.000001);
 	g_assert_cmpfloat (geocode_location_get_longitude (loc) - -100.736292, <, 0.000001);
 	g_assert (bbox_includes_location (bbox, geocode_place_get_location (place)));
-	g_assert_cmpstr (geocode_place_get_name (place), ==, "Santa Maria Del Rio, Santa Mar\303\255a del Rio");
-	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Santa Maria Del Rio, Santa Mar\303\255a del Rio");
+	g_assert_cmpstr (geocode_place_get_name (place), ==, "Santa Maria Del Rio, Santa Mar\303\255a del R\303\255o");
+	g_assert_cmpstr (geocode_location_get_description (loc), ==, "Santa Maria Del Rio, Santa Mar\303\255a del R\303\255o");
 
 	g_list_free_full (res, (GDestroyNotify) g_object_unref);
 }
