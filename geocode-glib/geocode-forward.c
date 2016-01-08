@@ -202,7 +202,7 @@ geocode_forward_init (GeocodeForward *forward)
 	forward->priv = G_TYPE_INSTANCE_GET_PRIVATE ((forward), GEOCODE_TYPE_FORWARD, GeocodeForwardPrivate);
 	forward->priv->ht = g_hash_table_new_full (g_str_hash, g_str_equal,
 						   g_free, g_free);
-        forward->priv->soup_session = soup_session_new ();
+	forward->priv->soup_session = _geocode_glib_build_soup_session ();
 	forward->priv->answer_count = DEFAULT_ANSWER_COUNT;
 	forward->priv->search_area = NULL;
 	forward->priv->bounded = FALSE;
