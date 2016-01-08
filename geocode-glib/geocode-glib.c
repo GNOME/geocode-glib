@@ -37,6 +37,29 @@
  * <ulink url="http://wiki.openstreetmap.org/wiki/Nominatim">OSM Nominatim APIs</ulink>
  **/
 
+SoupSession *
+_geocode_glib_build_soup_session (void)
+{
+	GApplication *application;
+	SoupSession *session;
+	char *user_agent;
+
+	application = g_application_get_default ();
+	if (application) {
+		const char *id = g_application_get_application_id (application);
+		user_agent = g_strdup_printf ("geocode-glib/%s (%s)",
+					      PACKAGE_VERSION, id);
+	} else {
+		user_agent = g_strdup_printf ("geocode-glib/%s",
+					      PACKAGE_VERSION);
+	}
+
+	session = soup_session_new_with_options (SOUP_SESSION_USER_AGENT,
+						 user_agent, NULL);
+	g_free (user_agent);
+	return session;
+}
+
 char *
 _geocode_glib_cache_path_for_query (SoupMessage *query)
 {

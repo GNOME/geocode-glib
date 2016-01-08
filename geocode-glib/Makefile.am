@@ -45,6 +45,7 @@ gcglib_HEADERS =					\
 AM_CPPFLAGS = 						\
 	-I$(top_srcdir)					\
 	-I$(top_builddir) 				\
+	-DPACKAGE_VERSION=\"@PACKAGE_VERSION@\"		\
 	-DTEST_SRCDIR=\""$(srcdir)/data/"\" 		\
 	-DGEOCODE_LOCALEDIR=\"$(localedir)\"
 
