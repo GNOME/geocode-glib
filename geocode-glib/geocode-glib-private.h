@@ -55,6 +55,7 @@ gboolean _geocode_glib_cache_save (SoupMessage *query,
 gboolean _geocode_glib_cache_load (SoupMessage *query,
                                    char       **contents);
 GHashTable *_geocode_glib_dup_hash_table (GHashTable *ht);
+SoupSession *_geocode_glib_build_soup_session (void);
 
 G_END_DECLS
 

@@ -62,7 +62,7 @@ dnl Requires for the library
 PKG_CHECK_MODULES(GEOCODE,
 		  gio-2.0 >= 2.34
 		  json-glib-1.0 >= 0.99.2
-		  libsoup-2.4)
+		  libsoup-2.4 >= 2.42)
 
 GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal glib-2.0`
 AC_SUBST(GLIB_GENMARSHAL)
