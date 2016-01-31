@@ -1,3 +1,10 @@
+3.16.3
+------
+
+Changes since 3.16.2:
+- Added a default User-Agent, based on GApplication ID if available.
+  Nominatim’s usage policy requires a User-Agent, so we add one!
+
 3.16.2
 ------
 
