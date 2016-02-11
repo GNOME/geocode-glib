@@ -840,7 +840,7 @@ geocode_location_get_crs (GeocodeLocation *loc)
 guint64
 geocode_location_get_timestamp (GeocodeLocation *loc)
 {
-        g_return_val_if_fail (GEOCODE_IS_LOCATION (loc), -1);
+        g_return_val_if_fail (GEOCODE_IS_LOCATION (loc), 0);
 
         return loc->priv->timestamp;
 }
