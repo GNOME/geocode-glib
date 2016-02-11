@@ -606,7 +606,8 @@ geocode_location_class_init (GeocodeLocationClass *klass)
          * GeocodeLocation:timestamp:
          *
          * A timestamp in seconds since
-         * <ulink url="http://en.wikipedia.org/wiki/Unix_epoch">Epoch</ulink>.
+         * <ulink url="http://en.wikipedia.org/wiki/Unix_epoch">Epoch</ulink>,
+         * giving when the location was resolved from an address.
          *
          * A value of 0 (zero) will be interpreted as the current time.
          */
@@ -831,7 +832,8 @@ geocode_location_get_crs (GeocodeLocation *loc)
  * geocode_location_get_timestamp:
  * @loc: a #GeocodeLocation
  *
- * Gets the timestamp (in seconds since Epoc) of location @loc.
+ * Gets the timestamp (in seconds since the Epoch) of location @loc. See
+ * #GeocodeLocation:timestamp.
  *
  * Returns: The timestamp of location @loc.
  **/
