@@ -1,3 +1,18 @@
+3.19.90
+-------
+
+Changes since 3.18.0:
+
+- Add simple train stops and tram stops to place types
+- Added a default User-Agent, based on GApplication ID if available.
+  Nominatim’s usage policy requires a User-Agent, so we add one!
+- Fix timetamp documentation
+
+All contributors to this release:
+Jonas Danielsson <jonas@threetimestwo.org>
+Philip Withnall <philip.withnall@collabora.co.uk>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 3.18.0
 
 No changes since 3.17.92
