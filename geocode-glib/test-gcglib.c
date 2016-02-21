@@ -237,7 +237,7 @@ test_pub (void)
 	g_assert (loc != NULL);
 
 	g_assert_cmpfloat (geocode_location_get_latitude (loc), ==, 51.2368747);
-	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.5912356);
+	g_assert_cmpfloat (geocode_location_get_longitude (loc), ==, -0.5912357);
 
 	g_object_unref (place);
 	g_list_free (res);
