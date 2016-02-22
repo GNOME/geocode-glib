@@ -566,6 +566,7 @@ geocode_forward_search_async (GeocodeForward      *forward,
 					    on_cache_data_loaded,
 					    simple);
 		g_object_unref (cache);
+		g_free (cache_path);
 	}
 }
 

@@ -467,6 +467,7 @@ geocode_reverse_resolve_async (GeocodeReverse     *object,
 					    on_cache_data_loaded,
 					    simple);
 		g_object_unref (cache);
+		g_free (cache_path);
 	}
 }
 
