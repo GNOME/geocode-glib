@@ -1,3 +1,15 @@
+3.20.0
+-------
+
+Changes since 3.19.90:
+
+- Add icons to EXTRA_DIST
+- Fix memleaks in query cache
+
+All contributors to this release:
+Aleksander Morgado <aleksander.morgado@collabora.co.uk>
+Jonas Danielsson <jonas@threetimestwo.org>
+
 3.19.90
 -------
 
