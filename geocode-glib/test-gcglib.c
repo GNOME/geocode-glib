@@ -395,7 +395,7 @@ test_distance (void)
 static void
 test_locale_format (void)
 {
-#ifdef __GLIBC__
+#if defined(__GLIBC__) && !defined(__UCLIBC__)
 	GeocodeForward *object;
 	GError *error = NULL;
 	GList *res;
