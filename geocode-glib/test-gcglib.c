@@ -7,9 +7,10 @@
 #include <gio/gio.h>
 #include <geocode-glib/geocode-glib.h>
 #include <geocode-glib/geocode-glib-private.h>
+#include <geocode-glib/tests/geocode-nominatim-test.h>
 
 static GMainLoop *loop = NULL;
-
+static gboolean enable_network = FALSE;
 static char **params = NULL;
 
 static void
@@ -104,6 +105,156 @@ bbox_includes_location (GeocodeBoundingBox *bbox,
 }
 
 static void
+add_attr (GHashTable *ht,
+	  const char *key,
+	  const char *s)
+{
+	GValue *value;
+	value = g_new0 (GValue, 1);
+	g_value_init (value, G_TYPE_STRING);
+	g_value_set_static_string (value, s);
+	g_hash_table_insert (ht, g_strdup (key), value);
+}
+
+static void
+free_attr (GValue *attr)
+{
+	g_value_unset (attr);
+	g_free (attr);
+}
+
+static void
+add_attr_string (GHashTable  *ht,
+                 const gchar *key,
+                 const gchar *value)
+{
+	g_hash_table_insert (ht, (gpointer) key, (gpointer) value);
+}
+
+static gchar *
+load_json (const gchar *expected_response_filename)
+{
+	g_autofree gchar *expected_response = NULL;
+	g_autofree gchar *expected_response_path = NULL;
+	g_autoptr (GError) error = NULL;
+
+	expected_response_path = g_test_build_filename (G_TEST_DIST, "tests",
+	                                                expected_response_filename,
+	                                                NULL);
+	g_file_get_contents (expected_response_path, &expected_response, NULL,
+	                     &error);
+	g_assert_no_error (error);
+
+	return g_steal_pointer (&expected_response);
+}
+
+static GeocodeReverse *
+create_reverse (GeocodeLocation *loc,
+                const gchar     *expected_response_filename)
+{
+	g_autoptr (GHashTable) parameters = NULL;
+	g_autoptr (GeocodeReverse) reverse = NULL;
+	char lat[G_ASCII_DTOSTR_BUF_SIZE];
+	char lon[G_ASCII_DTOSTR_BUF_SIZE];
+
+	/* Build the query parameters. */
+	g_ascii_dtostr (lat,
+	                G_ASCII_DTOSTR_BUF_SIZE,
+	                geocode_location_get_latitude (loc));
+	g_ascii_dtostr (lon,
+	                G_ASCII_DTOSTR_BUF_SIZE,
+	                geocode_location_get_longitude (loc));
+
+	parameters = g_hash_table_new_full (g_str_hash, g_str_equal, NULL,
+	                                    g_free);
+	add_attr_string (parameters, "lat", g_strdup (lat));
+	add_attr_string (parameters, "lon", g_strdup (lon));
+
+	reverse = geocode_reverse_new_for_location (loc);
+
+	if (!enable_network) {
+		g_autoptr (GeocodeNominatim) backend = NULL;
+		g_autofree gchar *expected_response = NULL;
+
+		/* Load the JSON we expect as a response. */
+		expected_response = load_json (expected_response_filename);
+
+		/* Build the backend and query object. */
+		backend = geocode_nominatim_test_new ();
+		geocode_nominatim_test_expect_query (GEOCODE_NOMINATIM_TEST (backend),
+		                                     parameters, expected_response);
+
+		geocode_reverse_set_backend (reverse, GEOCODE_BACKEND (backend));
+	}
+
+	return g_steal_pointer (&reverse);
+}
+
+/*
+ * @tp: (element-type utf8 GValue) (transfer none):
+ * @params: (element-type utf8 utf8) (transfer none):
+ * @expected_response_filename:
+ *
+ * Returns: (transfer full):
+ */
+static GeocodeForward *
+create_forward_for_params (GHashTable  *tp,
+                           GHashTable  *params,
+                           const gchar *expected_response_filename)
+{
+	g_autoptr (GeocodeForward) forward = NULL;
+
+	forward = geocode_forward_new_for_params (tp);
+
+	if (!enable_network) {
+		g_autoptr (GeocodeNominatim) backend = NULL;
+		g_autofree gchar *expected_response = NULL;
+
+		expected_response = load_json (expected_response_filename);
+
+		backend = geocode_nominatim_test_new ();
+		geocode_nominatim_test_expect_query (GEOCODE_NOMINATIM_TEST (backend),
+		                                     params, expected_response);
+
+		geocode_forward_set_backend (forward, GEOCODE_BACKEND (backend));
+	}
+
+	return g_steal_pointer (&forward);
+}
+
+/*
+ * @q:
+ * @params: (element-type utf8 utf8) (transfer none):
+ * @expected_response_filename:
+ *
+ * Returns: (transfer full):
+ */
+static GeocodeForward *
+create_forward_for_string (const gchar *q,
+                           GHashTable  *params,
+                           const gchar *expected_response_filename)
+{
+	g_autoptr (GeocodeForward) forward = NULL;
+
+	forward = geocode_forward_new_for_string (q);
+
+	if (!enable_network) {
+		g_autoptr (GeocodeNominatim) backend = NULL;
+		g_autofree gchar *expected_response = NULL;
+
+		expected_response = load_json (expected_response_filename);
+
+		backend = geocode_nominatim_test_new ();
+		geocode_nominatim_test_expect_query (GEOCODE_NOMINATIM_TEST (backend),
+		                                     params, expected_response);
+
+		geocode_forward_set_backend (forward, GEOCODE_BACKEND (backend));
+	}
+
+	return g_steal_pointer (&forward);
+}
+
+static void
 test_rev (void)
 {
 	GeocodeLocation *loc;
@@ -112,7 +263,7 @@ test_rev (void)
 	GeocodePlace *place;
 
 	loc = geocode_location_new (51.2370361, -0.5894834, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
-	rev = geocode_reverse_new_for_location (loc);
+	rev = create_reverse (loc, "rev.json");
 	g_object_unref (loc);
 
 	place = geocode_reverse_resolve (rev, &error);
@@ -147,7 +298,7 @@ test_rev_fail (void)
 	GeocodePlace *place;
 
 	loc = geocode_location_new (-90, -180, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
-	rev = geocode_reverse_new_for_location (loc);
+	rev = create_reverse (loc, "rev_fail.json");
 	g_object_unref (loc);
 
 	place = geocode_reverse_resolve (rev, &error);
@@ -158,29 +309,18 @@ test_rev_fail (void)
 }
 
 static void
-add_attr (GHashTable *ht,
-	  const char *key,
-	  const char *s)
-{
-	GValue *value;
-	value = g_new0 (GValue, 1);
-	g_value_init (value, G_TYPE_STRING);
-	g_value_set_static_string (value, s);
-	g_hash_table_insert (ht, g_strdup (key), value);
-}
-
-static void
 test_xep (void)
 {
-	GHashTable *tp;
+	g_autoptr (GHashTable) tp = NULL, params = NULL;
 	GeocodeForward *object;
 	GList *res;
 	GeocodePlace *place;
 	GeocodeLocation *loc;
 	GError *error = NULL;
 
+	/* The query parameters we are submitting. */
 	tp = g_hash_table_new_full (g_str_hash, g_str_equal,
-				    g_free, g_free);
+				    g_free, (GDestroyNotify) free_attr);
 	add_attr (tp, "country", "United Kingdom");
 	add_attr (tp, "region", "England");
 	add_attr (tp, "county", "Surrey");
@@ -188,9 +328,17 @@ test_xep (void)
 	add_attr (tp, "postalcode", "GU2 7NU");
 	add_attr (tp, "street", "Old Palace Road");
 
-	object = geocode_forward_new_for_params (tp);
-	g_assert (object != NULL);
-	g_hash_table_destroy (tp);
+	/* The query parameters the mock server expects to receive. */
+	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
+	add_attr_string (params, "country", "United Kingdom");
+	add_attr_string (params, "state", "England");
+	add_attr_string (params, "county", "Surrey");
+	add_attr_string (params, "city", "Guildford");
+	add_attr_string (params, "postalcode", "GU2 7NU");
+	add_attr_string (params, "street", "Old Palace Road");
+	add_attr_string (params, "limit", "1");
+
+	object = create_forward_for_params (tp, params, "xep.json");
 
 	res = geocode_forward_search (object, &error);
 	if (res == NULL) {
@@ -214,13 +362,22 @@ test_xep (void)
 static void
 test_pub (void)
 {
+	g_autoptr (GHashTable) params = NULL;
 	GeocodeForward *object;
 	GError *error = NULL;
 	GList *res;
 	GeocodePlace *place;
 	GeocodeLocation *loc;
 
-	object = geocode_forward_new_for_string ("9, old palace road, guildford, surrey");
+	/* The query parameters the mock server expects to receive. */
+	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
+	add_attr_string (params, "q", "9, old palace road, guildford, surrey");
+	add_attr_string (params, "limit", "1");
+	add_attr_string (params, "bounded", "0");
+
+	object = create_forward_for_string ("9, old palace road, guildford, surrey",
+	                                    params, "pub.json");
+
 	geocode_forward_set_answer_count (object, 1);
 	res = geocode_forward_search (object, &error);
 	if (res == NULL) {
@@ -247,6 +404,7 @@ static void
 test_search (void)
 {
 	GeocodeForward *forward;
+	g_autoptr (GHashTable) params = NULL;
 	GError *error = NULL;
 	GList *results;
 	char *old_locale;
@@ -254,7 +412,14 @@ test_search (void)
 	old_locale = g_strdup (setlocale(LC_MESSAGES, NULL));
 	setlocale (LC_MESSAGES, "en_GB.UTF-8");
 
-	forward = geocode_forward_new_for_string ("paris");
+	/* The query parameters the mock server expects to receive. */
+	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
+	add_attr_string (params, "q", "paris");
+	add_attr_string (params, "limit", "10");
+	add_attr_string (params, "bounded", "0");
+
+	forward = create_forward_for_string ("paris", params, "search.json");
+
 	results = geocode_forward_search (forward, &error);
 	if (results == NULL) {
 		g_warning ("Failed at geocoding: %s", error->message);
@@ -317,8 +482,17 @@ test_search_lat_long (void)
 	GeocodePlace *place;
 	GeocodeLocation *loc;
 	GeocodeBoundingBox *bbox;
+	g_autoptr (GHashTable) params = NULL;
 
-	object = geocode_forward_new_for_string ("Santa María del Río, San Luis Potosi");
+	/* The query parameters the mock server expects to receive. */
+	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
+	add_attr_string (params, "q", "Santa María del Río, San Luis Potosi");
+	add_attr_string (params, "limit", "10");
+	add_attr_string (params, "bounded", "0");
+
+	object = create_forward_for_string ("Santa María del Río, San Luis Potosi",
+	                                    params, "search_lat_long.json");
+
 	res = geocode_forward_search (object, &error);
 	if (res == NULL) {
 		g_warning ("Failed at geocoding: %s", error->message);
@@ -361,7 +535,21 @@ test_osm_type (void)
 		{ "Grand canyon, USA", GEOCODE_PLACE_OSM_TYPE_NODE }
 	};
 	for (i = 0; i < G_N_ELEMENTS (types); i++) {
-		object = geocode_forward_new_for_string (types[i].search_string);
+		g_autoptr (GHashTable) params = NULL;
+		g_autofree gchar *expected_response_filename = NULL;
+
+		/* The query parameters the mock server expects to receive. */
+		params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL,
+		                                NULL);
+		add_attr_string (params, "q", types[i].search_string);
+		add_attr_string (params, "limit", "10");
+		add_attr_string (params, "bounded", "0");
+
+		expected_response_filename = g_strdup_printf ("osm_type%u.json",
+		                                              i);
+
+		object = create_forward_for_string (types[i].search_string, params,
+		                                    expected_response_filename);
 		res = geocode_forward_search (object, &error);
 		if (res == NULL) {
 			g_warning ("Failed at geocoding: %s", error->message);
@@ -401,13 +589,22 @@ test_locale_format (void)
 	GList *res;
 	GeocodePlace *place;
 	char *old_locale;
+	g_autoptr (GHashTable) params = NULL;
 
 	old_locale = g_strdup (setlocale(LC_ADDRESS, NULL));
 
 	/* Set to a locale that has number after street */
 	setlocale (LC_ADDRESS, "sv_SE.utf8");
 
-	object = geocode_forward_new_for_string ("Université libre de Bruxelles");
+	/* The query parameters the mock server expects to receive. */
+	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
+	add_attr_string (params, "q", "Université libre de Bruxelles");
+	add_attr_string (params, "limit", "10");
+	add_attr_string (params, "bounded", "0");
+
+	object = create_forward_for_string ("Université libre de Bruxelles",
+	                                    params, "locale_format.json");
+
 	res = geocode_forward_search (object, &error);
 	if (res == NULL) {
 		g_warning ("Failed at geocoding: %s", error->message);
@@ -435,12 +632,22 @@ test_locale_name (void)
 	GeocodePlace *place;
 	GeocodeLocation *loc;
 	char *old_locale;
+	g_autoptr (GHashTable) params = NULL;
 
 	old_locale = g_strdup (setlocale(LC_MESSAGES, NULL));
 
+	/* The query parameters the mock server expects to receive. */
+	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
+	add_attr_string (params, "q", "moscow");
+	add_attr_string (params, "limit", "10");
+	add_attr_string (params, "bounded", "0");
+
 	/* Check Moscow's name in Czech */
 	setlocale (LC_MESSAGES, "cs_CZ.UTF-8");
-	object = geocode_forward_new_for_string ("moscow");
+
+	object = create_forward_for_string ("moscow", params,
+	                                    "locale_name.json");
+
 	res = geocode_forward_search (object, &error);
 	if (res == NULL) {
 		g_warning ("Failed at geocoding: %s", error->message);
@@ -624,6 +831,7 @@ int main (int argc, char **argv)
 	const GOptionEntry entries[] = {
 		{ "count", 0, 0, G_OPTION_ARG_INT, &answer_count, "Number of answers to get for forward searches", NULL },
 		{ "reverse", 0, 0, G_OPTION_ARG_NONE, &do_rev_geocoding, "Whether to do reverse geocoding for the given parameters", NULL },
+		{ "enable-network", 0, 0, G_OPTION_ARG_NONE, &enable_network, "Whether to do network queries during unit tests, or use recorded results", NULL },
 		{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &params, NULL, "[KEY=VALUE...]" },
 		{ NULL }
 	};

@@ -13,7 +13,7 @@ AC_CONFIG_SRCDIR([geocode-glib/test-gcglib.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([1.11 dist-xz no-dist-gzip check-news])
+AM_INIT_AUTOMAKE([1.11 dist-xz no-dist-gzip check-news subdir-objects])
 
 # Before making a release, the GCLIB_LT_VERSION string should be modified.
 # The string is of the form C:R:A.

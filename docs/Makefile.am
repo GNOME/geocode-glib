@@ -52,8 +52,10 @@ CFILE_GLOB=$(top_srcdir)/geocode-glib/geocode-*.c
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
-IGNORE_HFILES=					\
-	geocode-glib-private.h
+IGNORE_HFILES = \
+	geocode-glib-private.h \
+	geocode-nominatim-test.h \
+	$(NULL)
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
