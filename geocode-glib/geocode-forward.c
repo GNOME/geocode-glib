@@ -350,9 +350,9 @@ geocode_forward_search_async (GeocodeForward      *forward,
  *
  * Finishes a forward geocoding operation. See geocode_forward_search_async().
  *
- * Returns: (element-type GeocodePlace) (transfer container): A list of
- * places or %NULL in case of errors. Free the returned list with
- * g_list_free() when done.
+ * Returns: (element-type GeocodePlace) (transfer full): A list of
+ * places or %NULL in case of errors. Free the returned instances with
+ * g_object_unref() and the list with g_list_free() when done.
  **/
 GList *
 geocode_forward_search_finish (GeocodeForward       *forward,
@@ -374,9 +374,9 @@ geocode_forward_search_finish (GeocodeForward       *forward,
  * Gets the result of a forward geocoding
  * query using a web service.
  *
- * Returns: (element-type GeocodePlace) (transfer container): A list of
- * places or %NULL in case of errors. Free the returned list with
- * g_list_free() when done.
+ * Returns: (element-type GeocodePlace) (transfer full): A list of
+ * places or %NULL in case of errors. Free the returned instances with
+ * g_object_unref() and the list with g_list_free() when done.
  **/
 GList *
 geocode_forward_search (GeocodeForward      *forward,

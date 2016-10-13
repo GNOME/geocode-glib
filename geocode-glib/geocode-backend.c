@@ -84,9 +84,9 @@ geocode_backend_forward_search_async (GeocodeBackend      *backend,
  * Finishes a forward geocoding operation. See
  * geocode_backend_forward_search_async().
  *
- * Returns: (element-type GeocodePlace) (transfer container): A list of
- * places or %NULL in case of errors. Free the returned list with
- * g_list_free() when done.
+ * Returns: (element-type GeocodePlace) (transfer full): A list of
+ * places or %NULL in case of errors. Free the returned instances with
+ * g_object_unref() and the list with g_list_free() when done.
  *
  * Since: UNRELEASED
  */
@@ -120,9 +120,9 @@ geocode_backend_forward_search_finish (GeocodeBackend  *backend,
  * (geocode_backend_forward_search_async()) is more appropriate. See its
  * documentation for more information on usage.
  *
- * Returns: (element-type GeocodePlace) (transfer container): A list of
- * places or %NULL in case of errors. Free the returned list with
- * g_list_free() when done.
+ * Returns: (element-type GeocodePlace) (transfer full): A list of
+ * places or %NULL in case of errors. Free the returned instances with
+ * g_object_unref() and the list with g_list_free() when done.
  *
  * Since: UNRELEASED
  */
