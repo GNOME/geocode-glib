@@ -71,24 +71,30 @@ _geocode_glib_build_soup_session (const gchar *user_agent_override)
 }
 
 char *
-_geocode_glib_cache_path_for_query (SoupMessage *query)
+_geocode_glib_cache_path_for_query (const gchar *cache_dir,
+                                    SoupMessage *query)
 {
 	const char *filename;
 	char *path;
         SoupURI *soup_uri;
 	char *uri;
 	GChecksum *sum;
+	g_autofree gchar *allocated_cache_dir = NULL;
+
+	/* Use the default cache directory? */
+	if (cache_dir == NULL) {
+		allocated_cache_dir = g_build_filename (g_get_user_cache_dir (),
+		                                        "geocode-glib",
+		                                        NULL);
+		cache_dir = allocated_cache_dir;
+	}
 
 	/* Create cache directory */
-	path = g_build_filename (g_get_user_cache_dir (),
-				 "geocode-glib",
-				 NULL);
-	if (g_mkdir_with_parents (path, 0700) < 0) {
-		g_warning ("Failed to mkdir path '%s': %s", path, g_strerror (errno));
-		g_free (path);
+	if (g_mkdir_with_parents (cache_dir, 0700) < 0) {
+		g_warning ("Failed to mkdir path '%s': %s", cache_dir,
+		           g_strerror (errno));
 		return NULL;
 	}
-	g_free (path);
 
 	/* Create path for query */
 	soup_uri = soup_message_get_uri (query);
@@ -99,10 +105,7 @@ _geocode_glib_cache_path_for_query (SoupMessage *query)
 
 	filename = g_checksum_get_string (sum);
 
-	path = g_build_filename (g_get_user_cache_dir (),
-				 "geocode-glib",
-				 filename,
-				 NULL);
+	path = g_build_filename (cache_dir, filename, NULL);
 
 	g_checksum_free (sum);
 	g_free (uri);
@@ -110,14 +113,16 @@ _geocode_glib_cache_path_for_query (SoupMessage *query)
 	return path;
 }
 
+/* @cache_path can be NULL to use the default. */
 gboolean
-_geocode_glib_cache_save (SoupMessage *query,
-			  const char  *contents)
+_geocode_glib_cache_save (const gchar *cache_path,
+                          SoupMessage *query,
+                          const char  *contents)
 {
 	char *path;
 	gboolean ret;
 
-	path = _geocode_glib_cache_path_for_query (query);
+	path = _geocode_glib_cache_path_for_query (cache_path, query);
 	g_debug ("Saving cache file '%s'", path);
 	ret = g_file_set_contents (path, contents, -1, NULL);
 
@@ -125,14 +130,16 @@ _geocode_glib_cache_save (SoupMessage *query,
 	return ret;
 }
 
+/* @cache_path can be NULL to use the default. */
 gboolean
-_geocode_glib_cache_load (SoupMessage *query,
+_geocode_glib_cache_load (const gchar *cache_path,
+			  SoupMessage *query,
 			  char  **contents)
 {
 	char *path;
 	gboolean ret;
 
-	path = _geocode_glib_cache_path_for_query (query);
+	path = _geocode_glib_cache_path_for_query (cache_path, query);
 	g_debug ("Loading cache file '%s'", path);
 	ret = g_file_get_contents (path, contents, NULL, NULL);
 

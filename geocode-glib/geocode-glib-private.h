@@ -43,10 +43,13 @@ GList      *_geocode_parse_search_json  (const char *contents,
 
 char       *_geocode_object_get_lang (void);
 
-char *_geocode_glib_cache_path_for_query (SoupMessage *query);
-gboolean _geocode_glib_cache_save (SoupMessage *query,
+char *_geocode_glib_cache_path_for_query (const gchar *cache_path,
+                                          SoupMessage *query);
+gboolean _geocode_glib_cache_save (const gchar *cache_path,
+                                   SoupMessage *query,
                                    const char  *contents);
-gboolean _geocode_glib_cache_load (SoupMessage *query,
+gboolean _geocode_glib_cache_load (const gchar *cache_path,
+                                   SoupMessage *query,
                                    char       **contents);
 GHashTable *_geocode_glib_dup_hash_table (GHashTable *ht);
 gboolean _geocode_object_is_number_after_street (void);

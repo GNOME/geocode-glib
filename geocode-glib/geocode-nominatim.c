@@ -50,14 +50,16 @@ typedef enum {
 	PROP_BASE_URL = 1,
 	PROP_MAINTAINER_EMAIL_ADDRESS,
 	PROP_USER_AGENT,
+	PROP_CACHE_PATH,
 } GeocodeNominatimProperty;
 
-static GParamSpec *properties[PROP_USER_AGENT + 1];
+static GParamSpec *properties[PROP_CACHE_PATH + 1];
 
 typedef struct {
 	char *base_url;
 	char *maintainer_email_address;
 	char *user_agent;
+	char *cache_path;
 } GeocodeNominatimPrivate;
 
 static void geocode_backend_iface_init (GeocodeBackendInterface *iface);
@@ -880,7 +882,12 @@ on_query_data_loaded (SoupSession *session,
                       SoupMessage *query,
                       GTask       *task)
 {
+	GeocodeNominatim *self;
+	GeocodeNominatimPrivate *priv;
 	char *contents;
+
+	self = g_task_get_source_object (task);
+	priv = geocode_nominatim_get_instance_private (self);
 
 	if (query->status_code != SOUP_STATUS_OK)
 		g_task_return_new_error (task,
@@ -890,7 +897,7 @@ on_query_data_loaded (SoupSession *session,
 		                         query->reason_phrase ? query->reason_phrase : "Query failed");
 	else {
 		contents = g_strndup (query->response_body->data, query->response_body->length);
-		_geocode_glib_cache_save (query, contents);
+		_geocode_glib_cache_save (priv->cache_path, query, contents);
 		g_task_return_pointer (task, contents, g_free);
 	}
 
@@ -951,7 +958,8 @@ geocode_nominatim_query_async (GeocodeNominatim    *self,
 	soup_query = soup_message_new (SOUP_METHOD_GET, uri);
 	g_task_set_task_data (task, soup_query, g_object_unref);
 
-	cache_path = _geocode_glib_cache_path_for_query (soup_query);
+	cache_path = _geocode_glib_cache_path_for_query (priv->cache_path,
+	                                                 soup_query);
 	if (cache_path != NULL) {
 		GFile *cache;
 
@@ -994,14 +1002,14 @@ geocode_nominatim_query (GeocodeNominatim  *self,
 	soup_session = _geocode_glib_build_soup_session (priv->user_agent);
 	soup_query = soup_message_new (SOUP_METHOD_GET, uri);
 
-	if (_geocode_glib_cache_load (soup_query, &contents) == FALSE) {
+	if (_geocode_glib_cache_load (priv->cache_path, soup_query, &contents) == FALSE) {
 		if (soup_session_send_message (soup_session, soup_query) != SOUP_STATUS_OK) {
 			g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
 			                     soup_query->reason_phrase ? soup_query->reason_phrase : "Query failed");
 			contents = NULL;
 		} else {
 			contents = g_strndup (soup_query->response_body->data, soup_query->response_body->length);
-			_geocode_glib_cache_save (soup_query, contents);
+			_geocode_glib_cache_save (priv->cache_path, soup_query, contents);
 		}
 	}
 
@@ -1355,6 +1363,53 @@ geocode_nominatim_new (const char *base_url,
 	                                        NULL));
 }
 
+/**
+ * geocode_nominatim_get_cache_path:
+ * @self: a #GeocodeNominatim
+ *
+ * Get the current value of the cache path where query results are cached
+ * locally to avoid excess network round trips. This is the
+ * #GeocodeNominatim:cache-path property.
+ *
+ * Returns: (transfer none) (nullable): the current cache path, or %NULL if the
+ *    default is in use
+ * Since: UNRELEASED
+ */
+const gchar *
+geocode_nominatim_get_cache_path (GeocodeNominatim *self)
+{
+	GeocodeNominatimPrivate *priv = geocode_nominatim_get_instance_private (self);
+
+	g_return_val_if_fail (GEOCODE_IS_NOMINATIM (self), NULL);
+
+	return priv->cache_path;
+}
+
+/**
+ * geocode_nominatim_set_cache_path:
+ * @self: a #GeocodeNominatim
+ * @path: (nullable): new cache path to use, or %NULL to use the default
+ *
+ * Set the path where query results are cached, #GeocodeNominatim:cache-path.
+ *
+ * Since: UNRELEASED
+ */
+void
+geocode_nominatim_set_cache_path (GeocodeNominatim *self,
+                                  const gchar      *path)
+{
+	GeocodeNominatimPrivate *priv = geocode_nominatim_get_instance_private (self);
+
+	g_return_if_fail (GEOCODE_IS_NOMINATIM (self));
+
+	if (g_strcmp0 (path, priv->cache_path) == 0)
+		return;
+
+	g_free (priv->cache_path);
+	priv->cache_path = g_strdup (path);
+	g_object_notify (G_OBJECT (self), "cache-path");
+}
+
 static void
 geocode_nominatim_init (GeocodeNominatim *object)
 {
@@ -1395,6 +1450,9 @@ geocode_nominatim_get_property (GObject    *object,
 	case PROP_USER_AGENT:
 		g_value_set_string (value, priv->user_agent);
 		break;
+	case PROP_CACHE_PATH:
+		g_value_set_string (value, priv->cache_path);
+		break;
 	default:
 		/* We don't have any other property... */
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -1431,6 +1489,10 @@ geocode_nominatim_set_property (GObject      *object,
 			                          properties[PROP_USER_AGENT]);
 		}
 		break;
+	case PROP_CACHE_PATH:
+		geocode_nominatim_set_cache_path (GEOCODE_NOMINATIM (object),
+		                                  g_value_get_string (value));
+		break;
 	default:
 		/* We don't have any other property... */
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -1448,6 +1510,7 @@ geocode_nominatim_finalize (GObject *object)
 	g_free (priv->base_url);
 	g_free (priv->maintainer_email_address);
 	g_free (priv->user_agent);
+	g_free (priv->cache_path);
 
 	G_OBJECT_CLASS (geocode_nominatim_parent_class)->finalize (object);
 }
@@ -1532,6 +1595,21 @@ geocode_nominatim_class_init (GeocodeNominatimClass *klass)
 	properties[PROP_USER_AGENT] = g_param_spec_string ("user-agent",
 	                                                   "User agent",
 	                                                   "User-Agent string to send with HTTP(S) requests",
+	                                                   NULL,
+	                                                   (G_PARAM_READWRITE |
+	                                                    G_PARAM_STATIC_STRINGS));
+
+	/**
+	 * GeocodeNominatim:cache-path:
+	 *
+	 * Path to the query results cache on the file system, or %NULL to use
+	 * the default cache path (`$XDG_CACHE_HOME/geocode-glib`).
+	 *
+	 * Since: UNRELEASED
+	 */
+	properties[PROP_CACHE_PATH] = g_param_spec_string ("cache-path",
+	                                                   "Cache path",
+	                                                   "Path to the query results cache",
 	                                                   NULL,
 	                                                   (G_PARAM_READWRITE |
 	                                                    G_PARAM_STATIC_STRINGS));

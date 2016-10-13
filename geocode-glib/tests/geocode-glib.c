@@ -174,28 +174,33 @@ load_json (const gchar *expected_response_filename)
 }
 
 static void
-set_up_cache (void)
+backend_set_up_cache (GeocodeBackend *backend)
 {
-	g_autofree gchar *cache_path = NULL;
-	g_autoptr (GError) error = NULL;
+	/* If the network is not enabled, we are using a #GeocodeNominatimTest
+	 * backend, which handles its own temporary cache directory. */
+	if (enable_network && GEOCODE_IS_NOMINATIM (backend)) {
+		g_autofree gchar *cache_path = NULL;
+		g_autoptr (GError) error = NULL;
 
-	cache_path = g_dir_make_tmp ("test-gcglib-XXXXXX", &error);
-	g_assert_no_error (error);
-
-	g_setenv ("XDG_CACHE_HOME", cache_path, TRUE);
+		cache_path = g_dir_make_tmp ("test-gcglib-XXXXXX", &error);
+		g_assert_no_error (error);
+		geocode_nominatim_set_cache_path (GEOCODE_NOMINATIM (backend),
+		                                  cache_path);
+	}
 }
 
 static GeocodeReverse *
 create_reverse (GeocodeLocation *loc,
                 const gchar     *expected_response_filename)
 {
+	g_autoptr (GeocodeBackend) backend = NULL;
 	g_autoptr (GHashTable) parameters = NULL;
 	g_autoptr (GeocodeReverse) reverse = NULL;
 	char lat[G_ASCII_DTOSTR_BUF_SIZE];
 	char lon[G_ASCII_DTOSTR_BUF_SIZE];
 
 	/* Set up the cache to avoid polluting the user’s main cache. */
-	set_up_cache ();
+	backend_set_up_cache (backend);
 
 	/* Build the query parameters. */
 	g_ascii_dtostr (lat,
@@ -213,19 +218,21 @@ create_reverse (GeocodeLocation *loc,
 	reverse = geocode_reverse_new_for_location (loc);
 
 	if (!enable_network) {
-		g_autoptr (GeocodeNominatim) backend = NULL;
 		g_autofree gchar *expected_response = NULL;
 
 		/* Load the JSON we expect as a response. */
 		expected_response = load_json (expected_response_filename);
 
 		/* Build the backend and query object. */
-		backend = geocode_nominatim_test_new ();
+		backend = GEOCODE_BACKEND (geocode_nominatim_test_new ());
 		geocode_nominatim_test_expect_query (GEOCODE_NOMINATIM_TEST (backend),
 		                                     parameters, expected_response);
-
-		geocode_reverse_set_backend (reverse, GEOCODE_BACKEND (backend));
+	} else {
+		backend = GEOCODE_BACKEND (geocode_nominatim_get_gnome ());
 	}
+
+	backend_set_up_cache (backend);
+	geocode_reverse_set_backend (reverse, backend);
 
 	return g_steal_pointer (&reverse);
 }
@@ -242,25 +249,28 @@ create_forward_for_params (GHashTable  *tp,
                            GHashTable  *params,
                            const gchar *expected_response_filename)
 {
+	g_autoptr (GeocodeBackend) backend = NULL;
 	g_autoptr (GeocodeForward) forward = NULL;
 
 	/* Set up the cache to avoid polluting the user’s main cache. */
-	set_up_cache ();
+	backend_set_up_cache (backend);
 
 	forward = geocode_forward_new_for_params (tp);
 
 	if (!enable_network) {
-		g_autoptr (GeocodeNominatim) backend = NULL;
 		g_autofree gchar *expected_response = NULL;
 
 		expected_response = load_json (expected_response_filename);
 
-		backend = geocode_nominatim_test_new ();
+		backend = GEOCODE_BACKEND (geocode_nominatim_test_new ());
 		geocode_nominatim_test_expect_query (GEOCODE_NOMINATIM_TEST (backend),
 		                                     params, expected_response);
-
-		geocode_forward_set_backend (forward, GEOCODE_BACKEND (backend));
+	} else {
+		backend = GEOCODE_BACKEND (geocode_nominatim_get_gnome ());
 	}
+
+	backend_set_up_cache (backend);
+	geocode_forward_set_backend (forward, backend);
 
 	return g_steal_pointer (&forward);
 }
@@ -277,25 +287,28 @@ create_forward_for_string (const gchar *q,
                            GHashTable  *params,
                            const gchar *expected_response_filename)
 {
+	g_autoptr (GeocodeBackend) backend = NULL;
 	g_autoptr (GeocodeForward) forward = NULL;
 
 	/* Set up the cache to avoid polluting the user’s main cache. */
-	set_up_cache ();
+	backend_set_up_cache (backend);
 
 	forward = geocode_forward_new_for_string (q);
 
 	if (!enable_network) {
-		g_autoptr (GeocodeNominatim) backend = NULL;
 		g_autofree gchar *expected_response = NULL;
 
 		expected_response = load_json (expected_response_filename);
 
-		backend = geocode_nominatim_test_new ();
+		backend = GEOCODE_BACKEND (geocode_nominatim_test_new ());
 		geocode_nominatim_test_expect_query (GEOCODE_NOMINATIM_TEST (backend),
 		                                     params, expected_response);
-
-		geocode_forward_set_backend (forward, GEOCODE_BACKEND (backend));
+	} else {
+		backend = GEOCODE_BACKEND (geocode_nominatim_get_gnome ());
 	}
+
+	backend_set_up_cache (backend);
+	geocode_forward_set_backend (forward, backend);
 
 	return g_steal_pointer (&forward);
 }

@@ -89,6 +89,10 @@ struct _GeocodeNominatimClass {
 GeocodeNominatim *geocode_nominatim_new (const gchar *base_url,
                                          const gchar *maintainer_email_address);
 
+const gchar *geocode_nominatim_get_cache_path (GeocodeNominatim *self);
+void         geocode_nominatim_set_cache_path (GeocodeNominatim *self,
+                                               const gchar      *path);
+
 GeocodeNominatim *geocode_nominatim_get_gnome (void);
 
 G_END_DECLS

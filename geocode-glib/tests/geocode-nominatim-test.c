@@ -209,17 +209,33 @@ real_query (GeocodeNominatim  *self,
 
 /******************************************************************************/
 
+/**
+ * geocode_nominatim_test_new:
+ *
+ * Create a new #GeocodeNominatimTest instance, set up with a dummy base URI
+ * and maintainer e-mail address, and with its cache directory set to a new,
+ * empty temporary directory.
+ *
+ * Returns: (transfer full): a new #GeocodeNominatimTest
+ * Since: UNRELEASED
+ */
 GeocodeNominatim *
 geocode_nominatim_test_new (void)
 {
-	/* This shouldn’t be used with the user’s normal cache directory, or we
-	 * will pollute it. */
-	g_assert (g_str_has_prefix (g_get_user_cache_dir (), g_get_tmp_dir ()));
+	g_autoptr (GeocodeNominatim) nominatim = NULL;
+	g_autofree gchar *cache_path = NULL;
+	g_autoptr (GError) error = NULL;
 
-	return GEOCODE_NOMINATIM (g_object_new (GEOCODE_TYPE_NOMINATIM_TEST,
-	                                        "base-url", "http://example.invalid",
-	                                        "maintainer-email-address", "maintainer@invalid",
-	                                        NULL));
+	nominatim = GEOCODE_NOMINATIM (g_object_new (GEOCODE_TYPE_NOMINATIM_TEST,
+	                                             "base-url", "http://example.invalid",
+	                                             "maintainer-email-address", "maintainer@invalid",
+	                                             NULL));
+
+	cache_path = g_dir_make_tmp ("geocode-nominatim-test-XXXXXX", &error);
+	g_assert_no_error (error);
+	geocode_nominatim_set_cache_path (nominatim, cache_path);
+
+	return g_steal_pointer (&nominatim);
 }
 
 static void
