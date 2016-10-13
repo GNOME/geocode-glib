@@ -572,6 +572,7 @@ test_search_json (void)
 			    TEST_SRCDIR "/nominatim-rio.json", error->message);
 	}
 	list = _geocode_parse_search_json (contents, &error);
+	g_assert_no_error (error);
 
 	g_assert (list != NULL);
 	g_assert_cmpint (g_list_length (list), ==, 10);
