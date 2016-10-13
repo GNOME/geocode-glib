@@ -57,9 +57,9 @@ BUILT_SOURCES = \
 
 geocode-enum-types.h: $(GCGLIB_HEADER_FILES)
 	$(AM_V_GEN) ($(GLIB_MKENUMS) \
-		--fhead "#ifndef __GEOCODE_ENUM_TYPES_H__\n#define __GEOCODE_ENUM_TYPES_H__\n\n#include <glib-object.h>\n\nG_BEGIN_DECLS\n" \
+		--fhead "#ifndef __GEOCODE_ENUM_TYPES_H__\n#define __GEOCODE_ENUM_TYPES_H__\n\n#include <glib-object.h>\n\nG_BEGIN_DECLS\n\n/**\n * SECTION:geocode-enum-types\n * @short_description: Geocode enumerated types\n * @include: geocode-glib/geocode-glib.h\n *\n * The enumerated types defined and used by geocode-glib.\n */\n\n" \
 		--fprod "/* enumerations from \"@filename@\" */\n" \
-		--vhead "GType @enum_name@_get_type (void) G_GNUC_CONST;\n#define GEOCODE_TYPE_@ENUMSHORT@ (@enum_name@_get_type())\n\n/**\n * SECTION:geocode-enum-types\n * @short_description: Geocode enumerated types\n * @include: geocode-glib/geocode-glib.h\n *\n * The enumerated types defined and used by geocode-glib.\n **/" \
+		--vhead "GType @enum_name@_get_type (void) G_GNUC_CONST;\n#define GEOCODE_TYPE_@ENUMSHORT@ (@enum_name@_get_type())\n" \
 		--ftail "G_END_DECLS\n\n#endif /* __GEOCODE_ENUM_TYPES_H__ */" $^ > xgen-$(@F) \
 		&& mv -f xgen-$(@F) $@)
 
