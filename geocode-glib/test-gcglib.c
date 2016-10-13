@@ -36,7 +36,7 @@
 
 static GMainLoop *loop = NULL;
 static gboolean enable_network = FALSE;
-static char **params = NULL;
+static char **command_line_params = NULL;
 
 static void
 print_loc (GeocodeLocation *loc)
@@ -837,13 +837,13 @@ new_loc (void)
 {
 	gdouble latitude, longitude;
 
-	if (params[0] == NULL ||
-	    *params[0] == '\0' ||
-	    params[1] == NULL ||
-	    *params[1] == '\0')
+	if (command_line_params[0] == NULL ||
+	    *command_line_params[0] == '\0' ||
+	    command_line_params[1] == NULL ||
+	    *command_line_params[1] == '\0')
 		return NULL;
-	latitude = g_ascii_strtod (params[0], NULL);
-	longitude = g_ascii_strtod (params[1], NULL);
+	latitude = g_ascii_strtod (command_line_params[0], NULL);
+	longitude = g_ascii_strtod (command_line_params[1], NULL);
 	return geocode_location_new (latitude, longitude, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
 }
 
@@ -857,7 +857,7 @@ int main (int argc, char **argv)
 		{ "count", 0, 0, G_OPTION_ARG_INT, &answer_count, "Number of answers to get for forward searches", NULL },
 		{ "reverse", 0, 0, G_OPTION_ARG_NONE, &do_rev_geocoding, "Whether to do reverse geocoding for the given parameters", NULL },
 		{ "enable-network", 0, 0, G_OPTION_ARG_NONE, &enable_network, "Whether to do network queries during unit tests, or use recorded results", NULL },
-		{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &params, NULL, "[KEY=VALUE...]" },
+		{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_line_params, NULL, "[KEY=VALUE...]" },
 		{ NULL }
 	};
 
@@ -877,7 +877,7 @@ int main (int argc, char **argv)
 		return 1;
 	}
 
-	if (params == NULL) {
+	if (command_line_params == NULL) {
 		g_test_add_func ("/geocode/resolve_json", test_resolve_json);
 		g_test_add_func ("/geocode/search_json", test_search_json);
 		g_test_add_func ("/geocode/reverse", test_rev);
@@ -896,7 +896,7 @@ int main (int argc, char **argv)
 	if (do_rev_geocoding == FALSE) {
 		GeocodeForward *forward;
 
-		forward = geocode_forward_new_for_string (params[0]);
+		forward = geocode_forward_new_for_string (command_line_params[0]);
 		if (answer_count != DEFAULT_ANSWER_COUNT)
 			geocode_forward_set_answer_count (forward, answer_count);
 		geocode_forward_search_async (forward, NULL, got_geocode_search_cb, NULL);
