@@ -14,6 +14,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([1.11 dist-xz no-dist-gzip check-news subdir-objects])
+AX_CHECK_ENABLE_DEBUG([yes])
 
 # Before making a release, the GCLIB_LT_VERSION string should be modified.
 # The string is of the form C:R:A.
@@ -69,7 +70,6 @@ AC_SUBST(GLIB_GENMARSHAL)
 
 GOBJECT_INTROSPECTION_CHECK([0.6.3])
 
-GNOME_DEBUG_CHECK
 GNOME_COMPILE_WARNINGS([maximum])
 GNOME_CXX_WARNINGS
 GNOME_MAINTAINER_MODE_DEFINES
