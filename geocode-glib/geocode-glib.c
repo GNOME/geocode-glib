@@ -51,6 +51,11 @@ _geocode_glib_build_soup_session (const gchar *user_agent_override)
 		user_agent = g_strdup_printf ("geocode-glib/%s (%s)",
 					      PACKAGE_VERSION, id);
 		user_agent_allocated = user_agent;
+	} else if (g_get_application_name () != NULL) {
+		user_agent = g_strdup_printf ("geocode-glib/%s (%s)",
+		                              PACKAGE_VERSION,
+		                              g_get_application_name ());
+		user_agent_allocated = user_agent;
 	} else {
 		user_agent = g_strdup_printf ("geocode-glib/%s",
 					      PACKAGE_VERSION);
