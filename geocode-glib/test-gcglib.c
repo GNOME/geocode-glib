@@ -517,6 +517,8 @@ test_search (void)
 
 	setlocale (LC_MESSAGES, old_locale);
 	g_free (old_locale);
+
+	g_list_free_full (results, (GDestroyNotify) g_object_unref);
 }
 
 static void
@@ -616,7 +618,7 @@ test_osm_type (void)
 static void
 test_distance (void)
 {
-	GeocodeLocation *loca, *locb;
+	g_autoptr (GeocodeLocation) loca = NULL, locb = NULL;
 
 	/* 1600 Pennsylvania Ave NW, Washington, DC */
 	loca = geocode_location_new (38.898556, -77.037852, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
@@ -871,7 +873,7 @@ new_loc (void)
 int main (int argc, char **argv)
 {
 	GError *error = NULL;
-	GOptionContext *context;
+	g_autoptr (GOptionContext) context = NULL;
 	gboolean do_rev_geocoding = FALSE;
 	int answer_count = DEFAULT_ANSWER_COUNT;
 	const GOptionEntry entries[] = {
