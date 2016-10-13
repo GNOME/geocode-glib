@@ -984,12 +984,12 @@ _geocode_location_to_params (GeocodeLocation *location)
 	return ht;
 }
 
-static GeocodePlace *
+static GList *
 geocode_nominatim_reverse_resolve_finish (GeocodeBackend  *backend,
                                           GAsyncResult    *res,
                                           GError         **error)
 {
-	return GEOCODE_PLACE (g_task_propagate_pointer (G_TASK (res), error));
+	return g_task_propagate_pointer (G_TASK (res), error);
 }
 
 static void
@@ -1150,13 +1150,19 @@ resolve_json (const char  *contents,
 }
 
 static void
+places_list_free (GList *places)
+{
+	g_list_free_full (places, g_object_unref);
+}
+
+static void
 on_reverse_query_ready (GeocodeNominatim *self,
                         GAsyncResult     *res,
                         GTask            *task)
 {
 	GError *error = NULL;
 	char *contents;
-	GeocodePlace *ret;
+	g_autoptr (GeocodePlace) place = NULL;
 	GHashTable *attributes;
 
 	contents = GEOCODE_NOMINATIM_GET_CLASS (self)->query_finish (GEOCODE_NOMINATIM (self), res, &error);
@@ -1175,10 +1181,12 @@ on_reverse_query_ready (GeocodeNominatim *self,
 		return;
 	}
 
-	ret = _geocode_create_place_from_attributes (attributes);
+	place = _geocode_create_place_from_attributes (attributes);
 	g_hash_table_unref (attributes);
 
-	g_task_return_pointer (task, ret, g_object_unref);
+	g_task_return_pointer (task,
+	                       g_list_prepend (NULL, g_object_ref (place)),
+	                       (GDestroyNotify) places_list_free);
 	g_object_unref (task);
 }
 
@@ -1210,7 +1218,7 @@ geocode_nominatim_reverse_resolve_async (GeocodeBackend      *self,
 	g_free (uri);
 }
 
-static GeocodePlace *
+static GList *
 geocode_nominatim_reverse_resolve (GeocodeBackend   *self,
                                    GeocodeLocation  *location,
                                    GCancellable     *cancellable,
@@ -1219,7 +1227,7 @@ geocode_nominatim_reverse_resolve (GeocodeBackend   *self,
 	char *contents;
 	GHashTable *ht;
 	GHashTable *result = NULL;
-	GeocodePlace *place;
+	g_autoptr (GeocodePlace) place = NULL;
 	gchar *uri = NULL;
 
 	g_return_val_if_fail (GEOCODE_IS_BACKEND (self), NULL);
@@ -1246,7 +1254,7 @@ geocode_nominatim_reverse_resolve (GeocodeBackend   *self,
 	place = _geocode_create_place_from_attributes (result);
 	g_hash_table_unref (result);
 
-	return place;
+	return g_list_prepend (NULL, g_object_ref (place));
 }
 
 /******************************************************************************/

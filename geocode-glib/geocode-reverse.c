@@ -110,19 +110,28 @@ ensure_backend (GeocodeReverse *object)
 }
 
 static void
+places_list_free (GList *places)
+{
+	g_list_free_full (places, g_object_unref);
+}
+
+static void
 backend_reverse_resolve_ready (GeocodeBackend *backend,
                                GAsyncResult   *res,
                                GTask          *task)
 {
-	GeocodePlace *place;
+	GList *places = NULL;  /* (element-type GeocodePlace) */
 	GError *error = NULL;
 
-	place = geocode_backend_reverse_resolve_finish (backend, res, &error);
-	if (place)
-		g_task_return_pointer (task, place, g_object_unref);
+	/* Extract the first result from the list and return that. */
+	places = geocode_backend_reverse_resolve_finish (backend, res, &error);
+	if (places != NULL)
+		g_task_return_pointer (task, g_object_ref (places->data),
+		                       g_object_unref);
 	else
 		g_task_return_error (task, error);
 	g_object_unref (task);
+	g_clear_pointer (&places, places_list_free);
 }
 
 /**
@@ -200,16 +209,26 @@ GeocodePlace *
 geocode_reverse_resolve (GeocodeReverse *object,
                          GError        **error)
 {
+	GList *places = NULL;  /* (element-type GeocodePlace) */
+	GeocodePlace *place = NULL;
+
 	g_return_val_if_fail (GEOCODE_IS_REVERSE (object), NULL);
 	g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
 	ensure_backend (object);
 	g_assert (object->priv->backend != NULL);
 
-	return geocode_backend_reverse_resolve (object->priv->backend,
-	                                        object->priv->location,
-	                                        NULL,
-	                                        error);
+	places = geocode_backend_reverse_resolve (object->priv->backend,
+	                                          object->priv->location,
+	                                          NULL,
+	                                          error);
+
+	if (places != NULL)
+		place = g_object_ref (places->data);
+
+	g_list_free_full (places, g_object_unref);
+
+	return place;
 }
 
 /**

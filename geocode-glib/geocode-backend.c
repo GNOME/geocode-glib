@@ -186,12 +186,14 @@ geocode_backend_reverse_resolve_async (GeocodeBackend      *backend,
  *
  * Finishes a reverse geocoding operation. See geocode_backend_reverse_resolve_async().
  *
- * Returns: (transfer full): A #GeocodePlace instance, or %NULL in case of
- * errors. Free the returned instance with g_object_unref() when done.
+ * Returns: (transfer full) (element-type GeocodePlace): A list of
+ *    #GeocodePlace instances, or %NULL in case of errors. The list is ordered
+ *    by relevance, with most relevant results first. Free the returned
+ *    instances with g_object_unref() and the list with g_list_free() when done.
  *
  * Since: UNRELEASED
  **/
-GeocodePlace *
+GList *
 geocode_backend_reverse_resolve_finish (GeocodeBackend  *backend,
                                         GAsyncResult    *result,
                                         GError         **error)
@@ -214,14 +216,20 @@ geocode_backend_reverse_resolve_finish (GeocodeBackend  *backend,
  * @cancellable: optional #GCancellable object, %NULL to ignore.
  * @error: a #GError.
  *
- * Gets the result of a reverse geocoding query using the @backend.
+ * Gets the result of a reverse geocoding query using the @backend. Typically, a
+ * single result will be returned representing the place at the given location;
+ * but in some cases the results will be ambiguous and multiple results will
+ * be returned. They will be returned in order of relevance, with the most
+ * relevant result first in the list.
  *
- * Returns: (transfer full): A #GeocodePlace instance, or %NULL in case of
- * errors. Free the returned instance with g_object_unref() when done.
+ * Returns: (transfer full) (element-type GeocodePlace): A list of
+ *    #GeocodePlace instances, or %NULL in case of errors. The list is ordered
+ *    by relevance, with most relevant results first. Free the returned
+ *    instances with g_object_unref() and the list with g_list_free() when done.
  *
  * Since: UNRELEASED
  */
-GeocodePlace *
+GList *
 geocode_backend_reverse_resolve (GeocodeBackend   *backend,
                                  GeocodeLocation  *location,
                                  GCancellable     *cancellable,
@@ -305,14 +313,15 @@ reverse_resolve_async_thread (GTask           *task,
                               GCancellable    *cancellable)
 {
 	GError *error = NULL;
-	GeocodePlace *place;
+	GList *places;  /* (element-type GeocodePlace) */
 
-	place = geocode_backend_reverse_resolve (backend, location,
-	                                         cancellable, &error);
+	places = geocode_backend_reverse_resolve (backend, location,
+	                                          cancellable, &error);
 	if (error)
 		g_task_return_error (task, error);
 	else
-		g_task_return_pointer (task, place, g_object_unref);
+		g_task_return_pointer (task, places,
+		                       (GDestroyNotify) places_list_free);
 }
 
 static void
@@ -330,7 +339,7 @@ real_reverse_resolve_async (GeocodeBackend      *backend,
 	g_object_unref (task);
 }
 
-static GeocodePlace *
+static GList *
 real_reverse_resolve_finish (GeocodeBackend  *backend,
                              GAsyncResult    *result,
                              GError         **error)

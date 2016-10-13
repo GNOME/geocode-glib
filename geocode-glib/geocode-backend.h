@@ -77,7 +77,7 @@ struct _GeocodeBackendInterface
 	                                          GError              **error);
 
 	/* Reverse */
-	GeocodePlace *(*reverse_resolve)         (GeocodeBackend       *backend,
+	GList        *(*reverse_resolve)         (GeocodeBackend       *backend,
 	                                          GeocodeLocation      *location,
 	                                          GCancellable         *cancellable,
 	                                          GError              **error);
@@ -86,7 +86,7 @@ struct _GeocodeBackendInterface
 	                                          GCancellable         *cancellable,
 	                                          GAsyncReadyCallback   callback,
 	                                          gpointer              user_data);
-	GeocodePlace *(*reverse_resolve_finish)  (GeocodeBackend       *backend,
+	GList        *(*reverse_resolve_finish)  (GeocodeBackend       *backend,
 	                                          GAsyncResult         *result,
 	                                          GError              **error);
 
@@ -114,10 +114,10 @@ void          geocode_backend_reverse_resolve_async  (GeocodeBackend       *back
                                                       GCancellable         *cancellable,
                                                       GAsyncReadyCallback   callback,
                                                       gpointer              user_data);
-GeocodePlace *geocode_backend_reverse_resolve_finish (GeocodeBackend       *backend,
+GList        *geocode_backend_reverse_resolve_finish (GeocodeBackend       *backend,
                                                       GAsyncResult         *result,
                                                       GError              **error);
-GeocodePlace *geocode_backend_reverse_resolve        (GeocodeBackend       *backend,
+GList        *geocode_backend_reverse_resolve        (GeocodeBackend       *backend,
                                                       GeocodeLocation      *location,
                                                       GCancellable         *cancellable,
                                                       GError              **error);
