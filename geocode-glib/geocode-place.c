@@ -1127,7 +1127,7 @@ get_icon_name (GeocodePlace *place)
 {
         const char *icon_name;
 
-        switch (place->priv->place_type) {
+        switch ((int) place->priv->place_type) {
 
         case GEOCODE_PLACE_TYPE_BUILDING:
                 icon_name = "poi-building";
