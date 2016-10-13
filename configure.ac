@@ -8,6 +8,7 @@ AC_INIT([geocode-glib],
         [gclib_version_major.gclib_version_minor.gclib_version_micro],
         [http://bugzilla.gnome.org/enter_bug.cgi?product=geocode-glib],
         [geocode-glib])
+AX_IS_RELEASE([git-directory])
 
 AC_CONFIG_SRCDIR([geocode-glib/test-gcglib.c])
 AC_CONFIG_HEADERS([config.h])
