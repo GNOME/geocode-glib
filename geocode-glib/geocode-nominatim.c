@@ -35,13 +35,15 @@
 typedef enum {
 	PROP_BASE_URL = 1,
 	PROP_MAINTAINER_EMAIL_ADDRESS,
+	PROP_USER_AGENT,
 } GeocodeNominatimProperty;
 
-static GParamSpec *properties[PROP_MAINTAINER_EMAIL_ADDRESS + 1];
+static GParamSpec *properties[PROP_USER_AGENT + 1];
 
 typedef struct {
 	char *base_url;
 	char *maintainer_email_address;
+	char *user_agent;
 } GeocodeNominatimPrivate;
 
 static void geocode_backend_iface_init (GeocodeBackendInterface *iface);
@@ -877,8 +879,13 @@ on_cache_data_loaded (GFile        *cache,
                       GAsyncResult *res,
                       GTask        *task)
 {
+	GeocodeNominatim *self;
+	GeocodeNominatimPrivate *priv;
 	char *contents;
 	SoupSession *soup_session;
+
+	self = g_task_get_source_object (task);
+	priv = geocode_nominatim_get_instance_private (self);
 
 	if (g_file_load_contents_finish (cache,
 	                                 res,
@@ -891,7 +898,7 @@ on_cache_data_loaded (GFile        *cache,
 		return;
 	}
 
-	soup_session = _geocode_glib_build_soup_session ();
+	soup_session = _geocode_glib_build_soup_session (priv->user_agent);
 	soup_session_queue_message (soup_session,
 	                            g_object_ref (g_task_get_task_data (task)),
 	                            (SoupSessionCallback) on_query_data_loaded,
@@ -932,7 +939,7 @@ geocode_nominatim_query_async (GeocodeNominatim    *self,
 		return;
 	}
 
-	soup_session = _geocode_glib_build_soup_session ();
+	soup_session = _geocode_glib_build_soup_session (priv->user_agent);
 	soup_session_queue_message (soup_session,
 	                            g_object_ref (soup_query),
 	                            (SoupSessionCallback) on_query_data_loaded,
@@ -955,7 +962,7 @@ geocode_nominatim_query (GeocodeNominatim  *self,
 	if (g_cancellable_set_error_if_cancelled (cancellable, error))
 		return NULL;
 
-	soup_session = _geocode_glib_build_soup_session ();
+	soup_session = _geocode_glib_build_soup_session (priv->user_agent);
 	soup_query = soup_message_new (SOUP_METHOD_GET, uri);
 
 	if (_geocode_glib_cache_load (soup_query, &contents) == FALSE) {
@@ -1353,6 +1360,9 @@ geocode_nominatim_get_property (GObject    *object,
 	case PROP_MAINTAINER_EMAIL_ADDRESS:
 		g_value_set_string (value, priv->maintainer_email_address);
 		break;
+	case PROP_USER_AGENT:
+		g_value_set_string (value, priv->user_agent);
+		break;
 	default:
 		/* We don't have any other property... */
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -1381,6 +1391,14 @@ geocode_nominatim_set_property (GObject      *object,
 		g_assert (priv->maintainer_email_address == NULL);
 		priv->maintainer_email_address = g_value_dup_string (value);
 		break;
+	case PROP_USER_AGENT:
+		if (g_strcmp0 (priv->user_agent, g_value_get_string (value)) != 0) {
+			g_free (priv->user_agent);
+			priv->user_agent = g_value_dup_string (value);
+			g_object_notify_by_pspec (object,
+			                          properties[PROP_USER_AGENT]);
+		}
+		break;
 	default:
 		/* We don't have any other property... */
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -1397,6 +1415,7 @@ geocode_nominatim_finalize (GObject *object)
 
 	g_free (priv->base_url);
 	g_free (priv->maintainer_email_address);
+	g_free (priv->user_agent);
 
 	G_OBJECT_CLASS (geocode_nominatim_parent_class)->finalize (object);
 }
@@ -1461,6 +1480,29 @@ geocode_nominatim_class_init (GeocodeNominatimClass *klass)
 	                         (G_PARAM_READWRITE |
 	                          G_PARAM_CONSTRUCT_ONLY |
 	                          G_PARAM_STATIC_STRINGS));
+
+	/**
+	 * GeocodeNominatim:user-agent:
+	 *
+	 * User-Agent string to send with HTTP(S) requests, or %NULL to use the
+	 * default user agent, which is derived from the geocode-glib version
+	 * and #GApplication:id, for example: `geocode-glib/3.20 (MyAppId)`.
+	 *
+	 * As per the
+	 * [Nominatim usage policy](http://wiki.openstreetmap.org/wiki/Nominatim_usage_policy),
+	 * it should be set to a string which identifies the application which
+	 * is using geocode-glib, and must be a valid
+	 * [user agent](https://tools.ietf.org/html/rfc7231#section-5.5.3)
+	 * string.
+	 *
+	 * Since: UNRELEASED
+	 */
+	properties[PROP_USER_AGENT] = g_param_spec_string ("user-agent",
+	                                                   "User agent",
+	                                                   "User-Agent string to send with HTTP(S) requests",
+	                                                   NULL,
+	                                                   (G_PARAM_READWRITE |
+	                                                    G_PARAM_STATIC_STRINGS));
 
 	g_object_class_install_properties (object_class,
 	                                   G_N_ELEMENTS (properties), properties);

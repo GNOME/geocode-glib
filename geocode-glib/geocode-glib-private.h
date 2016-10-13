@@ -50,7 +50,7 @@ gboolean _geocode_glib_cache_load (SoupMessage *query,
                                    char       **contents);
 GHashTable *_geocode_glib_dup_hash_table (GHashTable *ht);
 gboolean _geocode_object_is_number_after_street (void);
-SoupSession *_geocode_glib_build_soup_session (void);
+SoupSession *_geocode_glib_build_soup_session (const gchar *user_agent_override);
 
 G_END_DECLS
 

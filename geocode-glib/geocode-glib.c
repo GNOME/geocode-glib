@@ -38,26 +38,29 @@
  **/
 
 SoupSession *
-_geocode_glib_build_soup_session (void)
+_geocode_glib_build_soup_session (const gchar *user_agent_override)
 {
-	GApplication *application;
-	SoupSession *session;
 	char *user_agent;
+	g_autofree gchar *user_agent_allocated = NULL;
 
-	application = g_application_get_default ();
-	if (application) {
+	if (user_agent_override != NULL) {
+		user_agent = user_agent_override;
+	} else if (g_application_get_default () != NULL) {
+		GApplication *application = g_application_get_default ();
 		const char *id = g_application_get_application_id (application);
 		user_agent = g_strdup_printf ("geocode-glib/%s (%s)",
 					      PACKAGE_VERSION, id);
+		user_agent_allocated = user_agent;
 	} else {
 		user_agent = g_strdup_printf ("geocode-glib/%s",
 					      PACKAGE_VERSION);
+		user_agent_allocated = user_agent;
 	}
 
-	session = soup_session_new_with_options (SOUP_SESSION_USER_AGENT,
-						 user_agent, NULL);
-	g_free (user_agent);
-	return session;
+	g_debug ("%s: user_agent = %s", G_STRFUNC, user_agent);
+
+	return soup_session_new_with_options (SOUP_SESSION_USER_AGENT,
+	                                      user_agent, NULL);
 }
 
 char *
