@@ -1170,6 +1170,8 @@ geocode_forward_get_answer_count (GeocodeForward *forward)
  * @forward: a #GeocodeForward representing a query
  *
  * Gets the area to limit searches within.
+ *
+ * Returns: (transfer none) (nullable): the search area, or %NULL if none is set
  **/
 GeocodeBoundingBox *
 geocode_forward_get_search_area (GeocodeForward *forward)
