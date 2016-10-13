@@ -860,7 +860,7 @@ geo_uri_from_location (GeocodeLocation *loc)
         char *uri;
         char *coords;
         char *params;
-        char *crs = "wgs84";
+        const char *crs = "wgs84";
         char lat[G_ASCII_DTOSTR_BUF_SIZE];
         char lon[G_ASCII_DTOSTR_BUF_SIZE];
         char alt[G_ASCII_DTOSTR_BUF_SIZE];

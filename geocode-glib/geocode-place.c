@@ -1122,10 +1122,10 @@ geocode_place_get_continent (GeocodePlace *place)
         return place->priv->continent;
 }
 
-static char *
+static const char *
 get_icon_name (GeocodePlace *place)
 {
-        char *icon_name;
+        const char *icon_name;
 
         switch (place->priv->place_type) {
 
@@ -1192,7 +1192,7 @@ get_icon_name (GeocodePlace *place)
 GIcon *
 geocode_place_get_icon (GeocodePlace *place)
 {
-        char *icon_name;
+        const char *icon_name;
 
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 

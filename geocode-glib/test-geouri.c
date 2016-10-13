@@ -48,7 +48,7 @@ test_parse_uri (void)
 {
         GeocodeLocation *loc;
         GError *error = NULL;
-        char *uri = "geo:1.2,2.3,4.5;crs=wgs84;u=67";
+        const char *uri = "geo:1.2,2.3,4.5;crs=wgs84;u=67";
 
         loc = geocode_location_new (0, 0, 0);
 
@@ -102,7 +102,7 @@ static void
 test_unescape_uri (void)
 {
         GeocodeLocation *loc;
-        char *uri = "geo:0,0?q=57.038,12.3982(Parkvägen%202,%20Tvååker)";
+        const char *uri = "geo:0,0?q=57.038,12.3982(Parkvägen%202,%20Tvååker)";
 
         loc = geocode_location_new (0, 0, 0);
         g_assert (geocode_location_set_from_uri (loc, uri, NULL));
@@ -122,7 +122,8 @@ test_convert_from_to_location (void)
         gdouble altitude = 5;
         gdouble accuracy = 40;
         /* Karlskirche (from RFC) */
-        char *uri = "geo:48.198634,16.371648,5;crs=wgs84;u=40";
+        const char *uri = "geo:48.198634,16.371648,5;crs=wgs84;u=40";
+        g_autofree gchar *returned_uri = NULL;
 
         loc = geocode_location_new (0, 0, 0);
         g_assert (geocode_location_set_from_uri (loc, uri, &error));
@@ -141,10 +142,10 @@ test_convert_from_to_location (void)
                            ==,
                            accuracy);
 
-        uri = geocode_location_to_uri (loc, GEOCODE_LOCATION_URI_SCHEME_GEO);
+        returned_uri = geocode_location_to_uri (loc, GEOCODE_LOCATION_URI_SCHEME_GEO);
         g_object_unref (loc);
         loc = geocode_location_new (0, 0, 0);
-        g_assert (geocode_location_set_from_uri (loc, uri, &error));
+        g_assert (geocode_location_set_from_uri (loc, returned_uri, &error));
         g_assert (error == NULL);
 
         g_assert_cmpfloat (geocode_location_get_latitude (loc),
@@ -159,7 +160,6 @@ test_convert_from_to_location (void)
         g_assert_cmpfloat (geocode_location_get_accuracy (loc),
                            ==,
                            accuracy);
-        g_free (uri);
         g_object_unref (loc);
 }
 
