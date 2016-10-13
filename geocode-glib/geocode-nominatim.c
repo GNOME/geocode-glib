@@ -53,6 +53,9 @@ G_DEFINE_TYPE_WITH_CODE (GeocodeNominatim, geocode_nominatim, G_TYPE_OBJECT,
 
 /******************************************************************************/
 
+static void _geocode_read_nominatim_attributes (JsonReader *reader,
+                                                GHashTable *ht);
+
 static struct {
 	const char *tp_attr;
 	const char *gc_attr; /* NULL to ignore */
@@ -406,7 +409,7 @@ get_place_type_from_attributes (GHashTable *ht)
         return place_type;
 }
 
-GeocodePlace *
+static GeocodePlace *
 _geocode_create_place_from_attributes (GHashTable *ht)
 {
         GeocodePlace *place;
@@ -1015,7 +1018,7 @@ insert_bounding_box_element (GHashTable *ht,
 	}
 }
 
-void
+static void
 _geocode_read_nominatim_attributes (JsonReader *reader,
                                     GHashTable *ht)
 {

@@ -36,8 +36,6 @@ geocode_reverse_set_backend
 geocode_error_quark
 geocode_error_get_type
 _geocode_parse_search_json
-_geocode_read_nominatim_attributes
-_geocode_create_place_from_attributes
 geocode_place_get_type
 geocode_place_type_get_type
 geocode_place_osm_type_get_type
