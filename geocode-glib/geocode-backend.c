@@ -145,14 +145,26 @@ geocode_backend_forward_search (GeocodeBackend  *backend,
 /**
  * geocode_backend_reverse_resolve_async:
  * @backend: a #GeocodeBackend.
- * @location: a #GeocodeLocation.
+ * @params: (transfer none) (element-type utf8 GValue): a #GHashTable with string keys, and #GValue values.
  * @cancellable: optional #GCancellable object, %NULL to ignore.
  * @callback: a #GAsyncReadyCallback to call when the request is satisfied.
  * @user_data: the data to pass to callback function.
  *
  * Asynchronously gets the result of a reverse geocoding query using the
- * backend. Use geocode_backend_reverse_resolve() to do the same thing
- * synchronously.
+ * backend.
+ *
+ * Typically, a single result will be returned representing the place at a
+ * given latitude and longitude (the `lat` and `lon` keys to @params); but in
+ * some cases the results will be ambiguous and *multiple* results will be
+ * returned. They will be returned in order of relevance, with the most
+ * relevant result first in the list.
+ *
+ * The @params hash table is in the format used by Telepathy, and documented
+ * in the [Telepathy specification](http://telepathy.freedesktop.org/spec/Connection_Interface_Location.html#Mapping:Location).
+ *
+ * See also: [XEP-0080 specification](http://xmpp.org/extensions/xep-0080.html).
+ *
+ * Use geocode_backend_reverse_resolve() to do the same thing synchronously.
  *
  * When the operation is finished, @callback will be called. You can then call
  * geocode_backend_reverse_resolve_finish() to get the result of the operation.
@@ -161,7 +173,7 @@ geocode_backend_forward_search (GeocodeBackend  *backend,
  */
 void
 geocode_backend_reverse_resolve_async (GeocodeBackend      *backend,
-                                       GeocodeLocation     *location,
+                                       GHashTable          *params,
                                        GCancellable        *cancellable,
                                        GAsyncReadyCallback  callback,
                                        gpointer             user_data)
@@ -169,12 +181,12 @@ geocode_backend_reverse_resolve_async (GeocodeBackend      *backend,
 	GeocodeBackendInterface *iface;
 
 	g_return_if_fail (GEOCODE_IS_BACKEND (backend));
-	g_return_if_fail (GEOCODE_IS_LOCATION (location));
+	g_return_if_fail (params != NULL);
 	g_return_if_fail (cancellable == NULL || G_IS_CANCELLABLE (cancellable));
 
 	iface = GEOCODE_BACKEND_GET_IFACE (backend);
 
-	return (* iface->reverse_resolve_async) (backend, location,
+	return (* iface->reverse_resolve_async) (backend, params,
 	                                         cancellable, callback, user_data);
 }
 
@@ -212,15 +224,16 @@ geocode_backend_reverse_resolve_finish (GeocodeBackend  *backend,
 /**
  * geocode_backend_reverse_resolve:
  * @backend: a #GeocodeBackend.
- * @location: a #GeocodeLocation.
+ * @params: (transfer none) (element-type utf8 GValue): a #GHashTable with string keys, and #GValue values.
  * @cancellable: optional #GCancellable object, %NULL to ignore.
  * @error: a #GError.
  *
- * Gets the result of a reverse geocoding query using the @backend. Typically, a
- * single result will be returned representing the place at the given location;
- * but in some cases the results will be ambiguous and multiple results will
- * be returned. They will be returned in order of relevance, with the most
- * relevant result first in the list.
+ * Gets the result of a reverse geocoding query using the @backend.
+ *
+ * This is a synchronous function, which means it may block on network requests.
+ * In most situations, the asynchronous version,
+ * geocode_backend_forward_search_async(), is more appropriate. See its
+ * documentation for more information on usage.
  *
  * Returns: (transfer full) (element-type GeocodePlace): A list of
  *    #GeocodePlace instances, or %NULL in case of errors. The list is ordered
@@ -231,14 +244,14 @@ geocode_backend_reverse_resolve_finish (GeocodeBackend  *backend,
  */
 GList *
 geocode_backend_reverse_resolve (GeocodeBackend   *backend,
-                                 GeocodeLocation  *location,
+                                 GHashTable       *params,
                                  GCancellable     *cancellable,
                                  GError          **error)
 {
 	GeocodeBackendInterface *iface;
 
 	g_return_val_if_fail (GEOCODE_IS_BACKEND (backend), NULL);
-	g_return_val_if_fail (GEOCODE_IS_LOCATION (location), NULL);
+	g_return_val_if_fail (params != NULL, NULL);
 	g_return_val_if_fail (cancellable == NULL || G_IS_CANCELLABLE (cancellable), NULL);
 	g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
@@ -254,7 +267,7 @@ geocode_backend_reverse_resolve (GeocodeBackend   *backend,
 		return NULL;
 	}
 
-	return (* iface->reverse_resolve) (backend, location,
+	return (* iface->reverse_resolve) (backend, params,
 	                                   cancellable, error);
 }
 
@@ -309,13 +322,13 @@ real_forward_search_finish (GeocodeBackend  *backend,
 static void
 reverse_resolve_async_thread (GTask           *task,
                               GeocodeBackend  *backend,
-                              GeocodeLocation *location,
+                              GHashTable      *params,
                               GCancellable    *cancellable)
 {
 	GError *error = NULL;
 	GList *places;  /* (element-type GeocodePlace) */
 
-	places = geocode_backend_reverse_resolve (backend, location,
+	places = geocode_backend_reverse_resolve (backend, params,
 	                                          cancellable, &error);
 	if (error)
 		g_task_return_error (task, error);
@@ -326,7 +339,7 @@ reverse_resolve_async_thread (GTask           *task,
 
 static void
 real_reverse_resolve_async (GeocodeBackend      *backend,
-                            GeocodeLocation     *location,
+                            GHashTable          *params,
                             GCancellable        *cancellable,
                             GAsyncReadyCallback  callback,
                             gpointer             user_data)
@@ -334,7 +347,8 @@ real_reverse_resolve_async (GeocodeBackend      *backend,
 	GTask *task;
 
 	task = g_task_new (backend, cancellable, callback, user_data);
-	g_task_set_task_data (task, g_object_ref (location), g_object_unref);
+	g_task_set_task_data (task, g_hash_table_ref (params),
+	                      (GDestroyNotify) g_hash_table_unref);
 	g_task_run_in_thread (task, (GTaskThreadFunc) reverse_resolve_async_thread);
 	g_object_unref (task);
 }

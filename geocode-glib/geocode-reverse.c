@@ -109,6 +109,48 @@ ensure_backend (GeocodeReverse *object)
 		object->priv->backend = GEOCODE_BACKEND (geocode_nominatim_get_gnome ());
 }
 
+static GValue *
+str_to_value (const gchar *str)
+{
+	GValue *value;
+
+	value = g_new0 (GValue, 1);
+	g_value_init (value, G_TYPE_STRING);
+	g_value_set_string (value, str);
+
+	return value;
+}
+
+static void
+free_value (GValue *value)
+{
+	g_value_unset (value);
+	g_free (value);
+}
+
+static GHashTable *
+_geocode_location_to_params (GeocodeLocation *location)
+{
+	GHashTable *ht;
+	char lat[G_ASCII_DTOSTR_BUF_SIZE];
+	char lon[G_ASCII_DTOSTR_BUF_SIZE];
+
+	g_ascii_dtostr (lat,
+	                G_ASCII_DTOSTR_BUF_SIZE,
+	                geocode_location_get_latitude (location));
+	g_ascii_dtostr (lon,
+	                G_ASCII_DTOSTR_BUF_SIZE,
+	                geocode_location_get_longitude (location));
+
+	/* Semantics from http://xmpp.org/extensions/xep-0080.html */
+	ht = g_hash_table_new_full (g_str_hash, g_str_equal, NULL,
+	                            (GDestroyNotify) free_value);
+	g_hash_table_insert (ht, (gpointer) "lat", str_to_value (lat));
+	g_hash_table_insert (ht, (gpointer) "lon", str_to_value (lon));
+
+	return ht;
+}
+
 static void
 places_list_free (GList *places)
 {
@@ -155,6 +197,7 @@ geocode_reverse_resolve_async (GeocodeReverse     *object,
                                gpointer            user_data)
 {
 	GTask *task;
+	g_autoptr (GHashTable) params = NULL;
 
 	g_return_if_fail (GEOCODE_IS_REVERSE (object));
 	g_return_if_fail (cancellable == NULL || G_IS_CANCELLABLE (cancellable));
@@ -162,9 +205,11 @@ geocode_reverse_resolve_async (GeocodeReverse     *object,
 	ensure_backend (object);
 	g_assert (object->priv->backend != NULL);
 
+	params = _geocode_location_to_params (object->priv->location);
+
 	task = g_task_new (object, cancellable, callback, user_data);
 	geocode_backend_reverse_resolve_async (object->priv->backend,
-	                                       object->priv->location,
+	                                       params,
 	                                       cancellable,
 	                                       (GAsyncReadyCallback) backend_reverse_resolve_ready,
 	                                       g_object_ref (task));
@@ -211,6 +256,7 @@ geocode_reverse_resolve (GeocodeReverse *object,
 {
 	GList *places = NULL;  /* (element-type GeocodePlace) */
 	GeocodePlace *place = NULL;
+	g_autoptr (GHashTable) params = NULL;
 
 	g_return_val_if_fail (GEOCODE_IS_REVERSE (object), NULL);
 	g_return_val_if_fail (error == NULL || *error == NULL, NULL);
@@ -218,8 +264,9 @@ geocode_reverse_resolve (GeocodeReverse *object,
 	ensure_backend (object);
 	g_assert (object->priv->backend != NULL);
 
+	params = _geocode_location_to_params (object->priv->location);
 	places = geocode_backend_reverse_resolve (object->priv->backend,
-	                                          object->priv->location,
+	                                          params,
 	                                          NULL,
 	                                          error);
 

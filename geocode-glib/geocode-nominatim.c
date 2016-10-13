@@ -783,17 +783,33 @@ _geocode_glib_dup_hash_table (GHashTable *ht)
 }
 
 static gchar *
-get_resolve_uri_for_params (GeocodeNominatim *self,
-                            GHashTable       *orig_ht)
+get_resolve_uri_for_params (GeocodeNominatim  *self,
+                            GHashTable        *orig_ht,
+                            GError           **error)
 {
 	GHashTable *ht;
 	char *locale;
 	char *params, *uri;
 	GeocodeNominatimPrivate *priv;
+	const GValue *lat, *lon;
 
 	priv = geocode_nominatim_get_instance_private (self);
 
-	ht = _geocode_glib_dup_hash_table (orig_ht);
+	/* Make sure we have both lat and lon. */
+	lat = g_hash_table_lookup (orig_ht, "lat");
+	lon = g_hash_table_lookup (orig_ht, "lon");
+
+	if (lat == NULL || lon == NULL) {
+		g_set_error_literal (error, GEOCODE_ERROR, GEOCODE_ERROR_INVALID_ARGUMENTS,
+		                     "Only following parameters supported: lat, lon");
+
+		return NULL;
+	}
+
+	ht = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
+
+	g_hash_table_insert (ht, (gpointer) "lat", (gpointer) g_value_get_string (lat));
+	g_hash_table_insert (ht, (gpointer) "lon", (gpointer) g_value_get_string (lon));
 
 	g_hash_table_insert (ht, (gpointer) "format", (gpointer) "json");
 	g_hash_table_insert (ht, (gpointer) "email",
@@ -960,29 +976,6 @@ geocode_nominatim_query (GeocodeNominatim  *self,
 }
 
 /******************************************************************************/
-
-static GHashTable *
-_geocode_location_to_params (GeocodeLocation *location)
-{
-	GHashTable *ht;
-	char coord[G_ASCII_DTOSTR_BUF_SIZE];
-	char *lat;
-	char *lon;
-
-	lat = g_strdup (g_ascii_dtostr (coord,
-	                                G_ASCII_DTOSTR_BUF_SIZE,
-	                                geocode_location_get_latitude (location)));
-
-	lon = g_strdup (g_ascii_dtostr (coord,
-	                                G_ASCII_DTOSTR_BUF_SIZE,
-	                                geocode_location_get_longitude (location)));
-
-	ht = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-	g_hash_table_insert (ht, g_strdup ("lat"), lat);
-	g_hash_table_insert (ht, g_strdup ("lon"), lon);
-
-	return ht;
-}
 
 static GList *
 geocode_nominatim_reverse_resolve_finish (GeocodeBackend  *backend,
@@ -1192,21 +1185,25 @@ on_reverse_query_ready (GeocodeNominatim *self,
 
 static void
 geocode_nominatim_reverse_resolve_async (GeocodeBackend      *self,
-                                         GeocodeLocation     *location,
+                                         GHashTable          *params,
                                          GCancellable        *cancellable,
                                          GAsyncReadyCallback  callback,
                                          gpointer             user_data)
 {
 	GTask *task;
-	GHashTable *ht;
 	gchar *uri = NULL;
+	GError *error = NULL;
 
 	g_return_if_fail (GEOCODE_IS_BACKEND (self));
-	g_return_if_fail (GEOCODE_IS_LOCATION (location));
+	g_return_if_fail (params != NULL);
 
-	ht = _geocode_location_to_params (location);
-	uri = get_resolve_uri_for_params (GEOCODE_NOMINATIM (self), ht);
-	g_hash_table_unref (ht);
+	uri = get_resolve_uri_for_params (GEOCODE_NOMINATIM (self), params,
+	                                  &error);
+
+	if (error != NULL) {
+		g_task_report_error (self, callback, user_data, NULL, error);
+		return;
+	}
 
 	task = g_task_new (self, cancellable, callback, user_data);
 	GEOCODE_NOMINATIM_GET_CLASS (self)->query_async (GEOCODE_NOMINATIM (self),
@@ -1219,23 +1216,24 @@ geocode_nominatim_reverse_resolve_async (GeocodeBackend      *self,
 }
 
 static GList *
-geocode_nominatim_reverse_resolve (GeocodeBackend   *self,
-                                   GeocodeLocation  *location,
-                                   GCancellable     *cancellable,
-                                   GError          **error)
+geocode_nominatim_reverse_resolve (GeocodeBackend  *self,
+                                   GHashTable      *params,
+                                   GCancellable    *cancellable,
+                                   GError         **error)
 {
 	char *contents;
-	GHashTable *ht;
 	GHashTable *result = NULL;
 	g_autoptr (GeocodePlace) place = NULL;
 	gchar *uri = NULL;
 
 	g_return_val_if_fail (GEOCODE_IS_BACKEND (self), NULL);
-	g_return_val_if_fail (GEOCODE_IS_LOCATION (location), NULL);
+	g_return_val_if_fail (params != NULL, NULL);
 
-	ht = _geocode_location_to_params (location);
-	uri = get_resolve_uri_for_params (GEOCODE_NOMINATIM (self), ht);
-	g_hash_table_unref (ht);
+	uri = get_resolve_uri_for_params (GEOCODE_NOMINATIM (self), params,
+	                                  error);
+
+	if (uri == NULL)
+		return NULL;
 
 	contents = GEOCODE_NOMINATIM_GET_CLASS (self)->query (GEOCODE_NOMINATIM (self),
 	                                                      uri,

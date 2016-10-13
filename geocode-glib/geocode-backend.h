@@ -78,11 +78,11 @@ struct _GeocodeBackendInterface
 
 	/* Reverse */
 	GList        *(*reverse_resolve)         (GeocodeBackend       *backend,
-	                                          GeocodeLocation      *location,
+	                                          GHashTable           *params,
 	                                          GCancellable         *cancellable,
 	                                          GError              **error);
 	void          (*reverse_resolve_async)   (GeocodeBackend       *backend,
-	                                          GeocodeLocation      *location,
+	                                          GHashTable           *params,
 	                                          GCancellable         *cancellable,
 	                                          GAsyncReadyCallback   callback,
 	                                          gpointer              user_data);
@@ -110,7 +110,7 @@ GList        *geocode_backend_forward_search         (GeocodeBackend      *backe
 
 /* Reverse geocoding operations */
 void          geocode_backend_reverse_resolve_async  (GeocodeBackend       *backend,
-                                                      GeocodeLocation      *location,
+                                                      GHashTable           *params,
                                                       GCancellable         *cancellable,
                                                       GAsyncReadyCallback   callback,
                                                       gpointer              user_data);
@@ -118,7 +118,7 @@ GList        *geocode_backend_reverse_resolve_finish (GeocodeBackend       *back
                                                       GAsyncResult         *result,
                                                       GError              **error);
 GList        *geocode_backend_reverse_resolve        (GeocodeBackend       *backend,
-                                                      GeocodeLocation      *location,
+                                                      GHashTable           *params,
                                                       GCancellable         *cancellable,
                                                       GError              **error);
 
