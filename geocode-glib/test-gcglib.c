@@ -554,7 +554,7 @@ test_resolve_json (void)
                 g_object_get (place, tests[i].prop, &value, NULL);
 		g_assert_cmpstr (value, ==, tests[i].value);
                 g_free (value);
-                g_list_free (list);
+                g_list_free_full (list, (GDestroyNotify) g_object_unref);
 	}
 }
 
@@ -596,6 +596,7 @@ test_search_json (void)
 
 	g_list_free_full (list, (GDestroyNotify) g_object_unref);
 	g_assert (found);
+	g_free (contents);
 }
 
 static GeocodeLocation *
