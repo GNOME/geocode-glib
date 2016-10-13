@@ -27,6 +27,7 @@ libgeocode_glib_la_LIBADD = $(GEOCODE_LIBS) $(LIBS)
 libgeocode_glib_la_LDFLAGS =				\
 	-version-info $(GCLIB_LT_VERSION)		\
 	-no-undefined					\
+	$(WARN_LDFLAGS)					\
 	$(AM_LDFLAGS)					\
 	-export-symbols $(srcdir)/geocode-glib.symbols
 
@@ -94,7 +95,9 @@ GeocodeGlib_1_0_gir_SCANNERFLAGS = \
 	--symbol-prefix=geocode \
 	--identifier-prefix=Geocode \
 	--pkg-export=geocode-glib-1.0 \
-	--c-include="geocode-glib/geocode-glib.h"
+	--c-include="geocode-glib/geocode-glib.h" \
+	$(WARN_SCANNERFLAGS) \
+	$(NULL)
 GeocodeGlib_1_0_gir_FILES = $(introspection_files)
 INTROSPECTION_GIRS += GeocodeGlib-1.0.gir
 

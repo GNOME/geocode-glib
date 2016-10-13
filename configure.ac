@@ -70,21 +70,10 @@ AC_SUBST(GLIB_GENMARSHAL)
 
 GOBJECT_INTROSPECTION_CHECK([0.6.3])
 
-GNOME_COMPILE_WARNINGS([maximum])
-GNOME_CXX_WARNINGS
+AX_COMPILER_FLAGS([WARN_CFLAGS],[WARN_LDFLAGS])
 
 GLIB_MKENUMS=`$PKG_CONFIG --variable=glib_mkenums glib-2.0`
 AC_SUBST(GLIB_MKENUMS)
-
-if test "$GCC" = "yes" ; then
-	CFLAGS="\
-	-Wall \
-	-Wchar-subscripts -Wmissing-declarations -Wmissing-prototypes \
-	-Wnested-externs -Wpointer-arith \
-	-Wcast-align -Wsign-compare -Wredundant-decls \
-	-fno-strict-aliasing \
-	$CFLAGS"
-fi
 
 AC_CONFIG_FILES([
           Makefile
