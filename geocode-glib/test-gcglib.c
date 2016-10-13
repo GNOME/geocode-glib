@@ -353,7 +353,7 @@ test_osm_type (void)
 	GeocodePlace *place;
 	guint i;
 	struct {
-		char *search_string;
+		const gchar *search_string;
 		GeocodePlaceOsmType osm_type;
 	} types[] = {
 		{ "Drottning Christinas väg", GEOCODE_PLACE_OSM_TYPE_WAY },
