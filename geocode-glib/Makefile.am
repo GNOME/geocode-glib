@@ -7,6 +7,8 @@ BUILT_GIRSOURCES =
 lib_LTLIBRARIES = libgeocode-glib.la
 
 libgeocode_glib_la_PUBLICSOURCES =			\
+	geocode-backend.c				\
+	geocode-nominatim.c				\
 	geocode-location.c				\
 	geocode-forward.c				\
 	geocode-reverse.c				\
@@ -30,6 +32,8 @@ libgeocode_glib_la_LDFLAGS =				\
 
 GCGLIB_HEADER_FILES = \
 	geocode-glib.h					\
+	geocode-backend.h				\
+	geocode-nominatim.h				\
 	geocode-location.h				\
 	geocode-forward.h				\
 	geocode-reverse.h				\

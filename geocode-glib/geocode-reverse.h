@@ -26,6 +26,7 @@
 #include <glib.h>
 #include <gio/gio.h>
 #include "geocode-place.h"
+#include "geocode-backend.h"
 
 G_BEGIN_DECLS
 
@@ -66,6 +67,9 @@ struct _GeocodeReverseClass {
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (GeocodeReverse, g_object_unref)
 
 GeocodeReverse *geocode_reverse_new_for_location (GeocodeLocation *location);
+
+void geocode_reverse_set_backend (GeocodeReverse *object,
+                                  GeocodeBackend *backend);
 
 void geocode_reverse_resolve_async (GeocodeReverse      *object,
 				    GCancellable        *cancellable,

@@ -26,6 +26,7 @@
 #include <glib.h>
 #include <gio/gio.h>
 #include <geocode-glib/geocode-glib.h>
+#include <geocode-glib/geocode-backend.h>
 #include <geocode-glib/geocode-bounding-box.h>
 
 G_BEGIN_DECLS
@@ -89,6 +90,9 @@ GList *geocode_forward_search_finish (GeocodeForward  *forward,
 
 GList *geocode_forward_search (GeocodeForward  *forward,
 			       GError         **error);
+
+void geocode_forward_set_backend (GeocodeForward *forward,
+                                  GeocodeBackend *backend);
 
 G_END_DECLS
 

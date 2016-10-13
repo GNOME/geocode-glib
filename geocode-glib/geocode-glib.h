@@ -32,5 +32,7 @@
 #include <geocode-glib/geocode-bounding-box.h>
 #include <geocode-glib/geocode-error.h>
 #include <geocode-glib/geocode-enum-types.h>
+#include <geocode-glib/geocode-backend.h>
+#include <geocode-glib/geocode-nominatim.h>
 
 #endif /* GEOCODE_GLIB_H */
