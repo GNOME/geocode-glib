@@ -65,6 +65,8 @@ struct _GeocodePlaceClass {
         GObjectClass parent_class;
 };
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (GeocodePlace, g_object_unref)
+
 /**
  * GeocodePlaceType:
  * @GEOCODE_PLACE_TYPE_UNKNOWN: Type is unknown for this place.

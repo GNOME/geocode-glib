@@ -64,6 +64,8 @@ struct _GeocodeBoundingBoxClass {
         GObjectClass parent_class;
 };
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (GeocodeBoundingBox, g_object_unref)
+
 GeocodeBoundingBox *geocode_bounding_box_new  (gdouble top,
                                                gdouble bottom,
                                                gdouble left,

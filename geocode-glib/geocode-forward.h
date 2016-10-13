@@ -64,6 +64,8 @@ struct _GeocodeForwardClass {
 	GObjectClass parent_class;
 };
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (GeocodeForward, g_object_unref)
+
 GeocodeForward *geocode_forward_new_for_string       (const char *str);
 GeocodeForward *geocode_forward_new_for_params       (GHashTable *params);
 guint geocode_forward_get_answer_count               (GeocodeForward *forward);

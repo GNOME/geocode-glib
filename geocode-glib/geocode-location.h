@@ -62,6 +62,8 @@ struct _GeocodeLocationClass {
         GObjectClass parent_class;
 };
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (GeocodeLocation, g_object_unref)
+
 /**
  * GeocodeLocationURIScheme:
  * @GEOCODE_LOCATION_URI_SCHEME_GEO: The 'geo' URI scheme, RFC 5870

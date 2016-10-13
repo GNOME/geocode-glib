@@ -63,6 +63,8 @@ struct _GeocodeReverseClass {
 	GObjectClass parent_class;
 };
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (GeocodeReverse, g_object_unref)
+
 GeocodeReverse *geocode_reverse_new_for_location (GeocodeLocation *location);
 
 void geocode_reverse_resolve_async (GeocodeReverse      *object,
