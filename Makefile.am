@@ -23,6 +23,7 @@ MAINTAINERCLEANFILES = \
 	gtk-doc.make \
 	ABOUT-NLS \
 	config.rpath \
+	m4/ \
 	po/Makevars.template \
 	po/Rules-quot \
 	po/boldquot.sed \
