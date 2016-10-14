@@ -781,7 +781,9 @@ test_resolve_json (void)
 		char *filename;
                 char *value;
 
-		filename = g_strdup_printf (TEST_SRCDIR "/%s", tests[i].fname);
+		filename = g_test_build_filename (G_TEST_DIST,
+		                                  tests[i].fname,
+		                                  NULL);
 		if (g_file_get_contents (filename, &contents, NULL, &error) == FALSE) {
 			g_critical ("Couldn't load contents of '%s': %s",
 				    filename, error->message);
@@ -820,11 +822,14 @@ test_search_json (void)
 	GList *list, *l;
 	char *contents;
         gboolean found = FALSE;
+	g_autofree gchar *filename = NULL;
 
-	if (g_file_get_contents (TEST_SRCDIR "/nominatim-rio.json",
-				 &contents, NULL, &error) == FALSE) {
+	filename = g_test_build_filename (G_TEST_DIST, "nominatim-rio.json",
+	                                  NULL);
+
+	if (g_file_get_contents (filename, &contents, NULL, &error) == FALSE) {
 		g_critical ("Couldn't load contents of '%s': %s",
-			    TEST_SRCDIR "/nominatim-rio.json", error->message);
+		            filename, error->message);
 	}
 	list = _geocode_parse_search_json (contents, &error);
 	g_assert_no_error (error);

@@ -53,7 +53,6 @@ AM_CPPFLAGS = 						\
 	-I$(top_srcdir)					\
 	-I$(top_builddir) 				\
 	-DPACKAGE_VERSION=\"@PACKAGE_VERSION@\"		\
-	-DTEST_SRCDIR=\""$(srcdir)/data/"\" 		\
 	-DGEOCODE_LOCALEDIR=\"$(localedir)\"
 
 AM_CFLAGS = $(GEOCODE_CFLAGS) $(COMMON_CFLAGS) $(WARN_CFLAGS) $(DISABLE_DEPRECATED)
@@ -114,10 +113,5 @@ CLEANFILES += $(gir_DATA) $(typelib_DATA)
 endif # HAVE_INTROSPECTION
 
 MAINTAINERCLEANFILES = Makefile.in
-
-EXTRA_DIST +=					 \
-	data/nominatim-rio.json			 \
-	data/nominatim-area.json		 \
-	data/nominatim-no-results.json
 
 -include $(top_srcdir)/git.mk

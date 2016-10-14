@@ -11,7 +11,6 @@ TESTS_ENVIRONMENT = \
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-I$(top_builddir) \
-	-DTEST_SRCDIR=\""$(srcdir)/../data/"\" \
 	$(NULL)
 
 AM_CFLAGS = \
@@ -34,6 +33,9 @@ geocode_glib_LDADD = $(top_builddir)/geocode-glib/libgeocode-glib.la $(GEOCODE_L
 EXTRA_DIST = \
 	locale_format.json \
 	locale_name.json \
+	nominatim-area.json \
+	nominatim-no-results.json \
+	nominatim-rio.json \
 	osm_type0.json \
 	osm_type1.json \
 	osm_type2.json \
