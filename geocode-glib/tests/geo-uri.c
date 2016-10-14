@@ -195,6 +195,4 @@ int main (int argc, char **argv)
         g_test_add_func ("/geouri/convert_uri", test_convert_from_to_location);
 
         return g_test_run ();
-
-        return 0;
 }
