@@ -26,7 +26,7 @@
 #include <glib.h>
 #include <gio/gio.h>
 
-#include "geocode-nominatim.h"
+#include "geocode-glib/geocode-nominatim.h"
 
 G_BEGIN_DECLS
 

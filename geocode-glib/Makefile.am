@@ -1,5 +1,7 @@
 include $(top_srcdir)/Makefile.decl
 
+SUBDIRS = . tests
+
 EXTRA_DIST = geocode-glib.symbols
 
 BUILT_GIRSOURCES =
@@ -110,38 +112,6 @@ typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 CLEANFILES += $(gir_DATA) $(typelib_DATA)
 
 endif # HAVE_INTROSPECTION
-
-TESTS = test-geouri test-gcglib
-noinst_PROGRAMS = $(TESTS)
-
-TESTS_ENVIRONMENT = \
-	G_TEST_SRCDIR="$(abs_srcdir)" \
-	G_TEST_BUILDDIR="$(abs_builddir)" \
-	G_DEBUG=gc-friendly \
-	MALLOC_CHECK_=2 \
-	MALLOC_PERTURB_=$$(($${RANDOM:-256} % 256))
-
-test_gcglib_SOURCES = \
-	tests/geocode-nominatim-test.h \
-	tests/geocode-nominatim-test.c \
-	test-gcglib.c
-
-test_geouri_LDADD = libgeocode-glib.la $(GEOCODE_LIBS)
-test_gcglib_LDADD = libgeocode-glib.la $(GEOCODE_LIBS)
-
-EXTRA_DIST += \
-	tests/locale_format.json \
-	tests/locale_name.json \
-	tests/osm_type0.json \
-	tests/osm_type1.json \
-	tests/osm_type2.json \
-	tests/pub.json \
-	tests/rev.json \
-	tests/rev_fail.json \
-	tests/search.json \
-	tests/search_lat_long.json \
-	tests/xep.json \
-	$(NULL)
 
 MAINTAINERCLEANFILES = Makefile.in
 

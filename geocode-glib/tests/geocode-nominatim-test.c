@@ -23,7 +23,7 @@
 #include <glib.h>
 #include <libsoup/soup.h>
 
-#include "geocode-glib.h"
+#include "geocode-glib/geocode-glib.h"
 #include "geocode-nominatim-test.h"
 
 struct _GeocodeNominatimTest {

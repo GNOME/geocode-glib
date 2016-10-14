@@ -10,7 +10,7 @@ AC_INIT([geocode-glib],
         [geocode-glib])
 AX_IS_RELEASE([git-directory])
 
-AC_CONFIG_SRCDIR([geocode-glib/test-gcglib.c])
+AC_CONFIG_SRCDIR([geocode-glib/geocode-glib.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -82,6 +82,7 @@ AC_CONFIG_FILES([
 	  docs/Makefile
 	  docs/version.xml
 	  geocode-glib/Makefile
+	  geocode-glib/tests/Makefile
 	  po/Makefile.in
 	  icons/Makefile
 ])

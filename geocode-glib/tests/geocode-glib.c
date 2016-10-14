@@ -163,7 +163,7 @@ load_json (const gchar *expected_response_filename)
 	g_autofree gchar *expected_response_path = NULL;
 	g_autoptr (GError) error = NULL;
 
-	expected_response_path = g_test_build_filename (G_TEST_DIST, "tests",
+	expected_response_path = g_test_build_filename (G_TEST_DIST,
 	                                                expected_response_filename,
 	                                                NULL);
 	g_file_get_contents (expected_response_path, &expected_response, NULL,
@@ -930,7 +930,7 @@ int main (int argc, char **argv)
 		loc = new_loc ();
 		if (loc == NULL) {
 			g_print ("Options parsing failed: Use for example\n"
-				 "test-gcglib --reverse -- 51.237070 -0.589669\n");
+				 "%s --reverse -- 51.237070 -0.589669\n", argv[0]);
 			return 1;
 		}
 		print_loc (loc);
