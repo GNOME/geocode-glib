@@ -1,12 +1,7 @@
-TESTS = geo-uri geocode-glib
-noinst_PROGRAMS = $(TESTS)
+include $(top_srcdir)/glib-tap.mk
 
-TESTS_ENVIRONMENT = \
-	G_TEST_SRCDIR="$(abs_srcdir)" \
-	G_TEST_BUILDDIR="$(abs_builddir)" \
-	G_DEBUG=gc-friendly \
-	MALLOC_CHECK_=2 \
-	MALLOC_PERTURB_=$$(($${RANDOM:-256} % 256))
+installed_testdir = $(libexecdir)/installed-tests/geocode-glib-@GCLIB_API_VERSION@
+installed_test_metadir = $(datadir)/installed-tests/geocode-glib-@GCLIB_API_VERSION@
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
@@ -22,15 +17,21 @@ AM_LDFLAGS = \
 	$(WARN_LDFLAGS) \
 	$(NULL)
 
+test_programs = \
+	geo-uri \
+	geocode-glib \
+	$(NULL)
+
+geo_uri_LDADD = $(top_builddir)/geocode-glib/libgeocode-glib.la $(GEOCODE_LIBS)
+geocode_glib_LDADD = $(top_builddir)/geocode-glib/libgeocode-glib.la $(GEOCODE_LIBS)
+
+geo_uri_SOURCES = geo-uri.c
 geocode_glib_SOURCES = \
 	geocode-nominatim-test.h \
 	geocode-nominatim-test.c \
 	geocode-glib.c
 
-geo_uri_LDADD = $(top_builddir)/geocode-glib/libgeocode-glib.la $(GEOCODE_LIBS)
-geocode_glib_LDADD = $(top_builddir)/geocode-glib/libgeocode-glib.la $(GEOCODE_LIBS)
-
-EXTRA_DIST = \
+dist_test_data = \
 	locale_format.json \
 	locale_name.json \
 	nominatim-area.json \

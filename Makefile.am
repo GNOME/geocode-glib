@@ -2,7 +2,11 @@ ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
 SUBDIRS = geocode-glib po docs icons
 
-EXTRA_DIST = gtk-doc.make
+EXTRA_DIST = \
+	glib-tap.mk \
+	gtk-doc.make \
+	tap-test \
+	$(NULL)
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc=yes --enable-introspection=yes
 
@@ -13,6 +17,7 @@ MAINTAINERCLEANFILES = \
 	$(GITIGNORE_MAINTAINERCLEANFILES_MAKEFILE_IN) \
 	$(GITIGNORE_MAINTAINERCLEANFILES_M4_LIBTOOL) \
 	build-aux/ \
+	build-aux/tap-driver.sh \
 	INSTALL \
 	omf.make \
 	gtk-doc.make \

@@ -13,6 +13,8 @@ AX_IS_RELEASE([git-directory])
 AC_CONFIG_SRCDIR([geocode-glib/geocode-glib.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([build-aux])
+AC_REQUIRE_AUX_FILE([tap-driver.sh])
 
 AM_INIT_AUTOMAKE([1.11 dist-xz no-dist-gzip check-news subdir-objects])
 AX_CHECK_ENABLE_DEBUG([yes])
@@ -75,6 +77,24 @@ AX_COMPILER_FLAGS([WARN_CFLAGS],[WARN_LDFLAGS])
 
 GLIB_MKENUMS=`$PKG_CONFIG --variable=glib_mkenums glib-2.0`
 AC_SUBST(GLIB_MKENUMS)
+
+# installed-tests
+AC_ARG_ENABLE([always_build_tests],
+              AS_HELP_STRING([--enable-always-build-tests],
+                             [Enable always building tests (default: yes)]),,
+              [enable_always_build_tests=yes])
+AC_ARG_ENABLE([installed_tests],
+              AS_HELP_STRING([--enable-installed-tests],
+                             [Install test programs (default: no)]),,
+              [enable_installed_tests=no])
+
+AM_CONDITIONAL([ENABLE_ALWAYS_BUILD_TESTS],
+               [test "$enable_always_build_tests" = "yes"])
+AC_SUBST([ENABLE_ALWAYS_BUILD_TESTS],[$enable_always_build_tests])
+
+AM_CONDITIONAL([ENABLE_INSTALLED_TESTS],
+               [test "$enable_installed_tests" = "yes"])
+AC_SUBST([ENABLE_INSTALLED_TESTS],[$enable_installed_tests])
 
 AC_CONFIG_FILES([
           Makefile
