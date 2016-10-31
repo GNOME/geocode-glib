@@ -1,0 +1,9 @@
+option('enable-installed-tests',
+       type: 'boolean', value: true,
+       description: 'Build & install test programs')
+option('enable-introspection',
+        type: 'boolean', value: true,
+        description: 'Whether to enable the introspection generation')
+option('enable-gtk-doc',
+       type: 'boolean', value: true,
+       description: 'Whether to generate the API reference for Geocode-GLib')
