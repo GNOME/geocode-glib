@@ -60,7 +60,7 @@ AC_CHECK_LIB([m],[atan2])
 
 dnl Requires for the library
 PKG_CHECK_MODULES(GEOCODE,
-		  gio-2.0 >= 2.34
+		  gio-2.0 >= 2.44
 		  json-glib-1.0 >= 0.99.2
 		  libsoup-2.4 >= 2.42)
 
