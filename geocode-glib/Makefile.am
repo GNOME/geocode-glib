@@ -10,6 +10,7 @@ lib_LTLIBRARIES = libgeocode-glib.la
 
 libgeocode_glib_la_PUBLICSOURCES =			\
 	geocode-backend.c				\
+	geocode-mock-backend.c				\
 	geocode-nominatim.c				\
 	geocode-location.c				\
 	geocode-forward.c				\
@@ -36,6 +37,7 @@ libgeocode_glib_la_LDFLAGS =				\
 GCGLIB_HEADER_FILES = \
 	geocode-glib.h					\
 	geocode-backend.h				\
+	geocode-mock-backend.h				\
 	geocode-nominatim.h				\
 	geocode-location.h				\
 	geocode-forward.h				\

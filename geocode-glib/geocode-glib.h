@@ -34,5 +34,6 @@
 #include <geocode-glib/geocode-enum-types.h>
 #include <geocode-glib/geocode-backend.h>
 #include <geocode-glib/geocode-nominatim.h>
+#include <geocode-glib/geocode-mock-backend.h>
 
 #endif /* GEOCODE_GLIB_H */
