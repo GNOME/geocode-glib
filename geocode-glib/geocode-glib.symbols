@@ -77,6 +77,7 @@ geocode_place_get_osm_id
 geocode_place_get_osm_type
 geocode_bounding_box_get_type
 geocode_bounding_box_new
+geocode_bounding_box_equal
 geocode_bounding_box_get_top
 geocode_bounding_box_get_bottom
 geocode_bounding_box_get_left

@@ -71,6 +71,9 @@ GeocodeBoundingBox *geocode_bounding_box_new  (gdouble top,
                                                gdouble left,
                                                gdouble right);
 
+gboolean geocode_bounding_box_equal     (GeocodeBoundingBox *a,
+                                         GeocodeBoundingBox *b);
+
 gdouble geocode_bounding_box_get_top    (GeocodeBoundingBox *bbox);
 gdouble geocode_bounding_box_get_bottom (GeocodeBoundingBox *bbox);
 gdouble geocode_bounding_box_get_left   (GeocodeBoundingBox *bbox);
