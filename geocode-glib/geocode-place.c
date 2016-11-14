@@ -628,6 +628,67 @@ geocode_place_new_with_location (const char      *name,
                              NULL);
 }
 
+/* NULL-safe #GeocodeLocation equality check. */
+static gboolean
+location_equal0 (GeocodeLocation *a,
+                 GeocodeLocation *b)
+{
+        return ((a == NULL && b == NULL) ||
+                (a != NULL && b != NULL && geocode_location_equal (a, b)));
+}
+
+/* NULL-safe #GeocodeBoundingBox equality check. */
+static gboolean
+bbox_equal0 (GeocodeBoundingBox *a,
+             GeocodeBoundingBox *b)
+{
+        return ((a == NULL && b == NULL) ||
+                (a != NULL && b != NULL && geocode_bounding_box_equal (a, b)));
+}
+
+/**
+ * geocode_place_equal:
+ * @a: a place
+ * @b: another place
+ *
+ * Compare two #GeocodePlace instances for equality. This compares all fields
+ * and only returns %TRUE if the instances are exactly equal. For example, if
+ * both places have the same #GeocodePlace:location, but place @b has its
+ * #GeocodePlace:continent property set and place @a does not, %FALSE will be
+ * returned.
+ *
+ * Both instances must be non-%NULL.
+ *
+ * Returns: %TRUE if the instances are equal, %FALSE otherwise
+ * Since: UNRELEASED
+ */
+gboolean
+geocode_place_equal (GeocodePlace *a,
+                     GeocodePlace *b)
+{
+        g_return_val_if_fail (GEOCODE_IS_PLACE (a), FALSE);
+        g_return_val_if_fail (GEOCODE_IS_PLACE (b), FALSE);
+
+        return (g_strcmp0 (a->priv->name, b->priv->name) == 0 &&
+                a->priv->place_type == b->priv->place_type &&
+                location_equal0 (a->priv->location, b->priv->location) &&
+                bbox_equal0 (a->priv->bbox, b->priv->bbox) &&
+                g_strcmp0 (a->priv->street_address, b->priv->street_address) == 0 &&
+                g_strcmp0 (a->priv->street, b->priv->street) == 0 &&
+                g_strcmp0 (a->priv->building, b->priv->building) == 0 &&
+                g_strcmp0 (a->priv->postal_code, b->priv->postal_code) == 0 &&
+                g_strcmp0 (a->priv->area, b->priv->area) == 0 &&
+                g_strcmp0 (a->priv->town, b->priv->town) == 0 &&
+                g_strcmp0 (a->priv->county, b->priv->county) == 0 &&
+                g_strcmp0 (a->priv->state, b->priv->state) == 0 &&
+                g_strcmp0 (a->priv->admin_area, b->priv->admin_area) == 0 &&
+                g_strcmp0 (a->priv->country_code, b->priv->country_code) == 0 &&
+                g_strcmp0 (a->priv->country, b->priv->country) == 0 &&
+                g_strcmp0 (a->priv->continent, b->priv->continent) == 0 &&
+                g_strcmp0 (a->priv->osm_id, b->priv->osm_id) == 0 &&
+                a->priv->osm_type == b->priv->osm_type);
+}
+
 /**
  * geocode_place_set_name:
  * @place: A place

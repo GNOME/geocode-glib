@@ -170,6 +170,9 @@ GeocodePlace *geocode_place_new_with_location      (const char      *name,
                                                     GeocodePlaceType place_type,
                                                     GeocodeLocation *location);
 
+gboolean geocode_place_equal                       (GeocodePlace *a,
+                                                    GeocodePlace *b);
+
 void geocode_place_set_name                        (GeocodePlace *place,
                                                     const char   *name);
 const char *geocode_place_get_name                 (GeocodePlace *place);

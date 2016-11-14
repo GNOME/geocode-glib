@@ -42,6 +42,7 @@ geocode_place_type_get_type
 geocode_place_osm_type_get_type
 geocode_place_new
 geocode_place_new_with_location
+geocode_place_equal
 geocode_place_get_area
 geocode_place_set_area
 geocode_place_get_building
