@@ -144,6 +144,9 @@ GeocodeLocation *geocode_location_new_with_description (gdouble     latitude,
                                                         gdouble     accuracy,
                                                         const char *description);
 
+gboolean geocode_location_equal                        (GeocodeLocation *a,
+                                                        GeocodeLocation *b);
+
 gboolean geocode_location_set_from_uri                 (GeocodeLocation *loc,
                                                         const char      *uri,
                                                         GError         **error);

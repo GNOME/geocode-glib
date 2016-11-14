@@ -113,6 +113,43 @@ geocode_location_get_property (GObject    *object,
         }
 }
 
+/**
+ * geocode_location_equal:
+ * @a: a location
+ * @b: another location
+ *
+ * Compare two #GeocodeLocation instances for equality. This compares all fields
+ * and only returns %TRUE if the instances are exactly equal. For example, if
+ * both locations have the same physical coordinates, but one location has its
+ * #GeocodeLocation:description property set and the other does not, %FALSE
+ * will be returned. Similarly, if both locations have the same
+ * #GeocodeLocation:latitude, #GeocodeLocation:longitude and
+ * #GeocodeLocation:altitude, but a different #GeocodeLocation:accuracy or
+ * #GeocodeLocation:timestamp, %FALSE will be returned. Or if both locations
+ * have the same#GeocodeLocation:latitude and #GeocodeLocation:longitude but a
+ * different #GeocodeLocation:altitude, %FALSE will be returned.
+ *
+ * Both instances must be non-%NULL.
+ *
+ * Returns: %TRUE if the instances are equal, %FALSE otherwise
+ * Since: UNRELEASED
+ */
+gboolean
+geocode_location_equal (GeocodeLocation *a,
+                        GeocodeLocation *b)
+{
+        g_return_val_if_fail (GEOCODE_IS_LOCATION (a), FALSE);
+        g_return_val_if_fail (GEOCODE_IS_LOCATION (b), FALSE);
+
+        return (a->priv->longitude == b->priv->longitude &&
+                a->priv->latitude == b->priv->latitude &&
+                a->priv->altitude == b->priv->altitude &&
+                a->priv->accuracy == b->priv->accuracy &&
+                a->priv->timestamp == b->priv->timestamp &&
+                g_strcmp0 (a->priv->description, b->priv->description) == 0 &&
+                a->priv->crs == b->priv->crs);
+}
+
 static void
 geocode_location_set_latitude (GeocodeLocation *loc,
                                gdouble          latitude)
