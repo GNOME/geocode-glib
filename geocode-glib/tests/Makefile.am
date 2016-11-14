@@ -25,6 +25,7 @@ LDADD = \
 test_programs = \
 	geo-uri \
 	geocode-glib \
+	mock-backend \
 	$(NULL)
 
 geo_uri_SOURCES = geo-uri.c
@@ -32,6 +33,7 @@ geocode_glib_SOURCES = \
 	geocode-nominatim-test.h \
 	geocode-nominatim-test.c \
 	geocode-glib.c
+mock_backend_SOURCES = mock-backend.c
 
 dist_test_data = \
 	locale_format.json \
