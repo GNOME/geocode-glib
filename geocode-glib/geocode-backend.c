@@ -115,6 +115,8 @@ geocode_backend_forward_search_finish (GeocodeBackend  *backend,
  *
  * Gets the result of a forward geocoding query using the @backend.
  *
+ * If no results are found, a %GEOCODE_ERROR_NO_MATCHES error is returned.
+ *
  * This is a synchronous function, which means it may block on network requests.
  * In most situations, the asynchronous version
  * (geocode_backend_forward_search_async()) is more appropriate. See its
@@ -229,6 +231,10 @@ geocode_backend_reverse_resolve_finish (GeocodeBackend  *backend,
  * @error: a #GError.
  *
  * Gets the result of a reverse geocoding query using the @backend.
+ *
+ * If no result could be found, a %GEOCODE_ERROR_NOT_SUPPORTED error will be
+ * returned. This typically happens if the coordinates to geocode are in the
+ * middle of the ocean.
  *
  * This is a synchronous function, which means it may block on network requests.
  * In most situations, the asynchronous version,

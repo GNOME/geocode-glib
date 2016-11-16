@@ -247,6 +247,10 @@ geocode_reverse_resolve_finish (GeocodeReverse *object,
  * Gets the result of a reverse geocoding
  * query using a web service.
  *
+ * If no result could be found, a %GEOCODE_ERROR_NOT_SUPPORTED error will be
+ * returned. This typically happens if the coordinates to geocode are in the
+ * middle of the ocean.
+ *
  * Returns: (transfer full): A #GeocodePlace instance, or %NULL in case of
  * errors. Free the returned instance with #g_object_unref() when done.
  **/

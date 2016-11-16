@@ -374,6 +374,8 @@ geocode_forward_search_finish (GeocodeForward       *forward,
  * Gets the result of a forward geocoding
  * query using a web service.
  *
+ * If no results are found, a %GEOCODE_ERROR_NO_MATCHES error is returned.
+ *
  * Returns: (element-type GeocodePlace) (transfer full): A list of
  * places or %NULL in case of errors. Free the returned instances with
  * g_object_unref() and the list with g_list_free() when done.
