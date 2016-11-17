@@ -110,13 +110,13 @@ ensure_backend (GeocodeReverse *object)
 }
 
 static GValue *
-str_to_value (const gchar *str)
+double_to_value (gdouble val)
 {
 	GValue *value;
 
 	value = g_new0 (GValue, 1);
-	g_value_init (value, G_TYPE_STRING);
-	g_value_set_string (value, str);
+	g_value_init (value, G_TYPE_DOUBLE);
+	g_value_set_double (value, val);
 
 	return value;
 }
@@ -132,21 +132,14 @@ static GHashTable *
 _geocode_location_to_params (GeocodeLocation *location)
 {
 	GHashTable *ht;
-	char lat[G_ASCII_DTOSTR_BUF_SIZE];
-	char lon[G_ASCII_DTOSTR_BUF_SIZE];
-
-	g_ascii_dtostr (lat,
-	                G_ASCII_DTOSTR_BUF_SIZE,
-	                geocode_location_get_latitude (location));
-	g_ascii_dtostr (lon,
-	                G_ASCII_DTOSTR_BUF_SIZE,
-	                geocode_location_get_longitude (location));
 
 	/* Semantics from http://xmpp.org/extensions/xep-0080.html */
 	ht = g_hash_table_new_full (g_str_hash, g_str_equal, NULL,
 	                            (GDestroyNotify) free_value);
-	g_hash_table_insert (ht, (gpointer) "lat", str_to_value (lat));
-	g_hash_table_insert (ht, (gpointer) "lon", str_to_value (lon));
+	g_hash_table_insert (ht, (gpointer) "lat",
+	                     double_to_value (geocode_location_get_latitude (location)));
+	g_hash_table_insert (ht, (gpointer) "lon",
+	                     double_to_value (geocode_location_get_longitude (location)));
 
 	return ht;
 }

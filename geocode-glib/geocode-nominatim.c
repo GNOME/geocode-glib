@@ -794,6 +794,8 @@ get_resolve_uri_for_params (GeocodeNominatim  *self,
 	char *params, *uri;
 	GeocodeNominatimPrivate *priv;
 	const GValue *lat, *lon;
+	char lat_str[G_ASCII_DTOSTR_BUF_SIZE];
+	char lon_str[G_ASCII_DTOSTR_BUF_SIZE];
 
 	priv = geocode_nominatim_get_instance_private (self);
 
@@ -810,8 +812,13 @@ get_resolve_uri_for_params (GeocodeNominatim  *self,
 
 	ht = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
 
-	g_hash_table_insert (ht, (gpointer) "lat", (gpointer) g_value_get_string (lat));
-	g_hash_table_insert (ht, (gpointer) "lon", (gpointer) g_value_get_string (lon));
+	g_ascii_dtostr (lat_str, G_ASCII_DTOSTR_BUF_SIZE,
+	                g_value_get_double (lat));
+	g_ascii_dtostr (lon_str, G_ASCII_DTOSTR_BUF_SIZE,
+	                g_value_get_double (lon));
+
+	g_hash_table_insert (ht, (gpointer) "lat", lat_str);
+	g_hash_table_insert (ht, (gpointer) "lon", lon_str);
 
 	g_hash_table_insert (ht, (gpointer) "format", (gpointer) "json");
 	g_hash_table_insert (ht, (gpointer) "email",
