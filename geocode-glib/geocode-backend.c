@@ -31,6 +31,39 @@
  * The #GeocodeBackend interface defines the operations that a resolver
  * service must implement.
  *
+ * geocode-glib supports multiple backends which provide the underlying
+ * geocoding database and functionality. By default, the #GeocodeNominatim
+ * backend is used with
+ * [GNOME’s Nominatim server](https://nominatim.gnome.org/). If you are using
+ * geocode-glib in some GNOME software, this is the correct backend to use.
+ * Otherwise, you should use a new #GeocodeNominatim instance with your own
+ * Nominatim server, or a custom #GeocodeBackend implementation to use geocoding
+ * data from a non-Nominatim service. In all cases, please respect the terms of
+ * use of the service you are using.
+ *
+ * If you are writing a library which uses geocode-glib, consider exposing the
+ * choice of #GeocodeBackend in your library API, so that applications can make
+ * the best choice about which geocoding backend to use.
+ *
+ * Custom backends can be implemented by subclassing #GeocodeBackend and
+ * implementing the synchronous `forward_search` and `reverse_resolve` methods.
+ * The asynchronous versions may be implemented as well; the default
+ * implementations run the synchronous version in a thread.
+ *
+ * In order to use a custom backend, either instantiate the backend directly
+ * and do forward and reverse queries on it using the #GeocodeBackend interface;
+ * or create #GeocodeForward and #GeocodeReverse objects as normal, and set
+ * the backend they use with geocode_forward_set_backend() and
+ * geocode_reverse_set_backend(). They default to using the GNOME Nominatim
+ * backend.
+ *
+ * #GeocodeMockBackend is intended to be used in unit tests for applications
+ * which use geocode-glib — it allows them to set the geocode results they
+ * expect their application to query, and check afterwards that the queries
+ * were performed. Additionally, it works offline, which allows application
+ * unit tests to be run on integration and build machines which are not online.
+ * It is not expected that #GeocodeMockBackend will be used in production code.
+ *
  * Since: 3.23.1
  */
 

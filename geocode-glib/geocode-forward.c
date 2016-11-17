@@ -372,7 +372,9 @@ geocode_forward_search_finish (GeocodeForward       *forward,
  * @error: a #GError
  *
  * Gets the result of a forward geocoding
- * query using a web service.
+ * query using the current backend (see geocode_forward_set_backend()). By
+ * default the GNOME Nominatim server is used. See #GeocodeBackend for more
+ * information.
  *
  * If no results are found, a %GEOCODE_ERROR_NO_MATCHES error is returned.
  *

@@ -238,7 +238,9 @@ geocode_reverse_resolve_finish (GeocodeReverse *object,
  * @error: a #GError
  *
  * Gets the result of a reverse geocoding
- * query using a web service.
+ * query using the current backend (see geocode_reverse_set_backend()). By
+ * default the GNOME Nominatim server is used. See #GeocodeBackend for more
+ * information.
  *
  * If no result could be found, a %GEOCODE_ERROR_NOT_SUPPORTED error will be
  * returned. This typically happens if the coordinates to geocode are in the
