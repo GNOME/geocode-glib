@@ -397,7 +397,7 @@ geocode_forward_search (GeocodeForward      *forward,
 /**
  * geocode_forward_set_answer_count:
  * @forward: a #GeocodeForward representing a query
- * @count: the number of requested results
+ * @count: the number of requested results, which must be greater than zero
  *
  * Sets the number of requested results to @count.
  **/
@@ -408,6 +408,7 @@ geocode_forward_set_answer_count (GeocodeForward *forward,
 	GValue *count_value;
 
 	g_return_if_fail (GEOCODE_IS_FORWARD (forward));
+	g_return_if_fail (count > 0);
 
 	forward->priv->answer_count = count;
 
