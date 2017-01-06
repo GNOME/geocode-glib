@@ -37,7 +37,7 @@ G_BEGIN_DECLS
  * All the fields in the #GeocodeNominatim structure are private and should
  * never be accessed directly.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 #define GEOCODE_TYPE_NOMINATIM (geocode_nominatim_get_type ())
 G_DECLARE_DERIVABLE_TYPE (GeocodeNominatim, geocode_nominatim, GEOCODE, NOMINATIM, GObject)
@@ -57,7 +57,7 @@ G_DECLARE_DERIVABLE_TYPE (GeocodeNominatim, geocode_nominatim, GEOCODE, NOMINATI
  * Applications should not normally have to derive #GeocodeNominatim; these
  * virtual methods are mainly intended for testing.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 struct _GeocodeNominatimClass {
 	GObjectClass parent_class;

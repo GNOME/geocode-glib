@@ -1269,7 +1269,7 @@ static GWeakRef backend_nominatim_gnome;
  *
  * Returns: (transfer full): a new #GeocodeNominatim. Use g_object_unref() when done.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 GeocodeNominatim *
 geocode_nominatim_get_gnome (void)
@@ -1301,7 +1301,7 @@ geocode_nominatim_get_gnome (void)
  *
  * Returns: (transfer full): a new #GeocodeNominatim. Use g_object_unref() when done.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 GeocodeNominatim *
 geocode_nominatim_new (const char *base_url,
@@ -1433,7 +1433,7 @@ geocode_nominatim_class_init (GeocodeNominatimClass *klass)
 	 * The base URL of the Nominatim service, for example
 	 * `https://nominatim.example.org`.
 	 *
-	 * Since: UNRELEASED
+	 * Since: 3.23.1
 	 */
 	properties[PROP_BASE_URL] = g_param_spec_string ("base-url",
 	                                                 "Base URL",
@@ -1451,7 +1451,7 @@ geocode_nominatim_class_init (GeocodeNominatimClass *klass)
 	 * them in the event of a problem with their usage. See
 	 * [the Nominatim API](http://wiki.openstreetmap.org/wiki/Nominatim).
 	 *
-	 * Since: UNRELEASED
+	 * Since: 3.23.1
 	 */
 	properties[PROP_MAINTAINER_EMAIL_ADDRESS] =
 	    g_param_spec_string ("maintainer-email-address",

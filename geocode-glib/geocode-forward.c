@@ -548,7 +548,7 @@ geocode_forward_get_bounded (GeocodeForward *forward)
  *
  * If none is given, the default GNOME Nominatim server is used.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 void
 geocode_forward_set_backend (GeocodeForward *forward,

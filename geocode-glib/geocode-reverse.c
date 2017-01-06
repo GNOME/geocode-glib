@@ -287,7 +287,7 @@ geocode_reverse_resolve (GeocodeReverse *object,
  *
  * If none is given, the default GNOME Nominatim server is used.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 void
 geocode_reverse_set_backend (GeocodeReverse *object,

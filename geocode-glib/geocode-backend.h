@@ -37,7 +37,7 @@ G_BEGIN_DECLS
  * All the fields in the #GeocodeBackend structure are private and should
  * never be accessed directly.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 #define GEOCODE_TYPE_BACKEND (geocode_backend_get_type ())
 G_DECLARE_INTERFACE (GeocodeBackend, geocode_backend, GEOCODE, BACKEND, GObject)
@@ -53,7 +53,7 @@ G_DECLARE_INTERFACE (GeocodeBackend, geocode_backend, GEOCODE, BACKEND, GObject)
  *
  * Interface which defines the basic operations for geocoding.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 struct _GeocodeBackendInterface
 {

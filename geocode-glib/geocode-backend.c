@@ -31,7 +31,7 @@
  * The #GeocodeBackend interface defines the operations that a resolver
  * service must implement.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 
 G_DEFINE_INTERFACE (GeocodeBackend, geocode_backend, G_TYPE_OBJECT)
@@ -55,7 +55,7 @@ G_DEFINE_INTERFACE (GeocodeBackend, geocode_backend, G_TYPE_OBJECT)
  * When the operation is finished, @callback will be called. You can then call
  * geocode_backend_forward_search_finish() to get the result of the operation.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 void
 geocode_backend_forward_search_async (GeocodeBackend      *backend,
@@ -88,7 +88,7 @@ geocode_backend_forward_search_async (GeocodeBackend      *backend,
  * places or %NULL in case of errors. Free the returned instances with
  * g_object_unref() and the list with g_list_free() when done.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 GList *
 geocode_backend_forward_search_finish (GeocodeBackend  *backend,
@@ -124,7 +124,7 @@ geocode_backend_forward_search_finish (GeocodeBackend  *backend,
  * places or %NULL in case of errors. Free the returned instances with
  * g_object_unref() and the list with g_list_free() when done.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 GList *
 geocode_backend_forward_search (GeocodeBackend  *backend,
@@ -169,7 +169,7 @@ geocode_backend_forward_search (GeocodeBackend  *backend,
  * When the operation is finished, @callback will be called. You can then call
  * geocode_backend_reverse_resolve_finish() to get the result of the operation.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 void
 geocode_backend_reverse_resolve_async (GeocodeBackend      *backend,
@@ -203,7 +203,7 @@ geocode_backend_reverse_resolve_async (GeocodeBackend      *backend,
  *    by relevance, with most relevant results first. Free the returned
  *    instances with g_object_unref() and the list with g_list_free() when done.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  **/
 GList *
 geocode_backend_reverse_resolve_finish (GeocodeBackend  *backend,
@@ -240,7 +240,7 @@ geocode_backend_reverse_resolve_finish (GeocodeBackend  *backend,
  *    by relevance, with most relevant results first. Free the returned
  *    instances with g_object_unref() and the list with g_list_free() when done.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 GList *
 geocode_backend_reverse_resolve (GeocodeBackend   *backend,
