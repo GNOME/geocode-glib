@@ -1125,60 +1125,43 @@ geocode_place_get_continent (GeocodePlace *place)
 static const char *
 get_icon_name (GeocodePlace *place)
 {
-        const char *icon_name;
-
         switch ((int) place->priv->place_type) {
-
         case GEOCODE_PLACE_TYPE_BUILDING:
-                icon_name = "poi-building";
-                break;
+                return "poi-building";
 
         case GEOCODE_PLACE_TYPE_TOWN:
-                icon_name = "poi-town";
-                break;
+                return "poi-town";
 
         case GEOCODE_PLACE_TYPE_AIRPORT:
-                icon_name = "poi-airport";
-                break;
+                return "poi-airport";
 
         case GEOCODE_PLACE_TYPE_RAILWAY_STATION:
-                icon_name = "poi-railway-station";
-                break;
+                return "poi-railway-station";
 
         case GEOCODE_PLACE_TYPE_BUS_STOP:
-                icon_name = "poi-bus-stop";
-                break;
+                return "poi-bus-stop";
 
         case GEOCODE_PLACE_TYPE_STREET:
-                icon_name = "poi-car";
-                break;
+                return "poi-car";
 
         case GEOCODE_PLACE_TYPE_SCHOOL:
-                icon_name = "poi-school";
-                break;
+                return "poi-school";
 
         case GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP:
-                icon_name = "poi-place-of-worship";
-                break;
+                return "poi-place-of-worship";
 
         case GEOCODE_PLACE_TYPE_RESTAURANT:
-                icon_name = "poi-restaurant";
-                break;
+                return "poi-restaurant";
 
         case GEOCODE_PLACE_TYPE_BAR:
-                icon_name = "poi-bar";
-                break;
+                return "poi-bar";
 
         case GEOCODE_PLACE_TYPE_LIGHT_RAIL_STATION:
-                icon_name = "poi-light-rail-station";
-                break;
+                return "poi-light-rail-station";
 
         default:
-                icon_name = "poi-marker"; /* generic marker */
-                break;
+                return "poi-marker"; /* generic marker */
         }
-
-        return icon_name;
 }
 
 /**
