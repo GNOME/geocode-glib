@@ -113,7 +113,10 @@ noinst_PROGRAMS = $(TESTS)
 
 TESTS_ENVIRONMENT = \
 	G_TEST_SRCDIR="$(abs_srcdir)" \
-	G_TEST_BUILDDIR="$(abs_builddir)"
+	G_TEST_BUILDDIR="$(abs_builddir)" \
+	G_DEBUG=gc-friendly \
+	MALLOC_CHECK_=2 \
+	MALLOC_PERTURB_=$$(($${RANDOM:-256} % 256))
 
 test_gcglib_SOURCES = \
 	tests/geocode-nominatim-test.h \
