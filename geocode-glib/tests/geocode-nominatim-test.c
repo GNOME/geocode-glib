@@ -212,6 +212,10 @@ real_query (GeocodeNominatim  *self,
 GeocodeNominatim *
 geocode_nominatim_test_new (void)
 {
+	/* This shouldn’t be used with the user’s normal cache directory, or we
+	 * will pollute it. */
+	g_assert (g_str_has_prefix (g_get_user_cache_dir (), g_get_tmp_dir ()));
+
 	return GEOCODE_NOMINATIM (g_object_new (GEOCODE_TYPE_NOMINATIM_TEST,
 	                                        "base-url", "http://example.invalid",
 	                                        "maintainer-email-address", "maintainer@invalid",

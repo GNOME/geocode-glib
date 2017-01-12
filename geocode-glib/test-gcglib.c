@@ -173,6 +173,18 @@ load_json (const gchar *expected_response_filename)
 	return g_steal_pointer (&expected_response);
 }
 
+static void
+set_up_cache (void)
+{
+	g_autofree gchar *cache_path = NULL;
+	g_autoptr (GError) error = NULL;
+
+	cache_path = g_dir_make_tmp ("test-gcglib-XXXXXX", &error);
+	g_assert_no_error (error);
+
+	g_setenv ("XDG_CACHE_HOME", cache_path, TRUE);
+}
+
 static GeocodeReverse *
 create_reverse (GeocodeLocation *loc,
                 const gchar     *expected_response_filename)
@@ -181,6 +193,9 @@ create_reverse (GeocodeLocation *loc,
 	g_autoptr (GeocodeReverse) reverse = NULL;
 	char lat[G_ASCII_DTOSTR_BUF_SIZE];
 	char lon[G_ASCII_DTOSTR_BUF_SIZE];
+
+	/* Set up the cache to avoid polluting the user’s main cache. */
+	set_up_cache ();
 
 	/* Build the query parameters. */
 	g_ascii_dtostr (lat,
@@ -229,6 +244,9 @@ create_forward_for_params (GHashTable  *tp,
 {
 	g_autoptr (GeocodeForward) forward = NULL;
 
+	/* Set up the cache to avoid polluting the user’s main cache. */
+	set_up_cache ();
+
 	forward = geocode_forward_new_for_params (tp);
 
 	if (!enable_network) {
@@ -260,6 +278,9 @@ create_forward_for_string (const gchar *q,
                            const gchar *expected_response_filename)
 {
 	g_autoptr (GeocodeForward) forward = NULL;
+
+	/* Set up the cache to avoid polluting the user’s main cache. */
+	set_up_cache ();
 
 	forward = geocode_forward_new_for_string (q);
 
