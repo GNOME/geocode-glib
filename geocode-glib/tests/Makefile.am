@@ -17,13 +17,15 @@ AM_LDFLAGS = \
 	$(WARN_LDFLAGS) \
 	$(NULL)
 
+LDADD = \
+	$(top_builddir)/geocode-glib/libgeocode-glib.la \
+	$(GEOCODE_LIBS) \
+	$(NULL)
+
 test_programs = \
 	geo-uri \
 	geocode-glib \
 	$(NULL)
-
-geo_uri_LDADD = $(top_builddir)/geocode-glib/libgeocode-glib.la $(GEOCODE_LIBS)
-geocode_glib_LDADD = $(top_builddir)/geocode-glib/libgeocode-glib.la $(GEOCODE_LIBS)
 
 geo_uri_SOURCES = geo-uri.c
 geocode_glib_SOURCES = \
