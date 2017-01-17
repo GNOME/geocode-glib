@@ -917,6 +917,9 @@ geocode_nominatim_query_async (GeocodeNominatim    *self,
 	SoupSession *soup_session;
 	SoupMessage *soup_query;
 	char *cache_path;
+	GeocodeNominatimPrivate *priv;
+
+	priv = geocode_nominatim_get_instance_private (self);
 
 	g_debug ("%s: uri = %s", G_STRFUNC, uri);
 
@@ -956,6 +959,9 @@ geocode_nominatim_query (GeocodeNominatim  *self,
 	SoupSession *soup_session;
 	SoupMessage *soup_query;
 	char *contents;
+	GeocodeNominatimPrivate *priv;
+
+	priv = geocode_nominatim_get_instance_private (self);
 
 	g_debug ("%s: uri = %s", G_STRFUNC, uri);
 
