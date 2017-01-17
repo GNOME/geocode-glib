@@ -40,7 +40,7 @@
 SoupSession *
 _geocode_glib_build_soup_session (const gchar *user_agent_override)
 {
-	char *user_agent;
+	const char *user_agent;
 	g_autofree gchar *user_agent_allocated = NULL;
 
 	if (user_agent_override != NULL) {
@@ -48,18 +48,18 @@ _geocode_glib_build_soup_session (const gchar *user_agent_override)
 	} else if (g_application_get_default () != NULL) {
 		GApplication *application = g_application_get_default ();
 		const char *id = g_application_get_application_id (application);
-		user_agent = g_strdup_printf ("geocode-glib/%s (%s)",
-					      PACKAGE_VERSION, id);
-		user_agent_allocated = user_agent;
+		user_agent_allocated = g_strdup_printf ("geocode-glib/%s (%s)",
+				                        PACKAGE_VERSION, id);
+		user_agent = user_agent_allocated;
 	} else if (g_get_application_name () != NULL) {
-		user_agent = g_strdup_printf ("geocode-glib/%s (%s)",
-		                              PACKAGE_VERSION,
-		                              g_get_application_name ());
-		user_agent_allocated = user_agent;
+		user_agent_allocated = g_strdup_printf ("geocode-glib/%s (%s)",
+		                                        PACKAGE_VERSION,
+		                                        g_get_application_name ());
+		user_agent = user_agent_allocated;
 	} else {
-		user_agent = g_strdup_printf ("geocode-glib/%s",
-					      PACKAGE_VERSION);
-		user_agent_allocated = user_agent;
+		user_agent_allocated = g_strdup_printf ("geocode-glib/%s",
+				                        PACKAGE_VERSION);
+		user_agent = user_agent_allocated;
 	}
 
 	g_debug ("%s: user_agent = %s", G_STRFUNC, user_agent);
