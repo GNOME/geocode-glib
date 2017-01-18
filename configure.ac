@@ -49,7 +49,9 @@ LT_PREREQ([2.2])
 LT_INIT([disable-static])
 
 # i18n support
-AM_GNU_GETTEXT_VERSION([0.18])
+# FIXME: Remove AM_GNU_GETTEXT_VERSION once autoreconf supports REQUIRE_VERSION
+AM_GNU_GETTEXT_VERSION([0.19.6])
+AM_GNU_GETTEXT_REQUIRE_VERSION([0.19.6])
 AM_GNU_GETTEXT([external])
 
 GETTEXT_PACKAGE=geocode-glib
