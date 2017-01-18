@@ -33,7 +33,6 @@ MAINTAINERCLEANFILES = \
 	po/quot.sed \
 	po/remove-potcdate.sin \
 	m4/gtk-doc.m4 \
-	m4/intltool.m4 \
 	geocode-glib-1.0.pc \
 	$(NULL)
 
