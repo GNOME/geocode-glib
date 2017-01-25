@@ -32,6 +32,20 @@
 #include "geocode-glib.h"
 #include "geocode-nominatim.h"
 
+/**
+ * SECTION:geocode-nominatim
+ * @short_description: Geocoding resolver using a Nominatim web service
+ * @include: geocode-glib/geocode-glib.h
+ *
+ * Contains functions for geocoding using the
+ * [OSM Nominatim APIs](http://wiki.openstreetmap.org/wiki/Nominatim) exposed
+ * by a Nominatim server at a given URI. By default, the GNOME Nominatim server
+ * is used, but other server details may be given when constructing a
+ * #GeocodeNominatim.
+ *
+ * Since: 3.23.1
+ */
+
 typedef enum {
 	PROP_BASE_URL = 1,
 	PROP_MAINTAINER_EMAIL_ADDRESS,
