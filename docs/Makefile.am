@@ -55,6 +55,7 @@ CFILE_GLOB=$(top_srcdir)/geocode-glib/geocode-*.c
 IGNORE_HFILES = \
 	geocode-glib-private.h \
 	geocode-nominatim-test.h \
+	geocode-enum-types.h \
 	$(NULL)
 
 # Images to copy into HTML directory.
