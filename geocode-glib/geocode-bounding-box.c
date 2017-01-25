@@ -285,7 +285,7 @@ geocode_bounding_box_new (gdouble top,
  * Both instances must be non-%NULL.
  *
  * Returns: %TRUE if the instances are equal, %FALSE otherwise
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 gboolean
 geocode_bounding_box_equal (GeocodeBoundingBox *a,

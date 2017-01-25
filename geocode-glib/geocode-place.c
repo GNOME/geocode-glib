@@ -660,7 +660,7 @@ bbox_equal0 (GeocodeBoundingBox *a,
  * Both instances must be non-%NULL.
  *
  * Returns: %TRUE if the instances are equal, %FALSE otherwise
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 gboolean
 geocode_place_equal (GeocodePlace *a,

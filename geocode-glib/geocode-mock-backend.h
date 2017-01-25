@@ -33,7 +33,7 @@ G_BEGIN_DECLS
  * All the fields in the #GeocodeMockBackend structure are private and should
  * never be accessed directly.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 #define GEOCODE_TYPE_MOCK_BACKEND (geocode_mock_backend_get_type ())
 G_DECLARE_FINAL_TYPE (GeocodeMockBackend, geocode_mock_backend,
@@ -71,7 +71,7 @@ void geocode_mock_backend_clear              (GeocodeMockBackend *self);
  * (for forward queries) or the %GEOCODE_ERROR_NOT_SUPPORTED error (for reverse
  * queries), rather than an empty @results list.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 typedef struct {
 	/* Request */

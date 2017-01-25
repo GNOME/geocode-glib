@@ -1508,7 +1508,7 @@ geocode_nominatim_class_init (GeocodeNominatimClass *klass)
 	 * [user agent](https://tools.ietf.org/html/rfc7231#section-5.5.3)
 	 * string.
 	 *
-	 * Since: UNRELEASED
+	 * Since: 3.23.1
 	 */
 	properties[PROP_USER_AGENT] = g_param_spec_string ("user-agent",
 	                                                   "User agent",

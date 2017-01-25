@@ -107,7 +107,7 @@
  * g_assert_cmpuint (query_log->len, ==, 1);
  * ]|
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 
 struct _GeocodeMockBackend {
@@ -404,7 +404,7 @@ geocode_mock_backend_reverse_resolve (GeocodeBackend  *backend,
  *
  * Returns: (transfer full): a new #GeocodeMockBackend
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 GeocodeMockBackend *
 geocode_mock_backend_new (void)
@@ -436,7 +436,7 @@ geocode_mock_backend_new (void)
  * Exactly one of @results and @error must be set. Empty result sets are
  * represented as a %GEOCODE_ERROR_NO_MATCHES error.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 void
 geocode_mock_backend_add_forward_result (GeocodeMockBackend *self,
@@ -481,7 +481,7 @@ geocode_mock_backend_add_forward_result (GeocodeMockBackend *self,
  * Exactly one of @results and @error must be set. Empty result sets are
  * represented as a %GEOCODE_ERROR_NOT_SUPPORTED error.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 void
 geocode_mock_backend_add_reverse_result (GeocodeMockBackend *self,
@@ -514,7 +514,7 @@ geocode_mock_backend_add_reverse_result (GeocodeMockBackend *self,
  *
  * This effectively resets the mock backend to its initial state.
  *
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 void
 geocode_mock_backend_clear (GeocodeMockBackend *self)
@@ -544,7 +544,7 @@ geocode_mock_backend_clear (GeocodeMockBackend *self)
  *
  * Returns: (transfer none) (element-type GeocodeMockBackendQuery): potentially
  *     empty sequence of forward and reverse query details
- * Since: UNRELEASED
+ * Since: 3.23.1
  */
 GPtrArray *
 geocode_mock_backend_get_query_log (GeocodeMockBackend *self)
