@@ -43,6 +43,14 @@ G_BEGIN_DECLS
 G_DECLARE_DERIVABLE_TYPE (GeocodeNominatim, geocode_nominatim, GEOCODE, NOMINATIM, GObject)
 
 /**
+ * GEOCODE_TYPE_NOMINATIM:
+ *
+ * See #GeocodeNominatim.
+ *
+ * Since: 3.23.1
+ */
+
+/**
  * GeocodeNominatimClass:
  * @query: synchronous query function to override network `GET` requests.
  * @query_async: asynchronous version of @query.

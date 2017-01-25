@@ -43,6 +43,14 @@ G_BEGIN_DECLS
 G_DECLARE_INTERFACE (GeocodeBackend, geocode_backend, GEOCODE, BACKEND, GObject)
 
 /**
+ * GEOCODE_TYPE_BACKEND:
+ *
+ * See #GeocodeBackend.
+ *
+ * Since: 3.23.1
+ */
+
+/**
  * GeocodeBackendInterface:
  * @forward_search: handles a synchronous forward geocoding request.
  * @forward_search_async: starts an asynchronous forward geocoding request.

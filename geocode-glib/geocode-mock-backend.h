@@ -39,6 +39,14 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (GeocodeMockBackend, geocode_mock_backend,
                       GEOCODE, MOCK_BACKEND, GObject)
 
+/**
+ * GEOCODE_TYPE_MOCK_BACKEND:
+ *
+ * See #GeocodeMockBackend.
+ *
+ * Since: 3.23.1
+ */
+
 GeocodeMockBackend *geocode_mock_backend_new (void);
 
 void geocode_mock_backend_add_forward_result (GeocodeMockBackend *self,
