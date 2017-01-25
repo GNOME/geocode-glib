@@ -39,15 +39,8 @@ MAINTAINERCLEANFILES = \
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = geocode-glib-1.0.pc
 
-# Build ChangeLog from GIT history
-ChangeLog:
-	@if test -f $(top_srcdir)/.git/HEAD; then \
-		git log --stat > $@; \
-	fi
-
-dist: ChangeLog
-
-.PHONY: ChangeLog
-
+# Build ChangeLog from git history
+@GENERATE_CHANGELOG_RULES@
+dist-hook: dist-ChangeLog
 
 -include $(top_srcdir)/git.mk

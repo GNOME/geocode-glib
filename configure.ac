@@ -98,6 +98,9 @@ AM_CONDITIONAL([ENABLE_INSTALLED_TESTS],
                [test "$enable_installed_tests" = "yes"])
 AC_SUBST([ENABLE_INSTALLED_TESTS],[$enable_installed_tests])
 
+# Changelog generation
+AX_GENERATE_CHANGELOG
+
 AC_CONFIG_FILES([
           Makefile
 	  geocode-glib-1.0.pc
