@@ -311,7 +311,7 @@ node_free_func (GNode    *node,
 	return FALSE;
 }
 
-static const char const *place_attributes[] = {
+static const char *place_attributes[] = {
 	"country",
 	"state",
 	"county",
