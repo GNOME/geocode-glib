@@ -50,6 +50,8 @@ libgcglib = shared_library('geocode-glib',
                            dependencies: deps,
                            include_directories: include,
                            link_args: link_args,
+                           soversion: '0',
+                           version: '0.0.0',
                            install: true)
 
 install_headers(headers, subdir: header_subdir)
