@@ -56,6 +56,18 @@ libgcglib = shared_library('geocode-glib',
 
 install_headers(headers, subdir: header_subdir)
 
+pkgconf = import('pkgconfig')
+pkgconf.generate(libraries: libgcglib,
+                 version: gclib_version,
+                 name: 'geocode-glib',
+                 description: 'Helper library for geocoding services',
+                 filebase: 'geocode-glib-@0@'.format(gclib_api_version),
+                 subdirs: 'geocode-glib-@0@'.format(gclib_api_version),
+                 requires: 'gio-2.0',
+                 variables: [
+                   'apiversion=' + gclib_api_version,
+                 ])
+
 gir = find_program('g-ir-scanner', required: false)
 cross_build = meson.is_cross_build()
 enable_gir = get_option('enable-introspection')
