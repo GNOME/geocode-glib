@@ -44,4 +44,7 @@ endif
 subdir('geocode-glib')
 subdir('po')
 subdir('icons')
-subdir('docs')
+
+if get_option('enable-gtk-doc')
+  subdir('docs')
+endif
