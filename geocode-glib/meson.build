@@ -42,14 +42,14 @@ if libm.found()
 endif
 
 include = include_directories('..')
-exports_file = join_paths(meson.current_source_dir(), 'geocode-glib.symbols')
-link_args = '-export-symbols ' + exports_file
+gclib_map = join_paths(meson.current_source_dir(), 'geocode-glib.map')
 
 libgcglib = shared_library('geocode-glib',
                            sources,
                            dependencies: deps,
                            include_directories: include,
-                           link_args: link_args,
+                           link_depends: gclib_map,
+                           link_args: [ '-Wl,--version-script,' + gclib_map ],
                            soversion: '0',
                            version: '0.0.0',
                            install: true)

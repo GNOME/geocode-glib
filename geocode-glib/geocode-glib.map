@@ -1,0 +1,8 @@
+{
+  global:
+    geocode_*;
+    _geocode_parse_search_json;
+
+  local:
+    *;
+};
