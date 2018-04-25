@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2010 Bastien Nocera
+   Copyright 2010 Bastien Nocera
 
    The Gnome Library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Library General Public License as

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Collabora Ltd.
+ * Copyright 2016 Collabora Ltd.
  *
  * The geocode-glib library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License as

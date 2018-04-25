@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2011 Bastien Nocera
-   Copyright (C) 2016 Collabora Ltd.
+   Copyright 2011 Bastien Nocera
+   Copyright 2016 Collabora Ltd.
 
    The Gnome Library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Library General Public License as

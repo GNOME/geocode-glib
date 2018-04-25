@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2011–2015 Red Hat
- * Copyright (C) 2014, 2015, 2016 Jonas Danielsson
- * Copyright (C) 2016 Collabora Ltd.
+ * Copyright 2011–2015 Red Hat
+ * Copyright 2014, 2015, 2016 Jonas Danielsson
+ * Copyright 2016 Collabora Ltd.
  *
  * The Gnome Library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public License as
