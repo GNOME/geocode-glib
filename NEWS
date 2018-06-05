@@ -1,3 +1,9 @@
+3.26.0
+------
+
+- Remove full build path from public headers so as to make the
+  build more easily reproduceable.
+
 3.25.4.1
 --------
 
