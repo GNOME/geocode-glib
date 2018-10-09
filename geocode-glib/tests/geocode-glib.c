@@ -629,6 +629,19 @@ test_distance (void)
 }
 
 static void
+test_zero_distance (void)
+{
+	g_autoptr (GeocodeLocation) loca = NULL, locb = NULL;
+
+	/* 1600 Pennsylvania Ave NW, Washington, DC */
+	loca = geocode_location_new (38.898556, -77.037852, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
+	/* 1600 Pennsylvania Ave NW, Washington, DC */
+	locb = geocode_location_new (38.898556, -77.037852, GEOCODE_LOCATION_ACCURACY_UNKNOWN);
+
+	g_assert_cmpfloat (geocode_location_get_distance_from (loca, locb), ==, 0.0);
+}
+
+static void
 test_locale_format (void)
 {
 #if defined(__GLIBC__) && !defined(__UCLIBC__)
@@ -914,6 +927,7 @@ int main (int argc, char **argv)
 		g_test_add_func ("/geocode/search", test_search);
 		g_test_add_func ("/geocode/search_lat_long", test_search_lat_long);
 		g_test_add_func ("/geocode/distance", test_distance);
+		g_test_add_func ("/geocode/zero_distance", test_zero_distance);
 		g_test_add_func ("/geocode/osm_type", test_osm_type);
 		return g_test_run ();
 	}
