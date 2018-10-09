@@ -1,0 +1,8 @@
+build-fedora:
+  image: fedora:latest
+  before_script:
+    - dnf install -y redhat-rpm-config meson json-glib-devel gettext itstool gobject-introspection-devel libsoup-devel
+  script:
+    - meson _build
+    - ninja -C _build test
+    - ninja -C _build install
