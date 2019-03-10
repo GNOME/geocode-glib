@@ -1073,7 +1073,10 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
 				value = json_node_get_string (node);
 				if (value && *value == '\0')
 					value = NULL;
-			}
+			} else if (json_node_get_value_type (node) == G_TYPE_INT64) {
+        guint64 int_value = json_node_get_int (node);
+        value = g_strdup_printf ("%ld", int_value);
+      }
 		}
 
 		if (value != NULL) {
