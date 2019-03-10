@@ -1063,21 +1063,24 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
 	}
 
 	for (i = 0; members[i] != NULL; i++) {
-		const char *value = NULL;
+		char *value = NULL;
 
 		json_reader_read_member (reader, members[i]);
 
 		if (json_reader_is_value (reader)) {
 			JsonNode *node = json_reader_get_value (reader);
 			if (json_node_get_value_type (node) == G_TYPE_STRING) {
-				value = json_node_get_string (node);
+				value = g_strdup (json_node_get_string (node));
 				if (value && *value == '\0')
-					value = NULL;
+					g_clear_pointer (&value, g_free);
+			} else if (json_node_get_value_type (node) == G_TYPE_INT64) {
+				gint64 int_value = json_node_get_int (node);
+				value = g_strdup_printf ("%"G_GINT64_FORMAT, int_value);
 			}
 		}
 
 		if (value != NULL) {
-			g_hash_table_insert (ht, g_strdup (members[i]), g_strdup (value));
+			g_hash_table_insert (ht, g_strdup (members[i]), value);
 
 			if (i == 0 && is_address) {
 				if (g_strcmp0 (members[i], "house_number") != 0)
