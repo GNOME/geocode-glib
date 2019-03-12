@@ -781,12 +781,14 @@ test_resolve_json (void)
 	guint i;
 	struct {
 		const char *fname;
+		guint num_results;
 		const char *error;
 		const char *prop;
 		const char *value;
 	} tests[] = {
-		{ "nominatim-area.json", NULL, "area", "Guildford Park" },
-		{ "nominatim-no-results.json", "No matches found for request", NULL, NULL },
+		{ "nominatim-area.json", 1, NULL, "area", "Guildford Park" },
+		{ "nominatim-no-results.json", 1, "No matches found for request", NULL, NULL },
+		{ "nominatim-data-type-change.json", 12, NULL, "osm_id", "335673748" },
 	};
 
 	for (i = 0; i < G_N_ELEMENTS (tests); i++) {
@@ -811,7 +813,7 @@ test_resolve_json (void)
 			g_assert_cmpstr (error->message, ==, tests[i].error);
 		} else {
                         g_assert (list != NULL);
-                        g_assert_cmpint (g_list_length (list), ==, 1);
+                        g_assert_cmpint (g_list_length (list), ==, tests[i].num_results);
 		}
 
 		if (list == NULL) {
