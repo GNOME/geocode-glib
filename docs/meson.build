@@ -17,6 +17,12 @@ private_headers = [
   'geocode-nominatim-test.h',
 ]
 
+version_xml_conf = configuration_data()
+version_xml_conf.set('VERSION', meson.project_version())
+configure_file(input: 'version.xml.in',
+               output: 'version.xml',
+               configuration: version_xml_conf)
+
 glib_prefix = dependency('glib-2.0').get_pkgconfig_variable('prefix')
 glib_docpath = join_paths(glib_prefix, 'share', 'gtk-doc', 'html')
 docpath = join_paths(datadir, 'gtk-doc', 'html')
