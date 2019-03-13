@@ -390,9 +390,11 @@ get_place_type_from_attributes (GHashTable *ht)
                 place_type =  GEOCODE_PLACE_TYPE_DRAINAGE;
         } else if (g_strcmp0 (category, "boundary") == 0) {
                 if (g_strcmp0 (type, "administrative") == 0) {
-                        int rank;
-
-                        rank = atoi (g_hash_table_lookup (ht, "place_rank"));
+                        int rank = 0;
+			char *key = g_hash_table_lookup (ht, "place_rank");
+			
+			if (key)
+				rank = atoi (key);
                         if (rank < 2)
                                 place_type =  GEOCODE_PLACE_TYPE_UNKNOWN;
 
