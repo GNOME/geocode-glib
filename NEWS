@@ -1,3 +1,9 @@
+3.26.1
+------
+
+- Fix crashes caused by Nominatim server changes
+- Fix warnings when building the API documentation
+
 3.26.0
 ------
 

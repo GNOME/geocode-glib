@@ -1,4 +1,4 @@
-project('geocode-glib', 'c', version: '3.26.0')
+project('geocode-glib', 'c', version: '3.26.1')
 
 gclib_version = meson.project_version() # set in project() below
 ver_arr = gclib_version.split('.')
