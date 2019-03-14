@@ -27,6 +27,7 @@ test('Test mock backend', e)
 install_data('locale_format.json',
              'locale_name.json',
              'nominatim-area.json',
+             'nominatim-data-type-change.json',
              'nominatim-no-results.json',
              'nominatim-place_rank.json',
              'nominatim-rio.json',
