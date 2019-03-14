@@ -789,6 +789,7 @@ test_resolve_json (void)
 		{ "nominatim-area.json", 1, NULL, "area", "Guildford Park" },
 		{ "nominatim-no-results.json", 1, "No matches found for request", NULL, NULL },
 		{ "nominatim-data-type-change.json", 12, NULL, "osm_id", "335673748" },
+		{ "nominatim-place_rank.json", 10, NULL, "osm_id", "2555133" },
 	};
 
 	for (i = 0; i < G_N_ELEMENTS (tests); i++) {
