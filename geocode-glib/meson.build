@@ -43,13 +43,20 @@ endif
 
 include = include_directories('..')
 gclib_map = join_paths(meson.current_source_dir(), 'geocode-glib.map')
+link_depends = []
+link_args = []
+
+if cc.has_link_argument('-Wl,--version-script,' + gclib_map)
+	link_depends += gclib_map
+	link_args += ['-Wl,--version-script,' + gclib_map]
+endif
 
 libgcglib = shared_library('geocode-glib',
                            sources,
                            dependencies: deps,
                            include_directories: include,
-                           link_depends: gclib_map,
-                           link_args: [ '-Wl,--version-script,' + gclib_map ],
+                           link_depends: link_depends,
+                           link_args: link_args,
                            soversion: '0',
                            version: '0.0.0',
                            install: true)
