@@ -4,6 +4,11 @@ variables:
 build-fedora:
   image: fedora:latest
   before_script:
+    # Undo delangification present in the Fedora Docker images
+    - rm -f /etc/rpm/macros.image-language-conf
+    - dnf reinstall -y glib2 glibc
+    # Add locales support required for tests
+    - dnf install -y glibc-langpack-fr glibc-langpack-cs glibc-langpack-en
     - dnf install -y glib2-devel json-glib-devel libsoup-devel gtk-doc meson git gcc gcc-c++ glibc-devel libabigail
   script:
     - meson _build
