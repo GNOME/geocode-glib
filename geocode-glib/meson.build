@@ -86,10 +86,9 @@ pkgconf.generate(libraries: libgcglib,
                  ])
 
 gir = find_program('g-ir-scanner', required: false)
-cross_build = meson.is_cross_build()
 enable_gir = get_option('enable-introspection')
 
-if gir.found() and not cross_build and enable_gir
+if gir.found() and enable_gir
   gir_args = [
     '--quiet',
 	'--c-include=geocode-glib/geocode-glib.h'

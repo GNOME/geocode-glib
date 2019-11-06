@@ -1,8 +1,17 @@
+variables:
+    LAST_ABI_BREAK: 5cd4856c207e169aa535a9e32f3361b61af639b2
+
 build-fedora:
   image: fedora:latest
   before_script:
-    - dnf install -y redhat-rpm-config meson json-glib-devel gettext itstool gobject-introspection-devel libsoup-devel gtk-doc
+    # Undo delangification present in the Fedora Docker images
+    - rm -f /etc/rpm/macros.image-language-conf
+    - dnf reinstall -y glib2 glibc
+    # Add locales support required for tests
+    - dnf install -y glibc-langpack-fr glibc-langpack-cs glibc-langpack-en
+    - dnf install -y glib2-devel json-glib-devel libsoup-devel gtk-doc meson git gcc gcc-c++ glibc-devel libabigail
   script:
     - meson _build
-    - ninja -C _build test
     - ninja -C _build install
+    - ninja -C _build test
+    - ./.ci/check-abi ${LAST_ABI_BREAK} $(git rev-parse HEAD)
