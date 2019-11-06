@@ -337,42 +337,38 @@ parse_geo_uri_parameters (GeocodeLocation *loc,
         char *val;
         char *u = NULL;
         char *crs = NULL;
+        int i;
         int ret = TRUE;
 
-        parameters = g_strsplit (params, ";", 2);
+        parameters = g_strsplit (params, ";", 256);
         if (parameters[0] == NULL)
                 goto err;
 
-        if (g_str_has_prefix (parameters[0], "u=")) {
-                /*
-                 * if u parameter is first, then there should not be any more
-                 * parameters.
-                 */
-                if (parameters[1] != NULL)
-                        goto err;
-
-                u = parameters[0];
-        } else if (g_str_has_prefix (parameters[0], "crs=")) {
-                /*
-                 * if crs parameter is first, then the next should be the u
-                 * parameter or none.
-                 */
-                crs = parameters[0];
-                if (parameters[1] != NULL){
-
-                        if (!g_str_has_prefix (parameters[1], "u="))
+        for (i = 0; parameters[i] != NULL; i++) {
+                if (g_str_has_prefix (parameters[i], "crs=")) {
+                        /*
+                         * if crs parameter is given, it has to be the first one
+                         */
+                        if (i != 0)
                                 goto err;
 
-                        u = parameters[1];
+                        crs = parameters[i];
+                } else if (g_str_has_prefix (parameters[i], "u=")) {
+                        /*
+                         * u parameter is either first one or after crs parameter and
+                         * has to appear only once in the parameter list
+                         */
+                        if ((crs == NULL && i != 0) || (crs != NULL && i != 1) || u != NULL)
+                                goto err;
+
+                        u = parameters[i];
                 }
-        } else {
-                goto err;
         }
 
         if (u != NULL) {
                 val = u + 2; /* len of 'u=' */
                 loc->priv->accuracy = g_ascii_strtod (val, &endptr);
-                if (*endptr != '\0')
+                if (*endptr != '\0' && *endptr != ';')
                         goto err;
         }
 
