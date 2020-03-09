@@ -1,3 +1,10 @@
+3.26.2
+------
+
+- Fix build exporting all the symbols
+- Allow GIR generation when cross-compiling
+- Allow unknown parameters inside geo: URL
+
 3.26.1
 ------
 
