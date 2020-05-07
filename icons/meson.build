@@ -15,7 +15,7 @@ foreach icon : public_icons
     file = join_paths('maki' , icon)
     install_dir = join_paths(get_option('datadir'),
                              'icons',
-                             'gnome',
+                             'hicolor',
                              'scalable',
                              'places')
 
