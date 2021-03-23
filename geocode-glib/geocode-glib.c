@@ -66,7 +66,7 @@ _geocode_glib_build_soup_session (const gchar *user_agent_override)
 
 	g_debug ("%s: user_agent = %s", G_STRFUNC, user_agent);
 
-	return soup_session_new_with_options (SOUP_SESSION_USER_AGENT,
+	return soup_session_new_with_options ("user-agent",
 	                                      user_agent, NULL);
 }
 
@@ -75,7 +75,11 @@ _geocode_glib_cache_path_for_query (SoupMessage *query)
 {
 	const char *filename;
 	char *path;
-        SoupURI *soup_uri;
+#if SOUP_CHECK_VERSION (2, 99, 2)
+	GUri *muri;
+#else
+	SoupURI *muri;
+#endif
 	char *uri;
 	GChecksum *sum;
 
@@ -91,8 +95,12 @@ _geocode_glib_cache_path_for_query (SoupMessage *query)
 	g_free (path);
 
 	/* Create path for query */
-	soup_uri = soup_message_get_uri (query);
-	uri = soup_uri_to_string (soup_uri, FALSE);
+	muri = soup_message_get_uri (query);
+#if SOUP_CHECK_VERSION (2, 99, 2)
+	uri = g_uri_to_string_partial (muri, G_URI_HIDE_PASSWORD);
+#else
+	uri = soup_uri_to_string (muri, FALSE);
+#endif
 
 	sum = g_checksum_new (G_CHECKSUM_SHA256);
 	g_checksum_update (sum, (const guchar *) uri, strlen (uri));

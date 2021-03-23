@@ -129,15 +129,24 @@ common_get_response (GeocodeNominatim  *self,
                      GError           **error)
 {
 	CacheItem *item;
-	SoupURI *parsed_uri = NULL;
 	GHashTable *parameters = NULL;
 
 	/* Parse the URI to get its query parameters. */
-	parsed_uri = soup_uri_new (uri);
+#if SOUP_CHECK_VERSION (2, 99, 2)
+	GUri *parsed_uri = g_uri_parse (uri, SOUP_HTTP_URI_FLAGS, NULL);
+#else
+	SoupURI *parsed_uri = soup_uri_new (uri);
+#endif
+
 	g_assert_nonnull (parsed_uri);
 
+#if SOUP_CHECK_VERSION (2, 99, 2)
+	parameters = soup_form_decode (g_uri_get_query (parsed_uri));
+	g_uri_unref (parsed_uri);
+#else
 	parameters = soup_form_decode (soup_uri_get_query (parsed_uri));
 	soup_uri_free (parsed_uri);
+#endif
 
 	{
 		GHashTableIter iter;

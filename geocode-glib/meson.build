@@ -33,9 +33,15 @@ public_sources = [ 'geocode-location.c',
 
 sources = public_sources + [ 'geocode-glib-private.h' ]
 
+if get_option('soup2')
+  soup_dep = dependency('libsoup-2.4', version: '>= 2.42')
+else
+  soup_dep = dependency('libsoup-3.0', version: '>= 2.99.2')
+endif
+
 deps = [ dependency('gio-2.0', version: '>= 2.34'),
-		 dependency('json-glib-1.0', version: '>= 0.99.2'),
-		 dependency('libsoup-2.4', version: '>= 2.42') ]
+         dependency('json-glib-1.0', version: '>= 0.99.2'),
+         soup_dep ]
 libm = cc.find_library('m', required: false)
 if libm.found()
     deps += [ libm ]
@@ -105,7 +111,7 @@ if gir.found() and enable_gir
                      includes: [ 'GObject-2.0',
                                  'Gio-2.0',
                                  'Json-1.0',
-                                 'Soup-2.4' ],
+                                 get_option('soup2') ? 'Soup-2.4' : 'Soup-3.0' ],
                      install: true,
                      extra_args: gir_args)
 endif
