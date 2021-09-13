@@ -15,9 +15,27 @@ variables:
       libabigail
     SOUP2_DEPS:
       libsoup-devel
+    SOUP3_DEPS:
+      libnghttp2-devel
+      sqlite-devel
+      libpsl-devel
 
-build-fedora:
+.build:
   image: fedora:latest
+  script:
+    - meson _build -Dsoup2=${SOUP2_ENABLED}
+    - ninja -C _build install
+    - ninja -C _build test
+  artifacts:
+    name: "geocode-glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
+    when: on_failure
+    paths:
+      - "**/meson-logs/*"
+
+build-fedora-soup2:
+  extends: .build
+  variables:
+    SOUP2_ENABLED: 'true'
   before_script:
     # Undo delangification present in the Fedora Docker images
     - rm -f /etc/rpm/macros.image-language-conf
@@ -27,4 +45,29 @@ build-fedora:
     - meson _build
     - ninja -C _build install
     - ninja -C _build test
-    - ./.ci/check-abi ${LAST_ABI_BREAK} $(git rev-parse HEAD)
+    - curl https://gitlab.freedesktop.org/hadess/check-abi/-/raw/main/contrib/check-abi-fedora.sh | bash
+    - check-abi --new-parameters="-Dsoup2=true" ${LAST_ABI_BREAK} $(git rev-parse HEAD)
+
+build-fedora-soup3:
+  extends: .build
+  variables:
+    SOUP2_ENABLED: 'false'
+  before_script:
+    # Undo delangification present in the Fedora Docker images
+    - rm -f /etc/rpm/macros.image-language-conf
+    - dnf reinstall -y glib2 glibc
+    - dnf install -y $COMMON_DEPS $SOUP3_DEPS
+    # Tasks specific to soup3 (glib 2.70, libsoup 3)
+    - git clone https://gitlab.gnome.org/GNOME/glib.git && pushd glib
+    - git checkout 2.69.3
+    - meson _build --prefix=/usr
+    - ninja -C _build install
+    - popd
+    - git clone --depth=1 https://gitlab.gnome.org/GNOME/libsoup.git && pushd libsoup
+    - meson _build --prefix=/usr -Dtls_check=false
+    - ninja -C _build install
+    - popd
+    - curl https://gitlab.freedesktop.org/hadess/check-abi/-/raw/main/contrib/check-abi-fedora.sh | bash
+    # To build the old version
+    - dnf install -y $SOUP2_DEPS
+    - check-abi --new-parameters="-Dsoup2=false" ${LAST_ABI_BREAK} $(git rev-parse HEAD)
