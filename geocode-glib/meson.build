@@ -79,6 +79,12 @@ libgcglib = shared_library('geocode-glib',
 
 install_headers(headers, subdir: header_subdir)
 
+if get_option('soup2')
+  soup_api_version = '2.4'
+else
+  soup_api_version = '3.0'
+endif
+
 pkgconf = import('pkgconfig')
 pkgconf.generate(libraries: libgcglib,
                  version: gclib_version,
@@ -89,6 +95,7 @@ pkgconf.generate(libraries: libgcglib,
                  requires: 'gio-2.0',
                  variables: [
                    'apiversion=' + gclib_api_version,
+                   'soupapiversion=' + soup_api_version,
                  ])
 
 gir = find_program('g-ir-scanner', required: false)
