@@ -1,3 +1,8 @@
+3.26.3
+------
+
+- Port the documentations from gtk-doc to gi-docgen
+
 3.26.2
 ------
 
