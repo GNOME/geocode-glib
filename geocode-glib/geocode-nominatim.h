@@ -31,14 +31,7 @@
 
 G_BEGIN_DECLS
 
-/**
- * GeocodeNominatim:
- *
- * All the fields in the #GeocodeNominatim structure are private and should
- * never be accessed directly.
- *
- * Since: 3.23.1
- */
+// All the fields in the #GeocodeNominatim structure are private and should never be accessed directly.
 #define GEOCODE_TYPE_NOMINATIM (geocode_nominatim_get_type ())
 G_DECLARE_DERIVABLE_TYPE (GeocodeNominatim, geocode_nominatim, GEOCODE, NOMINATIM, GObject)
 

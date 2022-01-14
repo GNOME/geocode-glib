@@ -39,11 +39,7 @@ GType geocode_reverse_get_type (void) G_GNUC_CONST;
 #define GEOCODE_IS_REVERSE_CLASS(klass)      (G_TYPE_CHECK_CLASS_TYPE ((klass), GEOCODE_TYPE_REVERSE))
 #define GEOCODE_REVERSE_GET_CLASS(obj)       (G_TYPE_INSTANCE_GET_CLASS ((obj), GEOCODE_TYPE_REVERSE, GeocodeReverseClass))
 
-/**
- * GeocodeReverse:
- *
- * All the fields in the #GeocodeReverse structure are private and should never be accessed directly.
-**/
+// All the fields in the #GeocodeReverse structure are private and should never be accessed directly.
 typedef struct _GeocodeReverse        GeocodeReverse;
 typedef struct _GeocodeReverseClass   GeocodeReverseClass;
 typedef struct _GeocodeReversePrivate GeocodeReversePrivate;

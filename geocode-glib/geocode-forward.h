@@ -40,11 +40,7 @@ GType geocode_forward_get_type (void) G_GNUC_CONST;
 #define GEOCODE_IS_FORWARD_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), GEOCODE_TYPE_FORWARD))
 #define GEOCODE_FORWARD_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), GEOCODE_TYPE_FORWARD, GeocodeForwardClass))
 
-/**
- * GeocodeForward:
- *
- * All the fields in the #GeocodeForward structure are private and should never be accessed directly.
-**/
+// All the fields in the #GeocodeForward structure are private and should never be accessed directly.
 typedef struct _GeocodeForward        GeocodeForward;
 typedef struct _GeocodeForwardClass   GeocodeForwardClass;
 typedef struct _GeocodeForwardPrivate GeocodeForwardPrivate;

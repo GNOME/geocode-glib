@@ -27,14 +27,7 @@
 
 G_BEGIN_DECLS
 
-/**
- * GeocodeMockBackend:
- *
- * All the fields in the #GeocodeMockBackend structure are private and should
- * never be accessed directly.
- *
- * Since: 3.23.1
- */
+// All the fields in the #GeocodeMockBackend structure are private and should never be accessed directly.
 #define GEOCODE_TYPE_MOCK_BACKEND (geocode_mock_backend_get_type ())
 G_DECLARE_FINAL_TYPE (GeocodeMockBackend, geocode_mock_backend,
                       GEOCODE, MOCK_BACKEND, GObject)
@@ -62,17 +55,17 @@ void geocode_mock_backend_clear              (GeocodeMockBackend *self);
 
 /**
  * GeocodeMockBackendQuery:
- * @params: query parameters, in the format accepted by geocode_forward_search()
- *     (if @is_forward is %TRUE) or geocode_reverse_resolve() (otherwise)
- * @is_forward: %TRUE if this represents a call to geocode_forward_search();
- *     %FALSE if it represents a call to geocode_reverse_resolve()
+ * @params: query parameters, in the format accepted by [method@Forward.search]
+ *     (if @is_forward is %TRUE) or [method@Reverse.resolve] (otherwise)
+ * @is_forward: %TRUE if this represents a call to [method@Forward.search];
+ *     %FALSE if it represents a call to [method@Reverse.resolve]
  * @results: (nullable) (element-type GeocodePlace): results returned by the
  *     query, or %NULL if an error was returned
  * @error: (nullable): error returned by the query, or %NULL if a result set
  *     was returned
  *
  * The details of a forward or reverse query which was performed on a
- * #GeocodeMockBackend by application code. This includes the input (@params,
+ * [class@MockBackend] by application code. This includes the input (@params,
  * @is_forward), and the output which was returned (@results or @error).
  *
  * Empty result sets are represented by the %GEOCODE_ERROR_NO_MATCHES error

@@ -44,11 +44,7 @@ typedef struct _GeocodePlace        GeocodePlace;
 typedef struct _GeocodePlaceClass   GeocodePlaceClass;
 typedef struct _GeocodePlacePrivate GeocodePlacePrivate;
 
-/**
- * GeocodePlace:
- *
- * All the fields in the #GeocodePlace structure are private and should never be accessed directly.
-**/
+// All the fields in the #GeocodePlace structure are private and should never be accessed directly.
 struct _GeocodePlace {
         /* <private> */
         GObject parent_instance;

@@ -31,14 +31,7 @@
 
 G_BEGIN_DECLS
 
-/**
- * GeocodeBackend:
- *
- * All the fields in the #GeocodeBackend structure are private and should
- * never be accessed directly.
- *
- * Since: 3.23.1
- */
+// All the fields in the #GeocodeBackend structure are private and should never be accessed directly.
 #define GEOCODE_TYPE_BACKEND (geocode_backend_get_type ())
 G_DECLARE_INTERFACE (GeocodeBackend, geocode_backend, GEOCODE, BACKEND, GObject)
 

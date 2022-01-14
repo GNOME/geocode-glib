@@ -41,12 +41,7 @@ typedef struct _GeocodeBoundingBox        GeocodeBoundingBox;
 typedef struct _GeocodeBoundingBoxClass   GeocodeBoundingBoxClass;
 typedef struct _GeocodeBoundingBoxPrivate GeocodeBoundingBoxPrivate;
 
-/**
- * GeocodeBoundingBox:
- *
- * All the fields in the #GeocodeLocation structure are private and should
- * never be accessed directly.
-**/
+// All the fields in the #GeocodeBoundingBox structure are private and should never be accessed directly.
 struct _GeocodeBoundingBox {
     /* <private> */
     GObject parent_instance;
