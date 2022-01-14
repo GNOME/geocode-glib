@@ -60,7 +60,8 @@ enum {
         PROP_CRS,
 };
 
-G_DEFINE_TYPE (GeocodeLocation, geocode_location, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_CODE (GeocodeLocation, geocode_location, G_TYPE_OBJECT,
+                         G_ADD_PRIVATE (GeocodeLocation))
 
 static void
 geocode_location_get_property (GObject    *object,
@@ -138,77 +139,100 @@ gboolean
 geocode_location_equal (GeocodeLocation *a,
                         GeocodeLocation *b)
 {
+        GeocodeLocationPrivate *priv_a;
+        GeocodeLocationPrivate *priv_b;
+
         g_return_val_if_fail (GEOCODE_IS_LOCATION (a), FALSE);
         g_return_val_if_fail (GEOCODE_IS_LOCATION (b), FALSE);
 
-        return (a->priv->longitude == b->priv->longitude &&
-                a->priv->latitude == b->priv->latitude &&
-                a->priv->altitude == b->priv->altitude &&
-                a->priv->accuracy == b->priv->accuracy &&
-                a->priv->timestamp == b->priv->timestamp &&
-                g_strcmp0 (a->priv->description, b->priv->description) == 0 &&
-                a->priv->crs == b->priv->crs);
+        priv_a = geocode_location_get_instance_private (a);
+        priv_b = geocode_location_get_instance_private (b);
+
+        return (priv_a->longitude == priv_b->longitude &&
+                priv_a->latitude == priv_b->latitude &&
+                priv_a->altitude == priv_b->altitude &&
+                priv_a->accuracy == priv_b->accuracy &&
+                priv_a->timestamp == priv_b->timestamp &&
+                g_strcmp0 (priv_a->description, priv_b->description) == 0 &&
+                priv_a->crs == priv_b->crs);
 }
 
 static void
 geocode_location_set_latitude (GeocodeLocation *loc,
                                gdouble          latitude)
 {
+        GeocodeLocationPrivate *priv;
         g_return_if_fail (latitude >= -90.0 && latitude <= 90.0);
 
-        loc->priv->latitude = latitude;
+        priv = geocode_location_get_instance_private (loc);
+        priv->latitude = latitude;
 }
 
 static void
 geocode_location_set_longitude (GeocodeLocation *loc,
                                 gdouble          longitude)
 {
+        GeocodeLocationPrivate *priv;
         g_return_if_fail (longitude >= -180.0 && longitude <= 180.0);
 
-        loc->priv->longitude = longitude;
+        priv = geocode_location_get_instance_private (loc);
+        priv->longitude = longitude;
 }
 
 static void
 geocode_location_set_altitude (GeocodeLocation *loc,
                                gdouble          altitude)
 {
-        loc->priv->altitude = altitude;
+        GeocodeLocationPrivate *priv;
+
+        priv = geocode_location_get_instance_private (loc);
+        priv->altitude = altitude;
 }
 
 static void
 geocode_location_set_accuracy (GeocodeLocation *loc,
                                gdouble          accuracy)
 {
+
+        GeocodeLocationPrivate *priv;
         g_return_if_fail (accuracy >= GEOCODE_LOCATION_ACCURACY_UNKNOWN);
 
-        loc->priv->accuracy = accuracy;
+        priv = geocode_location_get_instance_private (loc);
+        priv->accuracy = accuracy;
 }
 
 static void
 geocode_location_set_crs(GeocodeLocation   *loc,
                          GeocodeLocationCRS crs)
 {
+        GeocodeLocationPrivate *priv;
         g_return_if_fail (GEOCODE_IS_LOCATION (loc));
 
-        loc->priv->crs = crs;
+        priv = geocode_location_get_instance_private (loc);
+        priv->crs = crs;
 }
 
 static void
 geocode_location_set_timestamp (GeocodeLocation *loc,
                                 guint64          timestamp)
 {
+        GeocodeLocationPrivate *priv;
         g_return_if_fail (GEOCODE_IS_LOCATION (loc));
 
-        loc->priv->timestamp = timestamp;
+        priv = geocode_location_get_instance_private (loc);
+        priv->timestamp = timestamp;
 }
 
 static void
 geocode_location_constructed (GObject *object)
 {
         GeocodeLocation *location = GEOCODE_LOCATION (object);
+        GeocodeLocationPrivate *priv;
         GTimeVal tv;
 
-        if (location->priv->timestamp != 0)
+        priv = geocode_location_get_instance_private (location);
+
+        if (priv->timestamp != 0)
                 return;
 
         g_get_current_time (&tv);
@@ -271,13 +295,16 @@ parse_geo_uri_special_parameters (GeocodeLocation *loc,
                                   const char      *params,
                                   GError         **error)
 {
+        GeocodeLocationPrivate *priv;
         char *end_ptr;
         char *next_token;
         char *description;
         char *token_end;
         int description_len;
 
-        if (loc->priv->latitude != 0 || loc->priv->longitude != 0)
+        priv = geocode_location_get_instance_private (loc);
+
+        if (priv->latitude != 0 || priv->longitude != 0)
             goto err;
 
         if (strncmp (params, "q=", 2) != 0)
@@ -285,12 +312,12 @@ parse_geo_uri_special_parameters (GeocodeLocation *loc,
 
         next_token = ((char *)params) + 2;
 
-        loc->priv->latitude = g_ascii_strtod (next_token, &end_ptr);
+        priv->latitude = g_ascii_strtod (next_token, &end_ptr);
         if (*end_ptr != ',' || *end_ptr == *params)
                 goto err;
         next_token = end_ptr + 1;
 
-        loc->priv->longitude = g_ascii_strtod (next_token, &end_ptr);
+        priv->longitude = g_ascii_strtod (next_token, &end_ptr);
         if (*end_ptr == *next_token)
                 goto err;
 
@@ -332,6 +359,7 @@ parse_geo_uri_parameters (GeocodeLocation *loc,
                           const char      *params,
                           GError         **error)
 {
+        GeocodeLocationPrivate *priv;
         char **parameters;
         char *endptr;
         char *val;
@@ -340,6 +368,7 @@ parse_geo_uri_parameters (GeocodeLocation *loc,
         int i;
         int ret = TRUE;
 
+        priv = geocode_location_get_instance_private (loc);
         parameters = g_strsplit (params, ";", 256);
         if (parameters[0] == NULL)
                 goto err;
@@ -367,7 +396,7 @@ parse_geo_uri_parameters (GeocodeLocation *loc,
 
         if (u != NULL) {
                 val = u + 2; /* len of 'u=' */
-                loc->priv->accuracy = g_ascii_strtod (val, &endptr);
+                priv->accuracy = g_ascii_strtod (val, &endptr);
                 if (*endptr != '\0' && *endptr != ';')
                         goto err;
         }
@@ -436,11 +465,13 @@ parse_geo_uri (GeocodeLocation *loc,
                const char      *uri,
                GError         **error)
 {
+        GeocodeLocationPrivate *priv;
         const char *uri_part;
         char *end_ptr;
         char *next_token;
         const char *s;
 
+        priv = geocode_location_get_instance_private (loc);
         /* bail out if we encounter whitespace in uri */
         s = uri;
         while (*s) {
@@ -451,19 +482,19 @@ parse_geo_uri (GeocodeLocation *loc,
         uri_part = (const char *) uri + strlen("geo") + 1;
 
         /* g_ascii_strtod is locale safe */
-        loc->priv->latitude = g_ascii_strtod (uri_part, &end_ptr);
+        priv->latitude = g_ascii_strtod (uri_part, &end_ptr);
         if (*end_ptr != ',' || *end_ptr == *uri_part) {
                 goto err;
         }
         next_token = end_ptr + 1;
 
-        loc->priv->longitude = g_ascii_strtod (next_token, &end_ptr);
+        priv->longitude = g_ascii_strtod (next_token, &end_ptr);
         if (*end_ptr == *next_token) {
                 goto err;
         }
         if (*end_ptr == ',') {
                 next_token = end_ptr + 1;
-                loc->priv->altitude = g_ascii_strtod (next_token, &end_ptr);
+                priv->altitude = g_ascii_strtod (next_token, &end_ptr);
                 if (*end_ptr == *next_token) {
                         goto err;
                 }
@@ -526,8 +557,10 @@ static void
 geocode_location_finalize (GObject *glocation)
 {
         GeocodeLocation *location = (GeocodeLocation *) glocation;
+        GeocodeLocationPrivate *priv;
 
-        g_clear_pointer (&location->priv->description, g_free);
+        priv = geocode_location_get_instance_private (location);
+        g_clear_pointer (&priv->description, g_free);
 
         G_OBJECT_CLASS (geocode_location_parent_class)->finalize (glocation);
 }
@@ -542,8 +575,6 @@ geocode_location_class_init (GeocodeLocationClass *klass)
         glocation_class->get_property = geocode_location_get_property;
         glocation_class->set_property = geocode_location_set_property;
         glocation_class->constructed = geocode_location_constructed;
-
-        g_type_class_add_private (klass, sizeof (GeocodeLocationPrivate));
 
         /**
          * GeocodeLocation:description:
@@ -660,13 +691,12 @@ geocode_location_class_init (GeocodeLocationClass *klass)
 static void
 geocode_location_init (GeocodeLocation *location)
 {
-        location->priv = G_TYPE_INSTANCE_GET_PRIVATE ((location),
-                                                      GEOCODE_TYPE_LOCATION,
-                                                      GeocodeLocationPrivate);
+        GeocodeLocationPrivate *priv;
 
-        location->priv->altitude = GEOCODE_LOCATION_ALTITUDE_UNKNOWN;
-        location->priv->accuracy = GEOCODE_LOCATION_ACCURACY_UNKNOWN;
-        location->priv->crs = GEOCODE_LOCATION_CRS_WGS84;
+        priv = geocode_location_get_instance_private (location);
+        priv->altitude = GEOCODE_LOCATION_ALTITUDE_UNKNOWN;
+        priv->accuracy = GEOCODE_LOCATION_ACCURACY_UNKNOWN;
+        priv->crs = GEOCODE_LOCATION_CRS_WGS84;
 }
 
 /**
@@ -756,10 +786,12 @@ void
 geocode_location_set_description (GeocodeLocation *loc,
                                   const char      *description)
 {
+        GeocodeLocationPrivate *priv;
         g_return_if_fail (GEOCODE_IS_LOCATION (loc));
 
-        g_free (loc->priv->description);
-        loc->priv->description = g_strdup (description);
+        priv = geocode_location_get_instance_private (loc);
+        g_free (priv->description);
+        priv->description = g_strdup (description);
 }
 
 /**
@@ -773,9 +805,11 @@ geocode_location_set_description (GeocodeLocation *loc,
 const char *
 geocode_location_get_description (GeocodeLocation *loc)
 {
+        GeocodeLocationPrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_LOCATION (loc), NULL);
 
-        return loc->priv->description;
+        priv = geocode_location_get_instance_private (loc);
+        return priv->description;
 }
 
 /**
@@ -789,9 +823,11 @@ geocode_location_get_description (GeocodeLocation *loc)
 gdouble
 geocode_location_get_latitude (GeocodeLocation *loc)
 {
+        GeocodeLocationPrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_LOCATION (loc), 0.0);
 
-        return loc->priv->latitude;
+        priv = geocode_location_get_instance_private (loc);
+        return priv->latitude;
 }
 
 /**
@@ -805,9 +841,11 @@ geocode_location_get_latitude (GeocodeLocation *loc)
 gdouble
 geocode_location_get_longitude (GeocodeLocation *loc)
 {
+        GeocodeLocationPrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_LOCATION (loc), 0.0);
 
-        return loc->priv->longitude;
+        priv = geocode_location_get_instance_private (loc);
+        return priv->longitude;
 }
 
 /**
@@ -821,10 +859,12 @@ geocode_location_get_longitude (GeocodeLocation *loc)
 gdouble
 geocode_location_get_altitude (GeocodeLocation *loc)
 {
+        GeocodeLocationPrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_LOCATION (loc),
                               GEOCODE_LOCATION_ALTITUDE_UNKNOWN);
 
-        return loc->priv->altitude;
+        priv = geocode_location_get_instance_private (loc);
+        return priv->altitude;
 }
 
 /**
@@ -838,10 +878,12 @@ geocode_location_get_altitude (GeocodeLocation *loc)
 gdouble
 geocode_location_get_accuracy (GeocodeLocation *loc)
 {
+        GeocodeLocationPrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_LOCATION (loc),
                               GEOCODE_LOCATION_ACCURACY_UNKNOWN);
 
-        return loc->priv->accuracy;
+        priv = geocode_location_get_instance_private (loc);
+        return priv->accuracy;
 }
 
 /**
@@ -855,10 +897,12 @@ geocode_location_get_accuracy (GeocodeLocation *loc)
 GeocodeLocationCRS
 geocode_location_get_crs (GeocodeLocation *loc)
 {
+        GeocodeLocationPrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_LOCATION (loc),
                               GEOCODE_LOCATION_CRS_WGS84);
 
-        return loc->priv->crs;
+        priv = geocode_location_get_instance_private (loc);
+        return priv->crs;
 }
 
 /**
@@ -873,9 +917,11 @@ geocode_location_get_crs (GeocodeLocation *loc)
 guint64
 geocode_location_get_timestamp (GeocodeLocation *loc)
 {
+        GeocodeLocationPrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_LOCATION (loc), 0);
 
-        return loc->priv->timestamp;
+        priv = geocode_location_get_instance_private (loc);
+        return priv->timestamp;
 }
 
 static gdouble
@@ -889,6 +935,7 @@ round_coord_n (gdouble coord, guint n)
 static char *
 geo_uri_from_location (GeocodeLocation *loc)
 {
+        GeocodeLocationPrivate *priv;
         guint precision = 6; /* 0.1 meter precision */
         char *uri;
         char *coords;
@@ -901,26 +948,27 @@ geo_uri_from_location (GeocodeLocation *loc)
 
         g_return_val_if_fail (GEOCODE_IS_LOCATION (loc), NULL);
 
+        priv = geocode_location_get_instance_private (loc);
         g_ascii_formatd (lat,
                          G_ASCII_DTOSTR_BUF_SIZE,
                          "%.6f",
-                         round_coord_n (loc->priv->latitude, precision));
+                         round_coord_n (priv->latitude, precision));
         g_ascii_formatd (lon,
                          G_ASCII_DTOSTR_BUF_SIZE,
                          "%.6f",
-                         round_coord_n (loc->priv->longitude, precision));
+                         round_coord_n (priv->longitude, precision));
 
-        if (loc->priv->altitude != GEOCODE_LOCATION_ALTITUDE_UNKNOWN) {
+        if (priv->altitude != GEOCODE_LOCATION_ALTITUDE_UNKNOWN) {
                 g_ascii_dtostr (alt, G_ASCII_DTOSTR_BUF_SIZE,
-                                loc->priv->altitude);
+                                priv->altitude);
                 coords = g_strdup_printf ("%s,%s,%s", lat, lon, alt);
         } else {
                 coords = g_strdup_printf ("%s,%s", lat, lon);
         }
 
-        if (loc->priv->accuracy != GEOCODE_LOCATION_ACCURACY_UNKNOWN) {
+        if (priv->accuracy != GEOCODE_LOCATION_ACCURACY_UNKNOWN) {
                 g_ascii_dtostr (acc, G_ASCII_DTOSTR_BUF_SIZE,
-                                loc->priv->accuracy);
+                                priv->accuracy);
                 params = g_strdup_printf (";crs=%s;u=%s", crs, acc);
         } else {
                 params = g_strdup_printf (";crs=%s", crs);
@@ -967,20 +1015,25 @@ geocode_location_to_uri (GeocodeLocation *loc,
 double
 geocode_location_get_distance_from (GeocodeLocation *loca,
                                     GeocodeLocation *locb)
-{
+{       
+        GeocodeLocationPrivate *priv_a;
+        GeocodeLocationPrivate *priv_b;
         gdouble dlat, dlon, lat1, lat2;
         gdouble a, c;
 
         g_return_val_if_fail (GEOCODE_IS_LOCATION (loca), 0.0);
         g_return_val_if_fail (GEOCODE_IS_LOCATION (locb), 0.0);
 
+        priv_a = geocode_location_get_instance_private (loca);
+        priv_b = geocode_location_get_instance_private (locb);
+
         /* Algorithm from:
          * http://www.movable-type.co.uk/scripts/latlong.html */
 
-        dlat = (locb->priv->latitude - loca->priv->latitude) * M_PI / 180.0;
-        dlon = (locb->priv->longitude - loca->priv->longitude) * M_PI / 180.0;
-        lat1 = loca->priv->latitude * M_PI / 180.0;
-        lat2 = locb->priv->latitude * M_PI / 180.0;
+        dlat = (priv_b->latitude - priv_a->latitude) * M_PI / 180.0;
+        dlon = (priv_b->longitude - priv_a->longitude) * M_PI / 180.0;
+        lat1 = priv_a->latitude * M_PI / 180.0;
+        lat2 = priv_b->latitude * M_PI / 180.0;
 
         a = sin (dlat / 2) * sin (dlat / 2) +
             sin (dlon / 2) * sin (dlon / 2) * cos (lat1) * cos (lat2);

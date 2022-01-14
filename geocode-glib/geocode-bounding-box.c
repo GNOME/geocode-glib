@@ -47,7 +47,8 @@ enum {
         PROP_RIGHT
 };
 
-G_DEFINE_TYPE (GeocodeBoundingBox, geocode_bounding_box, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_CODE (GeocodeBoundingBox, geocode_bounding_box, G_TYPE_OBJECT,
+                         G_ADD_PRIVATE (GeocodeBoundingBox))
 
 static void
 geocode_bounding_box_get_property (GObject    *object,
@@ -89,36 +90,44 @@ static void
 geocode_bounding_box_set_top (GeocodeBoundingBox *bbox,
                               gdouble             top)
 {
+        GeocodeBoundingBoxPrivate *priv;
         g_return_if_fail (top >= -90.0 && top <= 90.0);
 
-        bbox->priv->top = top;
+        priv = geocode_bounding_box_get_instance_private (bbox);
+        priv->top = top;
 }
 
 static void
 geocode_bounding_box_set_bottom (GeocodeBoundingBox *bbox,
                                  gdouble             bottom)
 {
+        GeocodeBoundingBoxPrivate *priv;
         g_return_if_fail (bottom >= -90.0 && bottom <= 90.0);
 
-        bbox->priv->bottom = bottom;
+        priv = geocode_bounding_box_get_instance_private (bbox);
+        priv->bottom = bottom;
 }
 
 static void
 geocode_bounding_box_set_left (GeocodeBoundingBox *bbox,
                                gdouble             left)
 {
+        GeocodeBoundingBoxPrivate *priv;
         g_return_if_fail (left >= -180.0 && left <= 180.0);
 
-        bbox->priv->left = left;
+        priv = geocode_bounding_box_get_instance_private (bbox);
+        priv->left = left;
 }
 
 static void
 geocode_bounding_box_set_right (GeocodeBoundingBox *bbox,
                                 gdouble             right)
 {
+        GeocodeBoundingBoxPrivate *priv;
         g_return_if_fail (right >= -180.0 && right <= 180.0);
 
-        bbox->priv->right = right;
+        priv = geocode_bounding_box_get_instance_private (bbox);
+        priv->right = right;
 }
 
 static void
@@ -172,8 +181,6 @@ geocode_bounding_box_class_init (GeocodeBoundingBoxClass *klass)
         gbbox_class->finalize = geocode_bounding_box_finalize;
         gbbox_class->get_property = geocode_bounding_box_get_property;
         gbbox_class->set_property = geocode_bounding_box_set_property;
-
-        g_type_class_add_private (klass, sizeof (GeocodeBoundingBoxPrivate));
 
         /**
          * GeocodeBoundingBox:top:
@@ -244,9 +251,6 @@ geocode_bounding_box_class_init (GeocodeBoundingBoxClass *klass)
 static void
 geocode_bounding_box_init (GeocodeBoundingBox *bbox)
 {
-        bbox->priv = G_TYPE_INSTANCE_GET_PRIVATE ((bbox),
-                                                  GEOCODE_TYPE_BOUNDING_BOX,
-                                                  GeocodeBoundingBoxPrivate);
 }
 
 /**
@@ -291,13 +295,19 @@ gboolean
 geocode_bounding_box_equal (GeocodeBoundingBox *a,
                             GeocodeBoundingBox *b)
 {
+        GeocodeBoundingBoxPrivate *priv_a;
+        GeocodeBoundingBoxPrivate *priv_b;
+
         g_return_val_if_fail (GEOCODE_IS_BOUNDING_BOX (a), FALSE);
         g_return_val_if_fail (GEOCODE_IS_BOUNDING_BOX (b), FALSE);
 
-        return (a->priv->top == b->priv->top &&
-                a->priv->bottom == b->priv->bottom &&
-                a->priv->left == b->priv->left &&
-                a->priv->right == b->priv->right);
+        priv_a = geocode_bounding_box_get_instance_private (a);
+        priv_b = geocode_bounding_box_get_instance_private (b);
+
+        return (priv_a->top == priv_b->top &&
+                priv_a->bottom == priv_b->bottom &&
+                priv_a->left == priv_b->left &&
+                priv_a->right == priv_b->right);
 }
 
 /**
@@ -311,9 +321,11 @@ geocode_bounding_box_equal (GeocodeBoundingBox *a,
 gdouble
 geocode_bounding_box_get_top (GeocodeBoundingBox *bbox)
 {
+        GeocodeBoundingBoxPrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_BOUNDING_BOX (bbox), 0.0);
 
-        return bbox->priv->top;
+        priv = geocode_bounding_box_get_instance_private (bbox);
+        return priv->top;
 }
 
 /**
@@ -327,9 +339,11 @@ geocode_bounding_box_get_top (GeocodeBoundingBox *bbox)
 gdouble
 geocode_bounding_box_get_bottom (GeocodeBoundingBox *bbox)
 {
+        GeocodeBoundingBoxPrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_BOUNDING_BOX (bbox), 0.0);
 
-        return bbox->priv->bottom;
+        priv = geocode_bounding_box_get_instance_private (bbox);
+        return priv->bottom;
 }
 
 /**
@@ -343,9 +357,11 @@ geocode_bounding_box_get_bottom (GeocodeBoundingBox *bbox)
 gdouble
 geocode_bounding_box_get_left (GeocodeBoundingBox *bbox)
 {
+        GeocodeBoundingBoxPrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_BOUNDING_BOX (bbox), 0.0);
 
-        return bbox->priv->left;
+        priv = geocode_bounding_box_get_instance_private (bbox);
+        return priv->left;
 }
 
 /**
@@ -359,7 +375,10 @@ geocode_bounding_box_get_left (GeocodeBoundingBox *bbox)
 gdouble
 geocode_bounding_box_get_right (GeocodeBoundingBox *bbox)
 {
+        GeocodeBoundingBoxPrivate *priv;
+
         g_return_val_if_fail (GEOCODE_IS_BOUNDING_BOX (bbox), 0.0);
 
-        return bbox->priv->right;
+        priv = geocode_bounding_box_get_instance_private (bbox);
+        return priv->right;
 }

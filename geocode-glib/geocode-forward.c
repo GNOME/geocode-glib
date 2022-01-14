@@ -58,7 +58,8 @@ enum {
         PROP_BOUNDED
 };
 
-G_DEFINE_TYPE (GeocodeForward, geocode_forward, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_CODE (GeocodeForward, geocode_forward, G_TYPE_OBJECT,
+                         G_ADD_PRIVATE (GeocodeForward))
 
 static void
 geocode_forward_get_property (GObject	 *object,
@@ -125,10 +126,12 @@ geocode_forward_set_property(GObject	   *object,
 static void
 geocode_forward_finalize (GObject *gforward)
 {
+	GeocodeForwardPrivate *priv;
 	GeocodeForward *forward = (GeocodeForward *) gforward;
 
-	g_clear_pointer (&forward->priv->ht, g_hash_table_unref);
-	g_clear_object (&forward->priv->backend);
+	priv = geocode_forward_get_instance_private (forward);
+	g_clear_pointer (&priv->ht, g_hash_table_unref);
+	g_clear_object (&priv->backend);
 
 	G_OBJECT_CLASS (geocode_forward_parent_class)->finalize (gforward);
 }
@@ -142,9 +145,6 @@ geocode_forward_class_init (GeocodeForwardClass *klass)
 	gforward_class->finalize = geocode_forward_finalize;
 	gforward_class->get_property = geocode_forward_get_property;
 	gforward_class->set_property = geocode_forward_set_property;
-
-
-	g_type_class_add_private (klass, sizeof (GeocodeForwardPrivate));
 
 	/**
 	* GeocodeForward:answer-count:
@@ -203,21 +203,24 @@ free_value (GValue *value)
 static void
 geocode_forward_init (GeocodeForward *forward)
 {
-	forward->priv = G_TYPE_INSTANCE_GET_PRIVATE ((forward), GEOCODE_TYPE_FORWARD, GeocodeForwardPrivate);
-	forward->priv->ht = g_hash_table_new_full (g_str_hash, g_str_equal,
-	                                           g_free,
-	                                           (GDestroyNotify) free_value);
-	forward->priv->answer_count = DEFAULT_ANSWER_COUNT;
-	forward->priv->search_area = NULL;
-	forward->priv->bounded = FALSE;
+	GeocodeForwardPrivate *priv;
+
+	priv = geocode_forward_get_instance_private (forward);
+	priv->ht = g_hash_table_new_full (g_str_hash, g_str_equal,
+	                                  g_free,
+	                                  (GDestroyNotify) free_value);
+	priv->answer_count = DEFAULT_ANSWER_COUNT;
+	priv->search_area = NULL;
+	priv->bounded = FALSE;
 }
 
 static void
 ensure_backend (GeocodeForward *object)
 {
+	GeocodeForwardPrivate *priv = geocode_forward_get_instance_private (object);
 	/* If no backend is specified, default to the GNOME Nominatim backend */
-	if (object->priv->backend == NULL)
-		object->priv->backend = GEOCODE_BACKEND (geocode_nominatim_get_gnome ());
+	if (priv->backend == NULL)
+		priv->backend = GEOCODE_BACKEND (geocode_nominatim_get_gnome ());
 }
 
 /**
@@ -236,6 +239,7 @@ GeocodeForward *
 geocode_forward_new_for_params (GHashTable *params)
 {
 	GeocodeForward *forward;
+	GeocodeForwardPrivate *priv;
 	GHashTableIter iter;
 	const gchar *key;
 	const GValue *value;
@@ -250,12 +254,13 @@ geocode_forward_new_for_params (GHashTable *params)
 	forward = g_object_new (GEOCODE_TYPE_FORWARD, NULL);
 
 	g_hash_table_iter_init (&iter, params);
+	priv = geocode_forward_get_instance_private (forward);
 
 	while (g_hash_table_iter_next (&iter, (gpointer *) &key, (gpointer *) &value)) {
 		GValue *value_copy = g_new0 (GValue, 1);
 		g_value_init (value_copy, G_VALUE_TYPE (value));
 		g_value_copy (value, value_copy);
-		g_hash_table_insert (forward->priv->ht, g_strdup (key), value_copy);
+		g_hash_table_insert (priv->ht, g_strdup (key), value_copy);
 	}
 
 	return forward;
@@ -274,6 +279,7 @@ GeocodeForward *
 geocode_forward_new_for_string (const char *location)
 {
 	GeocodeForward *forward;
+	GeocodeForwardPrivate *priv;
 	GValue *location_value;
 
 	g_return_val_if_fail (location != NULL, NULL);
@@ -283,7 +289,8 @@ geocode_forward_new_for_string (const char *location)
 	location_value = g_new0 (GValue, 1);
 	g_value_init (location_value, G_TYPE_STRING);
 	g_value_set_string (location_value, location);
-	g_hash_table_insert (forward->priv->ht, g_strdup ("location"),
+	priv = geocode_forward_get_instance_private (forward);
+	g_hash_table_insert (priv->ht, g_strdup ("location"),
 	                     location_value);
 
 	return forward;
@@ -325,17 +332,19 @@ geocode_forward_search_async (GeocodeForward      *forward,
 			      GAsyncReadyCallback  callback,
 			      gpointer             user_data)
 {
+	GeocodeForwardPrivate *priv;
 	GTask *task;
 
 	g_return_if_fail (GEOCODE_IS_FORWARD (forward));
 	g_return_if_fail (cancellable == NULL || G_IS_CANCELLABLE (cancellable));
 
 	ensure_backend (forward);
-	g_assert (forward->priv->backend != NULL);
+	priv = geocode_forward_get_instance_private (forward);
+	g_assert (priv->backend != NULL);
 
 	task = g_task_new (forward, cancellable, callback, user_data);
-	geocode_backend_forward_search_async (forward->priv->backend,
-	                                      forward->priv->ht,
+	geocode_backend_forward_search_async (priv->backend,
+	                                      priv->ht,
 	                                      cancellable,
 	                                      (GAsyncReadyCallback) backend_forward_search_ready,
 	                                      g_object_ref (task));
@@ -386,14 +395,16 @@ GList *
 geocode_forward_search (GeocodeForward      *forward,
 			GError             **error)
 {
+	GeocodeForwardPrivate *priv;
 	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), NULL);
 	g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
 	ensure_backend (forward);
-	g_assert (forward->priv->backend != NULL);
+	priv = geocode_forward_get_instance_private (forward);
+	g_assert (priv->backend != NULL);
 
-	return geocode_backend_forward_search (forward->priv->backend,
-	                                       forward->priv->ht,
+	return geocode_backend_forward_search (priv->backend,
+	                                       priv->ht,
 	                                       NULL,
 	                                       error);
 }
@@ -410,18 +421,20 @@ geocode_forward_set_answer_count (GeocodeForward *forward,
 				  guint           count)
 {
 	GValue *count_value;
+	GeocodeForwardPrivate *priv;
 
 	g_return_if_fail (GEOCODE_IS_FORWARD (forward));
 	g_return_if_fail (count > 0);
 
-	forward->priv->answer_count = count;
+	priv = geocode_forward_get_instance_private (forward);
+	priv->answer_count = count;
 
 	/* Note: This key name is not defined in the Telepathy specification or
 	 * in XEP-0080; it is custom, but standard within Geocode. */
 	count_value = g_new0 (GValue, 1);
 	g_value_init (count_value, G_TYPE_UINT);
 	g_value_set_uint (count_value, count);
-	g_hash_table_insert (forward->priv->ht, g_strdup ("limit"),
+	g_hash_table_insert (priv->ht, g_strdup ("limit"),
 	                     count_value);
 }
 
@@ -437,6 +450,7 @@ geocode_forward_set_search_area (GeocodeForward     *forward,
 				 GeocodeBoundingBox *bbox)
 {
 	GValue *area_value;
+	GeocodeForwardPrivate *priv;
 	char *area;
 	char top[G_ASCII_DTOSTR_BUF_SIZE];
 	char left[G_ASCII_DTOSTR_BUF_SIZE];
@@ -445,7 +459,8 @@ geocode_forward_set_search_area (GeocodeForward     *forward,
 
 	g_return_if_fail (GEOCODE_IS_FORWARD (forward));
 
-	forward->priv->search_area = bbox;
+	priv = geocode_forward_get_instance_private (forward);
+	priv->search_area = bbox;
 
 	/* need to convert with g_ascii_dtostr to be locale safe */
 	g_ascii_dtostr (top, G_ASCII_DTOSTR_BUF_SIZE,
@@ -466,7 +481,7 @@ geocode_forward_set_search_area (GeocodeForward     *forward,
 	area_value = g_new0 (GValue, 1);
 	g_value_init (area_value, G_TYPE_STRING);
 	g_value_take_string (area_value, area);
-	g_hash_table_insert (forward->priv->ht, g_strdup ("viewbox"),
+	g_hash_table_insert (priv->ht, g_strdup ("viewbox"),
 	                     area_value);
 }
 
@@ -484,17 +499,19 @@ geocode_forward_set_bounded (GeocodeForward *forward,
 			     gboolean        bounded)
 {
 	GValue *bounded_value;
+	GeocodeForwardPrivate *priv;
 
 	g_return_if_fail (GEOCODE_IS_FORWARD (forward));
 
-	forward->priv->bounded = bounded;
+	priv = geocode_forward_get_instance_private (forward);
+	priv->bounded = bounded;
 
 	/* Note: This key name is not defined in the Telepathy specification or
 	 * in XEP-0080; it is custom, but standard within Geocode. */
 	bounded_value = g_new0 (GValue, 1);
 	g_value_init (bounded_value, G_TYPE_STRING);
 	g_value_set_boolean (bounded_value, bounded);
-	g_hash_table_insert (forward->priv->ht, g_strdup ("bounded"),
+	g_hash_table_insert (priv->ht, g_strdup ("bounded"),
 	                     bounded_value);
 }
 
@@ -507,9 +524,11 @@ geocode_forward_set_bounded (GeocodeForward *forward,
 guint
 geocode_forward_get_answer_count (GeocodeForward *forward)
 {
+	GeocodeForwardPrivate *priv;
 	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), 0);
 
-	return forward->priv->answer_count;
+	priv = geocode_forward_get_instance_private (forward);
+	return priv->answer_count;
 }
 
 /**
@@ -523,9 +542,11 @@ geocode_forward_get_answer_count (GeocodeForward *forward)
 GeocodeBoundingBox *
 geocode_forward_get_search_area (GeocodeForward *forward)
 {
+	GeocodeForwardPrivate *priv;
 	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), NULL);
 
-	return forward->priv->search_area;
+	priv = geocode_forward_get_instance_private (forward);
+	return priv->search_area;
 }
 
 /**
@@ -538,9 +559,11 @@ geocode_forward_get_search_area (GeocodeForward *forward)
 gboolean
 geocode_forward_get_bounded (GeocodeForward *forward)
 {
+	GeocodeForwardPrivate *priv;
 	g_return_val_if_fail (GEOCODE_IS_FORWARD (forward), FALSE);
 
-	return forward->priv->bounded;
+	priv = geocode_forward_get_instance_private (forward);
+	return priv->bounded;
 }
 
 /**
@@ -559,8 +582,11 @@ void
 geocode_forward_set_backend (GeocodeForward *forward,
                              GeocodeBackend *backend)
 {
+	GeocodeForwardPrivate *priv;
+
 	g_return_if_fail (GEOCODE_IS_FORWARD (forward));
 	g_return_if_fail (backend == NULL || GEOCODE_IS_BACKEND (backend));
 
-	g_set_object (&forward->priv->backend, backend);
+	priv = geocode_forward_get_instance_private (forward);
+	g_set_object (&priv->backend, backend);
 }

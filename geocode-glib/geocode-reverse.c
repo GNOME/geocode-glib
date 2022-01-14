@@ -47,15 +47,19 @@ struct _GeocodeReversePrivate {
 	GeocodeBackend  *backend;
 };
 
-G_DEFINE_TYPE (GeocodeReverse, geocode_reverse, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_CODE (GeocodeReverse, geocode_reverse, G_TYPE_OBJECT,
+                         G_ADD_PRIVATE (GeocodeReverse))
 
 static void
 geocode_reverse_finalize (GObject *gobject)
 {
 	GeocodeReverse *object = (GeocodeReverse *) gobject;
+	GeocodeReversePrivate *priv;
 
-	g_clear_object (&object->priv->location);
-	g_clear_object (&object->priv->backend);
+	priv = geocode_reverse_get_instance_private (object);
+
+	g_clear_object (&priv->location);
+	g_clear_object (&priv->backend);
 
 	G_OBJECT_CLASS (geocode_reverse_parent_class)->finalize (gobject);
 }
@@ -69,14 +73,11 @@ geocode_reverse_class_init (GeocodeReverseClass *klass)
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 
 	gobject_class->finalize = geocode_reverse_finalize;
-
-	g_type_class_add_private (klass, sizeof (GeocodeReversePrivate));
 }
 
 static void
 geocode_reverse_init (GeocodeReverse *object)
 {
-	object->priv = G_TYPE_INSTANCE_GET_PRIVATE ((object), GEOCODE_TYPE_REVERSE, GeocodeReversePrivate);
 }
 
 /**
@@ -92,11 +93,13 @@ GeocodeReverse *
 geocode_reverse_new_for_location (GeocodeLocation *location)
 {
 	GeocodeReverse *object;
+	GeocodeReversePrivate *priv;
 
 	g_return_val_if_fail (GEOCODE_IS_LOCATION (location), NULL);
 
 	object = g_object_new (GEOCODE_TYPE_REVERSE, NULL);
-	object->priv->location = g_object_ref (location);
+	priv = geocode_reverse_get_instance_private (object);
+	priv->location = g_object_ref (location);
 
 	return object;
 }
@@ -104,9 +107,12 @@ geocode_reverse_new_for_location (GeocodeLocation *location)
 static void
 ensure_backend (GeocodeReverse *object)
 {
+	GeocodeReversePrivate *priv;
+
+	priv = geocode_reverse_get_instance_private (object);
 	/* If no backend is specified, default to the GNOME Nominatim backend */
-	if (object->priv->backend == NULL)
-		object->priv->backend = GEOCODE_BACKEND (geocode_nominatim_get_gnome ());
+	if (priv->backend == NULL)
+		priv->backend = GEOCODE_BACKEND (geocode_nominatim_get_gnome ());
 }
 
 static GValue *
@@ -190,18 +196,20 @@ geocode_reverse_resolve_async (GeocodeReverse     *object,
                                gpointer            user_data)
 {
 	GTask *task;
+	GeocodeReversePrivate *priv;
 	g_autoptr (GHashTable) params = NULL;
 
 	g_return_if_fail (GEOCODE_IS_REVERSE (object));
 	g_return_if_fail (cancellable == NULL || G_IS_CANCELLABLE (cancellable));
 
 	ensure_backend (object);
-	g_assert (object->priv->backend != NULL);
+	priv = geocode_reverse_get_instance_private (object);
+	g_assert (priv->backend != NULL);
 
-	params = _geocode_location_to_params (object->priv->location);
+	params = _geocode_location_to_params (priv->location);
 
 	task = g_task_new (object, cancellable, callback, user_data);
-	geocode_backend_reverse_resolve_async (object->priv->backend,
+	geocode_backend_reverse_resolve_async (priv->backend,
 	                                       params,
 	                                       cancellable,
 	                                       (GAsyncReadyCallback) backend_reverse_resolve_ready,
@@ -253,6 +261,7 @@ GeocodePlace *
 geocode_reverse_resolve (GeocodeReverse *object,
                          GError        **error)
 {
+	GeocodeReversePrivate *priv;
 	GList *places = NULL;  /* (element-type GeocodePlace) */
 	GeocodePlace *place = NULL;
 	g_autoptr (GHashTable) params = NULL;
@@ -260,11 +269,12 @@ geocode_reverse_resolve (GeocodeReverse *object,
 	g_return_val_if_fail (GEOCODE_IS_REVERSE (object), NULL);
 	g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
+	priv = geocode_reverse_get_instance_private (object);
 	ensure_backend (object);
-	g_assert (object->priv->backend != NULL);
+	g_assert (priv->backend != NULL);
 
-	params = _geocode_location_to_params (object->priv->location);
-	places = geocode_backend_reverse_resolve (object->priv->backend,
+	params = _geocode_location_to_params (priv->location);
+	places = geocode_backend_reverse_resolve (priv->backend,
 	                                          params,
 	                                          NULL,
 	                                          error);
@@ -292,8 +302,12 @@ void
 geocode_reverse_set_backend (GeocodeReverse *object,
                              GeocodeBackend *backend)
 {
+	GeocodeReversePrivate *priv;
+
 	g_return_if_fail (GEOCODE_IS_REVERSE (object));
 	g_return_if_fail (backend == NULL || GEOCODE_IS_BACKEND (backend));
 
-	g_set_object (&object->priv->backend, backend);
+	priv = geocode_reverse_get_instance_private (object);
+
+	g_set_object (&priv->backend, backend);
 }

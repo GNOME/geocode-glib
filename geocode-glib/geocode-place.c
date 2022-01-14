@@ -84,7 +84,8 @@ enum {
         PROP_OSM_TYPE
 };
 
-G_DEFINE_TYPE (GeocodePlace, geocode_place, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_CODE (GeocodePlace, geocode_place, G_TYPE_OBJECT,
+                         G_ADD_PRIVATE (GeocodePlace))
 
 static void
 geocode_place_get_property (GObject    *object,
@@ -203,18 +204,19 @@ geocode_place_set_property(GObject      *object,
                            GParamSpec   *pspec)
 {
         GeocodePlace *place = GEOCODE_PLACE (object);
+        GeocodePlacePrivate *priv = geocode_place_get_instance_private (place);
 
         switch (property_id) {
         case PROP_NAME:
-                place->priv->name = g_value_dup_string (value);
+                priv->name = g_value_dup_string (value);
                 break;
 
         case PROP_PLACE_TYPE:
-                place->priv->place_type = g_value_get_enum (value);
+                priv->place_type = g_value_get_enum (value);
                 break;
 
         case PROP_LOCATION:
-                place->priv->location = g_value_dup_object (value);
+                priv->location = g_value_dup_object (value);
                 break;
 
         case PROP_STREET_ADDRESS:
@@ -271,15 +273,15 @@ geocode_place_set_property(GObject      *object,
                 break;
 
         case PROP_BBOX:
-                place->priv->bbox = g_value_dup_object (value);
+                priv->bbox = g_value_dup_object (value);
                 break;
 
         case PROP_OSM_ID:
-                place->priv->osm_id = g_value_dup_string (value);
+                priv->osm_id = g_value_dup_string (value);
                 break;
 
         case PROP_OSM_TYPE:
-                place->priv->osm_type = g_value_get_enum (value);
+                priv->osm_type = g_value_get_enum (value);
                 break;
 
         default:
@@ -292,24 +294,25 @@ static void
 geocode_place_dispose (GObject *gplace)
 {
         GeocodePlace *place = (GeocodePlace *) gplace;
+        GeocodePlacePrivate *priv = geocode_place_get_instance_private (place);
 
-        g_clear_object (&place->priv->location);
-        g_clear_object (&place->priv->bbox);
+        g_clear_object (&priv->location);
+        g_clear_object (&priv->bbox);
 
-        g_clear_pointer (&place->priv->name, g_free);
-        g_clear_pointer (&place->priv->osm_id, g_free);
-        g_clear_pointer (&place->priv->street_address, g_free);
-        g_clear_pointer (&place->priv->street, g_free);
-        g_clear_pointer (&place->priv->building, g_free);
-        g_clear_pointer (&place->priv->postal_code, g_free);
-        g_clear_pointer (&place->priv->area, g_free);
-        g_clear_pointer (&place->priv->town, g_free);
-        g_clear_pointer (&place->priv->county, g_free);
-        g_clear_pointer (&place->priv->state, g_free);
-        g_clear_pointer (&place->priv->admin_area, g_free);
-        g_clear_pointer (&place->priv->country_code, g_free);
-        g_clear_pointer (&place->priv->country, g_free);
-        g_clear_pointer (&place->priv->continent, g_free);
+        g_clear_pointer (&priv->name, g_free);
+        g_clear_pointer (&priv->osm_id, g_free);
+        g_clear_pointer (&priv->street_address, g_free);
+        g_clear_pointer (&priv->street, g_free);
+        g_clear_pointer (&priv->building, g_free);
+        g_clear_pointer (&priv->postal_code, g_free);
+        g_clear_pointer (&priv->area, g_free);
+        g_clear_pointer (&priv->town, g_free);
+        g_clear_pointer (&priv->county, g_free);
+        g_clear_pointer (&priv->state, g_free);
+        g_clear_pointer (&priv->admin_area, g_free);
+        g_clear_pointer (&priv->country_code, g_free);
+        g_clear_pointer (&priv->country, g_free);
+        g_clear_pointer (&priv->continent, g_free);
 
         G_OBJECT_CLASS (geocode_place_parent_class)->dispose (gplace);
 }
@@ -323,8 +326,6 @@ geocode_place_class_init (GeocodePlaceClass *klass)
         gplace_class->dispose = geocode_place_dispose;
         gplace_class->get_property = geocode_place_get_property;
         gplace_class->set_property = geocode_place_set_property;
-
-        g_type_class_add_private (klass, sizeof (GeocodePlacePrivate));
 
         /**
          * GeocodePlace:name:
@@ -580,11 +581,9 @@ geocode_place_class_init (GeocodePlaceClass *klass)
 static void
 geocode_place_init (GeocodePlace *place)
 {
-        place->priv = G_TYPE_INSTANCE_GET_PRIVATE ((place),
-                                                      GEOCODE_TYPE_PLACE,
-                                                      GeocodePlacePrivate);
-        place->priv->bbox = NULL;
-        place->priv->osm_type = GEOCODE_PLACE_OSM_TYPE_UNKNOWN;
+        GeocodePlacePrivate *priv = geocode_place_get_instance_private (place);
+        priv->bbox = NULL;
+        priv->osm_type = GEOCODE_PLACE_OSM_TYPE_UNKNOWN;
 }
 
 /**
@@ -666,27 +665,32 @@ gboolean
 geocode_place_equal (GeocodePlace *a,
                      GeocodePlace *b)
 {
+        GeocodePlacePrivate *priv_a;
+        GeocodePlacePrivate *priv_b;
         g_return_val_if_fail (GEOCODE_IS_PLACE (a), FALSE);
         g_return_val_if_fail (GEOCODE_IS_PLACE (b), FALSE);
 
-        return (g_strcmp0 (a->priv->name, b->priv->name) == 0 &&
-                a->priv->place_type == b->priv->place_type &&
-                location_equal0 (a->priv->location, b->priv->location) &&
-                bbox_equal0 (a->priv->bbox, b->priv->bbox) &&
-                g_strcmp0 (a->priv->street_address, b->priv->street_address) == 0 &&
-                g_strcmp0 (a->priv->street, b->priv->street) == 0 &&
-                g_strcmp0 (a->priv->building, b->priv->building) == 0 &&
-                g_strcmp0 (a->priv->postal_code, b->priv->postal_code) == 0 &&
-                g_strcmp0 (a->priv->area, b->priv->area) == 0 &&
-                g_strcmp0 (a->priv->town, b->priv->town) == 0 &&
-                g_strcmp0 (a->priv->county, b->priv->county) == 0 &&
-                g_strcmp0 (a->priv->state, b->priv->state) == 0 &&
-                g_strcmp0 (a->priv->admin_area, b->priv->admin_area) == 0 &&
-                g_strcmp0 (a->priv->country_code, b->priv->country_code) == 0 &&
-                g_strcmp0 (a->priv->country, b->priv->country) == 0 &&
-                g_strcmp0 (a->priv->continent, b->priv->continent) == 0 &&
-                g_strcmp0 (a->priv->osm_id, b->priv->osm_id) == 0 &&
-                a->priv->osm_type == b->priv->osm_type);
+        priv_a = geocode_place_get_instance_private (a);
+        priv_b = geocode_place_get_instance_private (b);
+
+        return (g_strcmp0 (priv_a->name, priv_b->name) == 0 &&
+                priv_a->place_type == priv_b->place_type &&
+                location_equal0 (priv_a->location, priv_b->location) &&
+                bbox_equal0 (priv_a->bbox, priv_b->bbox) &&
+                g_strcmp0 (priv_a->street_address, priv_b->street_address) == 0 &&
+                g_strcmp0 (priv_a->street, priv_b->street) == 0 &&
+                g_strcmp0 (priv_a->building, priv_b->building) == 0 &&
+                g_strcmp0 (priv_a->postal_code, priv_b->postal_code) == 0 &&
+                g_strcmp0 (priv_a->area, priv_b->area) == 0 &&
+                g_strcmp0 (priv_a->town, priv_b->town) == 0 &&
+                g_strcmp0 (priv_a->county, priv_b->county) == 0 &&
+                g_strcmp0 (priv_a->state, priv_b->state) == 0 &&
+                g_strcmp0 (priv_a->admin_area, priv_b->admin_area) == 0 &&
+                g_strcmp0 (priv_a->country_code, priv_b->country_code) == 0 &&
+                g_strcmp0 (priv_a->country, priv_b->country) == 0 &&
+                g_strcmp0 (priv_a->continent, priv_b->continent) == 0 &&
+                g_strcmp0 (priv_a->osm_id, priv_b->osm_id) == 0 &&
+                priv_a->osm_type == priv_b->osm_type);
 }
 
 /**
@@ -700,11 +704,13 @@ void
 geocode_place_set_name (GeocodePlace *place,
                         const char   *name)
 {
+        GeocodePlacePrivate *priv;
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (name != NULL);
 
-        g_free (place->priv->name);
-        place->priv->name = g_strdup (name);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->name);
+        priv->name = g_strdup (name);
 }
 
 /**
@@ -718,9 +724,11 @@ geocode_place_set_name (GeocodePlace *place,
 const char *
 geocode_place_get_name (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->name;
+        priv = geocode_place_get_instance_private (place);
+        return priv->name;
 
 }
 
@@ -735,10 +743,12 @@ geocode_place_get_name (GeocodePlace *place)
 GeocodePlaceType
 geocode_place_get_place_type (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place),
                               GEOCODE_PLACE_TYPE_UNKNOWN);
 
-        return place->priv->place_type;
+        priv = geocode_place_get_instance_private (place);
+        return priv->place_type;
 }
 
 /**
@@ -752,11 +762,13 @@ void
 geocode_place_set_location (GeocodePlace *place,
                             GeocodeLocation *location)
 {
+        GeocodePlacePrivate *priv;
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (GEOCODE_IS_LOCATION (location));
 
-        g_clear_object (&place->priv->location);
-        place->priv->location = g_object_ref (location);
+        priv = geocode_place_get_instance_private (place);
+        g_clear_object (&priv->location);
+        priv->location = g_object_ref (location);
 }
 
 /**
@@ -770,9 +782,11 @@ geocode_place_set_location (GeocodePlace *place,
 GeocodeLocation *
 geocode_place_get_location (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->location;
+        priv = geocode_place_get_instance_private (place);
+        return priv->location;
 }
 
 /**
@@ -786,11 +800,14 @@ void
 geocode_place_set_street_address (GeocodePlace *place,
                                   const char   *street_address)
 {
+        GeocodePlacePrivate *priv;
+
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (street_address != NULL);
 
-        g_free (place->priv->street_address);
-        place->priv->street_address = g_strdup (street_address);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->street_address);
+        priv->street_address = g_strdup (street_address);
 }
 
 /**
@@ -804,9 +821,11 @@ geocode_place_set_street_address (GeocodePlace *place,
 const char *
 geocode_place_get_street_address (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->street_address;
+        priv = geocode_place_get_instance_private (place);
+        return priv->street_address;
 }
 
 /**
@@ -820,11 +839,14 @@ void
 geocode_place_set_street (GeocodePlace *place,
                           const char   *street)
 {
+        GeocodePlacePrivate *priv;
+
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (street != NULL);
 
-        g_free (place->priv->street);
-        place->priv->street = g_strdup (street);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->street);
+        priv->street = g_strdup (street);
 }
 
 /**
@@ -838,9 +860,11 @@ geocode_place_set_street (GeocodePlace *place,
 const char *
 geocode_place_get_street (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->street;
+        priv = geocode_place_get_instance_private (place);
+        return priv->street;
 }
 
 /**
@@ -854,11 +878,13 @@ void
 geocode_place_set_building (GeocodePlace *place,
                             const char   *building)
 {
+        GeocodePlacePrivate *priv;
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (building != NULL);
 
-        g_free (place->priv->building);
-        place->priv->building = g_strdup (building);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->building);
+        priv->building = g_strdup (building);
 }
 
 /**
@@ -872,9 +898,11 @@ geocode_place_set_building (GeocodePlace *place,
 const char *
 geocode_place_get_building (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->building;
+        priv = geocode_place_get_instance_private (place);
+        return priv->building;
 }
 
 /**
@@ -888,11 +916,13 @@ void
 geocode_place_set_postal_code (GeocodePlace *place,
                                const char   *postal_code)
 {
+        GeocodePlacePrivate *priv;
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (postal_code != NULL);
 
-        g_free (place->priv->postal_code);
-        place->priv->postal_code = g_strdup (postal_code);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->postal_code);
+        priv->postal_code = g_strdup (postal_code);
 }
 
 /**
@@ -906,9 +936,11 @@ geocode_place_set_postal_code (GeocodePlace *place,
 const char *
 geocode_place_get_postal_code (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->postal_code;
+        priv = geocode_place_get_instance_private (place);
+        return priv->postal_code;
 }
 
 /**
@@ -922,11 +954,13 @@ void
 geocode_place_set_area (GeocodePlace *place,
                         const char   *area)
 {
+        GeocodePlacePrivate *priv;
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (area != NULL);
 
-        g_free (place->priv->area);
-        place->priv->area = g_strdup (area);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->area);
+        priv->area = g_strdup (area);
 }
 
 /**
@@ -940,9 +974,11 @@ geocode_place_set_area (GeocodePlace *place,
 const char *
 geocode_place_get_area (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->area;
+        priv = geocode_place_get_instance_private (place);
+        return priv->area;
 }
 
 /**
@@ -956,11 +992,14 @@ void
 geocode_place_set_town (GeocodePlace *place,
                         const char   *town)
 {
+        GeocodePlacePrivate *priv;
+
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (town != NULL);
 
-        g_free (place->priv->town);
-        place->priv->town = g_strdup (town);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->town);
+        priv->town = g_strdup (town);
 }
 
 /**
@@ -974,9 +1013,11 @@ geocode_place_set_town (GeocodePlace *place,
 const char *
 geocode_place_get_town (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->town;
+        priv = geocode_place_get_instance_private (place);
+        return priv->town;
 }
 
 /**
@@ -990,11 +1031,13 @@ void
 geocode_place_set_county (GeocodePlace *place,
                           const char   *county)
 {
+        GeocodePlacePrivate *priv;
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (county != NULL);
 
-        g_free (place->priv->county);
-        place->priv->county = g_strdup (county);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->county);
+        priv->county = g_strdup (county);
 }
 
 /**
@@ -1008,9 +1051,11 @@ geocode_place_set_county (GeocodePlace *place,
 const char *
 geocode_place_get_county (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->county;
+        priv = geocode_place_get_instance_private (place);
+        return priv->county;
 }
 
 /**
@@ -1024,11 +1069,13 @@ void
 geocode_place_set_state (GeocodePlace *place,
                          const char   *state)
 {
+        GeocodePlacePrivate *priv;
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (state != NULL);
 
-        g_free (place->priv->state);
-        place->priv->state = g_strdup (state);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->state);
+        priv->state = g_strdup (state);
 }
 
 /**
@@ -1042,9 +1089,11 @@ geocode_place_set_state (GeocodePlace *place,
 const char *
 geocode_place_get_state (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->state;
+        priv = geocode_place_get_instance_private (place);
+        return priv->state;
 }
 
 /**
@@ -1058,11 +1107,13 @@ void
 geocode_place_set_administrative_area (GeocodePlace *place,
                                        const char   *admin_area)
 {
+        GeocodePlacePrivate *priv;
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (admin_area != NULL);
 
-        g_free (place->priv->admin_area);
-        place->priv->admin_area = g_strdup (admin_area);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->admin_area);
+        priv->admin_area = g_strdup (admin_area);
 }
 
 /**
@@ -1076,9 +1127,11 @@ geocode_place_set_administrative_area (GeocodePlace *place,
 const char *
 geocode_place_get_administrative_area (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->admin_area;
+        priv = geocode_place_get_instance_private (place);
+        return priv->admin_area;
 }
 
 /**
@@ -1092,11 +1145,13 @@ void
 geocode_place_set_country_code (GeocodePlace *place,
                                 const char   *country_code)
 {
+        GeocodePlacePrivate *priv;
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (country_code != NULL);
 
-        g_free (place->priv->country_code);
-        place->priv->country_code = g_utf8_strup (country_code, -1);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->country_code);
+        priv->country_code = g_utf8_strup (country_code, -1);
 }
 
 /**
@@ -1109,10 +1164,12 @@ geocode_place_set_country_code (GeocodePlace *place,
  **/
 const char *
 geocode_place_get_country_code (GeocodePlace *place)
-{
+{       
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->country_code;
+        priv = geocode_place_get_instance_private (place);
+        return priv->country_code;
 }
 
 /**
@@ -1126,11 +1183,13 @@ void
 geocode_place_set_country (GeocodePlace *place,
                            const char   *country)
 {
+        GeocodePlacePrivate *priv;
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (country != NULL);
 
-        g_free (place->priv->country);
-        place->priv->country = g_strdup (country);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->country);
+        priv->country = g_strdup (country);
 }
 
 /**
@@ -1144,9 +1203,11 @@ geocode_place_set_country (GeocodePlace *place,
 const char *
 geocode_place_get_country (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->country;
+        priv = geocode_place_get_instance_private (place);
+        return priv->country;
 }
 
 /**
@@ -1160,11 +1221,13 @@ void
 geocode_place_set_continent (GeocodePlace *place,
                              const char   *continent)
 {
+        GeocodePlacePrivate *priv;
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (continent != NULL);
 
-        g_free (place->priv->continent);
-        place->priv->continent = g_strdup (continent);
+        priv = geocode_place_get_instance_private (place);
+        g_free (priv->continent);
+        priv->continent = g_strdup (continent);
 }
 
 /**
@@ -1178,15 +1241,18 @@ geocode_place_set_continent (GeocodePlace *place,
 const char *
 geocode_place_get_continent (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->continent;
+        priv = geocode_place_get_instance_private (place);
+        return priv->continent;
 }
 
 static const char *
 get_icon_name (GeocodePlace *place)
 {
-        switch ((int) place->priv->place_type) {
+        GeocodePlacePrivate *priv = geocode_place_get_instance_private (place);
+        switch ((int) priv->place_type) {
         case GEOCODE_PLACE_TYPE_BUILDING:
                 return "poi-building";
 
@@ -1257,9 +1323,11 @@ geocode_place_get_icon (GeocodePlace *place)
 GeocodeBoundingBox *
 geocode_place_get_bounding_box (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->bbox;
+        priv = geocode_place_get_instance_private (place);
+        return priv->bbox;
 }
 
 /**
@@ -1274,11 +1342,13 @@ void
 geocode_place_set_bounding_box (GeocodePlace       *place,
                                 GeocodeBoundingBox *bbox)
 {
+        GeocodePlacePrivate *priv;
         g_return_if_fail (GEOCODE_IS_PLACE (place));
         g_return_if_fail (GEOCODE_IS_BOUNDING_BOX (bbox));
 
-        g_clear_object (&place->priv->bbox);
-        place->priv->bbox = g_object_ref (bbox);
+        priv = geocode_place_get_instance_private (place);
+        g_clear_object (&priv->bbox);
+        priv->bbox = g_object_ref (bbox);
 }
 
 /**
@@ -1292,9 +1362,11 @@ geocode_place_set_bounding_box (GeocodePlace       *place,
 const char *
 geocode_place_get_osm_id (GeocodePlace *place)
 {
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), NULL);
 
-        return place->priv->osm_id;
+        priv = geocode_place_get_instance_private (place);
+        return priv->osm_id;
 }
 
 /**
@@ -1307,8 +1379,10 @@ geocode_place_get_osm_id (GeocodePlace *place)
  **/
 GeocodePlaceOsmType
 geocode_place_get_osm_type (GeocodePlace *place)
-{
+{       
+        GeocodePlacePrivate *priv;
         g_return_val_if_fail (GEOCODE_IS_PLACE (place), GEOCODE_PLACE_OSM_TYPE_UNKNOWN);
 
-        return place->priv->osm_type;
+        priv = geocode_place_get_instance_private (place);
+        return priv->osm_type;
 }
