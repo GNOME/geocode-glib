@@ -30,12 +30,9 @@
 #define EARTH_RADIUS_KM 6372.795
 
 /**
- * SECTION:geocode-location
- * @short_description: Geocode location object
- * @include: geocode-glib/geocode-glib.h
+ * GeocodeLocation:
  *
- * The #GeocodeLocation instance represents a location on earth, with an
- * optional description.
+ * Represents a location on earth, with an optional description.
  **/
 
 struct _GeocodeLocationPrivate {
@@ -118,16 +115,17 @@ geocode_location_get_property (GObject    *object,
  * @a: a location
  * @b: another location
  *
- * Compare two #GeocodeLocation instances for equality. This compares all fields
- * and only returns %TRUE if the instances are exactly equal. For example, if
- * both locations have the same physical coordinates, but one location has its
- * #GeocodeLocation:description property set and the other does not, %FALSE
+ * Compare two #GeocodeLocation instances for equality. 
+ * 
+ * This compares all fields and only returns %TRUE if the instances are exactly equal. 
+ * For example, if both locations have the same physical coordinates, but one location has its
+ * [property@Location:description] property set and the other does not, %FALSE
  * will be returned. Similarly, if both locations have the same
- * #GeocodeLocation:latitude, #GeocodeLocation:longitude and
- * #GeocodeLocation:altitude, but a different #GeocodeLocation:accuracy or
- * #GeocodeLocation:timestamp, %FALSE will be returned. Or if both locations
- * have the same#GeocodeLocation:latitude and #GeocodeLocation:longitude but a
- * different #GeocodeLocation:altitude, %FALSE will be returned.
+ * [property@Location:latitude], [property@Location:longitude] and
+ * [property@Location:altitude], but a different [property@Location:accuracy] or
+ * [property@Location:timestamp], %FALSE will be returned. Or if both locations
+ * have the same[property@Location:latitude] and [property@Location:longitude] but a
+ * different [property@Location:altitude], %FALSE will be returned.
  *
  * Both instances must be non-%NULL.
  *
@@ -727,13 +725,12 @@ geocode_location_new_with_description (gdouble     latitude,
  * The URI should be in the geo scheme (RFC 5870) which in its simplest form
  * looks like:
  *
- * - geo:latitude,longitude
+ * - `geo:latitude,longitude`
  *
- * An <ulink
- * url="http://developer.android.com/guide/components/intents-common.html#Maps">
- * Android extension</ulink> to set a description is also supported in the form of:
+ * An [Android extension](http://developer.android.com/guide/components/intents-common.html#Maps) 
+ * to set a description is also supported in the form of:
  *
- * - geo:0,0?q=latitude,longitude(description)
+ * - `geo:0,0?q=latitude,longitude(description)`
  *
  * Returns: %TRUE on success and %FALSE on error.
  **/
@@ -866,7 +863,7 @@ geocode_location_get_crs (GeocodeLocation *loc)
  * @loc: a #GeocodeLocation
  *
  * Gets the timestamp (in seconds since the Epoch) of location @loc. See
- * #GeocodeLocation:timestamp.
+ * [property@Location:timestamp].
  *
  * Returns: The timestamp of location @loc.
  **/

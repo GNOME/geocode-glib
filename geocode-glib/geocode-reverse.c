@@ -34,12 +34,9 @@
 #include <geocode-glib/geocode-glib-private.h>
 
 /**
- * SECTION:geocode-reverse
- * @short_description: Geocode reverse geocoding object
- * @include: geocode-glib/geocode-glib.h
+ * GeocodeReverse:
  *
- * Contains functions for reverse geocoding using the
- * <ulink url="http://wiki.openstreetmap.org/wiki/Nominatim">OSM Nominatim APIs</ulink>
+ * Contains functions for reverse geocoding using the [OSM Nominatim APIs](http://wiki.openstreetmap.org/wiki/Nominatim).
  **/
 
 struct _GeocodeReversePrivate {
@@ -84,7 +81,7 @@ geocode_reverse_init (GeocodeReverse *object)
  * @location: a #GeocodeLocation object
  *
  * Creates a new #GeocodeReverse to perform reverse geocoding with.
- * Use geocode_reverse_resolve_async() to perform the resolution.
+ * Use [method@Reverse.resolve_async] to perform the resolution.
  *
  * Returns: a new #GeocodeReverse. Use g_object_unref() when done.
  **/
@@ -177,11 +174,12 @@ backend_reverse_resolve_ready (GeocodeBackend *backend,
  * @user_data: the data to pass to callback function
  *
  * Asynchronously gets the result of a reverse geocoding
- * query using a web service. Use geocode_reverse_resolve() to do the same
- * thing synchronously.
+ * query using a web service. 
+ * 
+ * Use [method@Reverse.resolve] to do the same thing synchronously.
  *
  * When the operation is finished, @callback will be called. You can then call
- * geocode_reverse_resolve_finish() to get the result of the operation.
+ * [method@Reverse.resolve_finish] to get the result of the operation.
  **/
 void
 geocode_reverse_resolve_async (GeocodeReverse     *object,
@@ -215,7 +213,7 @@ geocode_reverse_resolve_async (GeocodeReverse     *object,
  * @res: a #GAsyncResult.
  * @error: a #GError.
  *
- * Finishes a reverse geocoding operation. See geocode_reverse_resolve_async().
+ * Finishes a reverse geocoding operation. See [method@Reverse.resolve_async].
  *
  * Returns: (transfer full): A #GeocodePlace instance, or %NULL in case of
  * errors. Free the returned instance with #g_object_unref() when done.
@@ -237,9 +235,10 @@ geocode_reverse_resolve_finish (GeocodeReverse *object,
  * @object: a #GeocodeReverse representing a query
  * @error: a #GError
  *
- * Gets the result of a reverse geocoding
- * query using the current backend (see geocode_reverse_set_backend()). By
- * default the GNOME Nominatim server is used. See #GeocodeBackend for more
+ * Gets the result of a reverse geocoding query using the current backend 
+ * (see [method@Reverse.set_backend]). 
+ * 
+ * By default the GNOME Nominatim server is used. See [iface@Backend] for more
  * information.
  *
  * If no result could be found, a %GEOCODE_ERROR_NOT_SUPPORTED error will be

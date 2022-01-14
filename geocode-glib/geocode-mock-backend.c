@@ -30,12 +30,12 @@
 #include "geocode-mock-backend.h"
 
 /**
- * SECTION:geocode-mock-backend
- * @short_description: Geocode mock backend implementation
- * @include: geocode-glib/geocode-glib.h
+ * GeocodeMockBackend:
  *
  * #GeocodeMockBackend is intended to be used in unit tests for applications
- * which use geocode-glib — it allows them to set the geocode results they
+ * which use geocode-glib.
+ * 
+ * It allows them to set the geocode results they
  * expect their application to query, and check afterwards that the queries
  * were performed. It works offline, which allows application unit tests to be
  * run on integration and build machines which are not online. It is not
@@ -43,13 +43,13 @@
  *
  * To use it, create the backend instance, add the query results to it which
  * you want to be returned to your application’s queries, then use it as the
- * #GeocodeBackend for geocode_forward_set_backend() or
- * geocode_reverse_set_backend(). After a test has been run, the set of queries
+ * [iface@Backend] for [method@Forward.set_backend] or
+ * [method@Reverse.set_backend]. After a test has been run, the set of queries
  * which the code under test actually made on the backend can be checked using
- * geocode_mock_backend_get_query_log(). The backend can be reset using
- * geocode_mock_backend_clear() and new queries added for the next test.
+ * [method@MockBackend.get_query_log]. The backend can be reset using
+ * [method@MockBackend.clear] and new queries added for the next test.
  *
- * |[<!-- language="C" -->
+ * ```c
  * static void
  * place_list_free (GList *l)
  * {
@@ -72,15 +72,15 @@
  *
  * backend = geocode_mock_backend_new ();
  *
- * /<!-- -->* Build the set of parameters the mock backend expects to receive from
- *  * the #GeocodeForward instance. *<!-- -->/
+ * // Build the set of parameters the mock backend expects to receive from
+ * // the #GeocodeForward instance.
  * params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
  *
  * g_value_init (&location, G_TYPE_STRING);
  * g_value_set_static_string (&location, "Bullpot Farm");
  * g_hash_table_insert (params, (gpointer) "location", &location);
  *
- * /<!-- -->* Build the set of results the mock backend should return. *<!-- -->/
+ * // Build the set of results the mock backend should return.
  * expected_location = geocode_location_new_with_description (
  *     54.22759825, -2.51857179181113, 5.0,
  *     "Bullpot Farm, Fell Road, South Lakeland, Cumbria, "
@@ -93,8 +93,8 @@
  * geocode_mock_backend_add_forward_result (backend, params,
  *                                          expected_results, NULL);
  *
- * /<!-- -->* Do the search. This would typically call the application code
- *  * under test, rather than geocode-glib directly. *<!-- -->/
+ * // Do the search. This would typically call the application code
+ * // under test, rather than geocode-glib directly.
  * forward = geocode_forward_new_for_string ("Bullpot Farm");
  * geocode_forward_set_backend (forward, GEOCODE_BACKEND (backend));
  * results = geocode_forward_search (forward, &error);
@@ -102,10 +102,10 @@
  * g_assert_no_error (error);
  * assert_place_list_equal (results, expected_results);
  *
- * /<!-- -->* Check the application made the expected query. *<!-- -->/
+ * // Check the application made the expected query.
  * query_log = geocode_mock_backend_get_query_log (backend);
  * g_assert_cmpuint (query_log->len, ==, 1);
- * ]|
+ * ```
  *
  * Since: 3.23.1
  */
@@ -427,7 +427,7 @@ geocode_mock_backend_new (void)
  *
  * Add a query and corresponding result (or error) to the mock backend, meaning
  * that if it receives a forward search for @params through
- * geocode_backend_forward_search() (or its asynchronous variants), the mock
+ * [method@Backend.forward_search] (or its asynchronous variants), the mock
  * backend will return the given @results or @error to the caller.
  *
  * If a set of @params is added to the backend multiple times, the most
@@ -472,7 +472,7 @@ geocode_mock_backend_add_forward_result (GeocodeMockBackend *self,
  *
  * Add a query and corresponding result (or error) to the mock backend, meaning
  * that if it receives a reverse search for @params through
- * geocode_backend_reverse_resolve() (or its asynchronous variants), the mock
+ * [method@Backend.reverse_resolve] (or its asynchronous variants), the mock
  * backend will return the given @results or @error to the caller.
  *
  * If a set of @params is added to the backend multiple times, the most
@@ -507,10 +507,12 @@ geocode_mock_backend_add_reverse_result (GeocodeMockBackend *self,
  * geocode_mock_backend_clear:
  * @self: a #GeocodeMockBackend
  *
- * Clear the set of stored results in the mock backend which have been added
- * using geocode_mock_backend_add_forward_result() and
- * geocode_mock_backend_add_reverse_result(). Additionally, clear the query log
- * so far (see geocode_mock_backend_get_query_log()).
+ * Clear the set of stored results in the mock backend.
+ * 
+ * The stored results would have been added
+ * using [method@MockBackend.add_forward_result] and
+ * [method@MockBackend.add_reverse_result]. Additionally, clear the query log
+ * so far (see [method@MockBackend.get_query_log]).
  *
  * This effectively resets the mock backend to its initial state.
  *
@@ -532,14 +534,14 @@ geocode_mock_backend_clear (GeocodeMockBackend *self)
  *
  * Get the details of the forward and reverse queries which have been requested
  * of the mock backend since the most recent call to
- * geocode_mock_backend_clear(). The query details are provided as
- * #GeocodeMockBackendQuery structures, which map the query parameters to
- * either the result set or the error which geocode_backend_forward_search()
- * or geocode_backend_reverse_resolve() (or their asynchronous variants)
+ * [method@MockBackend.clear]. The query details are provided as
+ * [struct@MockBackendQuery] structures, which map the query parameters to
+ * either the result set or the error which [method@Backend.forward_search]
+ * or [method@Backend.reverse_resolve] (or their asynchronous variants)
  * returned to the caller.
  *
  * The results are provided in the order in which calls were made to
- * geocode_backend_forward_search() and geocode_backend_reverse_resolve().
+ * [method@Backend.forward_search] and [method@Backend.reverse_resolve].
  * Results for forward and reverse queries may be interleaved.
  *
  * Returns: (transfer none) (element-type GeocodeMockBackendQuery): potentially

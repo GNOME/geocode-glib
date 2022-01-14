@@ -24,19 +24,17 @@
 #include "geocode-backend.h"
 
 /**
- * SECTION:geocode-backend
- * @short_description: Geocode backend object
- * @include: geocode-glib/geocode-glib.h
+ * GeocodeBackend:
  *
  * The #GeocodeBackend interface defines the operations that a resolver
  * service must implement.
  *
  * geocode-glib supports multiple backends which provide the underlying
- * geocoding database and functionality. By default, the #GeocodeNominatim
+ * geocoding database and functionality. By default, the [class@Nominatim]
  * backend is used with
  * [GNOME’s Nominatim server](https://nominatim.gnome.org/). If you are using
  * geocode-glib in some GNOME software, this is the correct backend to use.
- * Otherwise, you should use a new #GeocodeNominatim instance with your own
+ * Otherwise, you should use a new [class@Nominatim] instance with your own
  * Nominatim server, or a custom #GeocodeBackend implementation to use geocoding
  * data from a non-Nominatim service. In all cases, please respect the terms of
  * use of the service you are using.
@@ -52,17 +50,17 @@
  *
  * In order to use a custom backend, either instantiate the backend directly
  * and do forward and reverse queries on it using the #GeocodeBackend interface;
- * or create #GeocodeForward and #GeocodeReverse objects as normal, and set
- * the backend they use with geocode_forward_set_backend() and
- * geocode_reverse_set_backend(). They default to using the GNOME Nominatim
+ * or create [class@Forward] and [class@Reverse] objects as normal, and set
+ * the backend they use with [method@Forward.set_backend] and
+ * [method@Reverse.set_backend]. They default to using the GNOME Nominatim
  * backend.
  *
- * #GeocodeMockBackend is intended to be used in unit tests for applications
+ * [class@MockBackend] is intended to be used in unit tests for applications
  * which use geocode-glib — it allows them to set the geocode results they
  * expect their application to query, and check afterwards that the queries
  * were performed. Additionally, it works offline, which allows application
  * unit tests to be run on integration and build machines which are not online.
- * It is not expected that #GeocodeMockBackend will be used in production code.
+ * It is not expected that [class@MockBackend] will be used in production code.
  *
  * Since: 3.23.1
  */
@@ -78,7 +76,7 @@ G_DEFINE_INTERFACE (GeocodeBackend, geocode_backend, G_TYPE_OBJECT)
  * @user_data: the data to pass to the @callback function
  *
  * Asynchronously performs a forward geocoding query using the @backend. Use
- * geocode_backend_forward_search() to do the same thing synchronously.
+ * [method@Backend.forward_search] to do the same thing synchronously.
  *
  * The @params hash table is in the format used by Telepathy, and documented
  * in the [Telepathy specification](http://telepathy.freedesktop.org/spec/Connection_Interface_Location.html#Mapping:Location).
@@ -86,7 +84,7 @@ G_DEFINE_INTERFACE (GeocodeBackend, geocode_backend, G_TYPE_OBJECT)
  * See also: [XEP-0080 specification](http://xmpp.org/extensions/xep-0080.html).
  *
  * When the operation is finished, @callback will be called. You can then call
- * geocode_backend_forward_search_finish() to get the result of the operation.
+ * [method@Backend.forward_search_finish] to get the result of the operation.
  *
  * Since: 3.23.1
  */
@@ -115,7 +113,7 @@ geocode_backend_forward_search_async (GeocodeBackend      *backend,
  * @error: a #GError.
  *
  * Finishes a forward geocoding operation. See
- * geocode_backend_forward_search_async().
+ * [method@Backend.forward_search_async].
  *
  * Returns: (element-type GeocodePlace) (transfer full): A list of
  * places or %NULL in case of errors. Free the returned instances with
@@ -152,7 +150,7 @@ geocode_backend_forward_search_finish (GeocodeBackend  *backend,
  *
  * This is a synchronous function, which means it may block on network requests.
  * In most situations, the asynchronous version
- * (geocode_backend_forward_search_async()) is more appropriate. See its
+ * ([method@Backend.forward_search_async]) is more appropriate. See its
  * documentation for more information on usage.
  *
  * Returns: (element-type GeocodePlace) (transfer full): A list of
@@ -199,10 +197,10 @@ geocode_backend_forward_search (GeocodeBackend  *backend,
  *
  * See also: [XEP-0080 specification](http://xmpp.org/extensions/xep-0080.html).
  *
- * Use geocode_backend_reverse_resolve() to do the same thing synchronously.
+ * Use [method@Backend.reverse_resolve] to do the same thing synchronously.
  *
  * When the operation is finished, @callback will be called. You can then call
- * geocode_backend_reverse_resolve_finish() to get the result of the operation.
+ * [method@Backend.reverse_resolve_finish] to get the result of the operation.
  *
  * Since: 3.23.1
  */
@@ -231,7 +229,7 @@ geocode_backend_reverse_resolve_async (GeocodeBackend      *backend,
  * @result: a #GAsyncResult.
  * @error: a #GError.
  *
- * Finishes a reverse geocoding operation. See geocode_backend_reverse_resolve_async().
+ * Finishes a reverse geocoding operation. See [method@Backend.reverse_resolve_async].
  *
  * Returns: (transfer full) (element-type GeocodePlace): A list of
  *    #GeocodePlace instances, or %NULL in case of errors. The list is ordered
@@ -271,7 +269,7 @@ geocode_backend_reverse_resolve_finish (GeocodeBackend  *backend,
  *
  * This is a synchronous function, which means it may block on network requests.
  * In most situations, the asynchronous version,
- * geocode_backend_forward_search_async(), is more appropriate. See its
+ * [method@Backend.forward_search_async], is more appropriate. See its
  * documentation for more information on usage.
  *
  * Returns: (transfer full) (element-type GeocodePlace): A list of

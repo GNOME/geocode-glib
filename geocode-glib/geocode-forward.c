@@ -33,9 +33,7 @@
 #include <geocode-glib/geocode-nominatim.h>
 
 /**
- * SECTION:geocode-forward
- * @short_description: Geocode forward geocoding object
- * @include: geocode-glib/geocode-glib.h
+ * GeocodeForward:
  *
  * Contains functions for geocoding using the
  * <ulink url="http://wiki.openstreetmap.org/wiki/Nominatim">OSM Nominatim APIs</ulink>
@@ -165,7 +163,7 @@ geocode_forward_class_init (GeocodeForwardClass *klass)
 	* GeocodeForward:search-area:
 	*
 	* The bounding box that limits the search area.
-	* If #GeocodeForward:bounded property is set to #TRUE only results from
+	* If [property@Forward:bounded] property is set to #TRUE only results from
 	* this area is returned.
 	*/
 	pspec = g_param_spec_object ("search-area",
@@ -179,9 +177,9 @@ geocode_forward_class_init (GeocodeForwardClass *klass)
 	/**
 	* GeocodeForward:bounded:
 	*
-	* If set to #TRUE then only results in the #GeocodeForward:search-area
+	* If set to #TRUE then only results in the [property@Forward:search-area]
 	* bounding box are returned.
-	* If set to #FALSE the #GeocodeForward:search-area is treated like a
+	* If set to #FALSE the [property@Forward:search-area] is treated like a
 	* preferred area for results.
 	*/
 	pspec = g_param_spec_boolean ("bounded",
@@ -313,11 +311,11 @@ backend_forward_search_ready (GeocodeBackend *backend,
  * @user_data: the data to pass to callback function
  *
  * Asynchronously performs a forward geocoding
- * query using a web service. Use geocode_forward_search() to do the same
+ * query using a web service. Use [method@Forward.search] to do the same
  * thing synchronously.
  *
  * When the operation is finished, @callback will be called. You can then call
- * geocode_forward_search_finish() to get the result of the operation.
+ * [method@Forward.search_finish] to get the result of the operation.
  **/
 void
 geocode_forward_search_async (GeocodeForward      *forward,
@@ -348,7 +346,7 @@ geocode_forward_search_async (GeocodeForward      *forward,
  * @res: a #GAsyncResult.
  * @error: a #GError.
  *
- * Finishes a forward geocoding operation. See geocode_forward_search_async().
+ * Finishes a forward geocoding operation. See [method@Forward.search_async].
  *
  * Returns: (element-type GeocodePlace) (transfer full): A list of
  * places or %NULL in case of errors. Free the returned instances with
@@ -372,8 +370,8 @@ geocode_forward_search_finish (GeocodeForward       *forward,
  * @error: a #GError
  *
  * Gets the result of a forward geocoding
- * query using the current backend (see geocode_forward_set_backend()). By
- * default the GNOME Nominatim server is used. See #GeocodeBackend for more
+ * query using the current backend (see [method@Forward.set_backend]). By
+ * default the GNOME Nominatim server is used. See [iface@Backend] for more
  * information.
  *
  * If no results are found, a %GEOCODE_ERROR_NO_MATCHES error is returned.
@@ -474,10 +472,10 @@ geocode_forward_set_search_area (GeocodeForward     *forward,
  * geocode_forward_set_bounded:
  * @forward: a #GeocodeForward representing a query
  * @bounded: #TRUE to restrict results to only items contained within the
- * #GeocodeForward:search-area bounding box.
+ * [property@Forward:search-area] bounding box.
  *
- * Set the #GeocodeForward:bounded property that regulates whether the
- * #GeocodeForward:search-area property acts restricting or not.
+ * Set the [property@Forward:bounded] property that regulates whether the
+ * [property@Forward:search-area] property acts restricting or not.
  **/
 void
 geocode_forward_set_bounded (GeocodeForward *forward,
@@ -532,8 +530,8 @@ geocode_forward_get_search_area (GeocodeForward *forward)
  * geocode_forward_get_bounded:
  * @forward: a #GeocodeForward representing a query
  *
- * Gets the #GeocodeForward:bounded property that regulates whether the
- * #GeocodeForward:search-area property acts restricting or not.
+ * Gets the [property@Forward:bounded] property that regulates whether the
+ * [property@Forward:search-area] property acts restricting or not.
  **/
 gboolean
 geocode_forward_get_bounded (GeocodeForward *forward)

@@ -33,9 +33,7 @@
 #include "geocode-nominatim.h"
 
 /**
- * SECTION:geocode-nominatim
- * @short_description: Geocoding resolver using a Nominatim web service
- * @include: geocode-glib/geocode-glib.h
+ * GeocodeNominatim:
  *
  * Contains functions for geocoding using the
  * [OSM Nominatim APIs](http://wiki.openstreetmap.org/wiki/Nominatim) exposed
@@ -1378,7 +1376,7 @@ static GWeakRef backend_nominatim_gnome;
 /**
  * geocode_nominatim_get_gnome:
  *
- * Gets a reference to the default Nominatim server on nominatim.gnome.org.
+ * Gets a reference to the default Nominatim server on <nominatim.gnome.org>.
  *
  * This function is thread-safe.
  *
@@ -1411,8 +1409,8 @@ geocode_nominatim_get_gnome (void)
  * @maintainer_email_address: the email address of the software maintainer.
  *
  * Creates a new backend implementation for an online Nominatim server. See
- * the documentation for #GeocodeNominatim:base-url and
- * #GeocodeNominatim:maintainer-email-address.
+ * the documentation for [property@Nominatim:base-url] and
+ * [property@Nominatim:maintainer-email-address].
  *
  * Returns: (transfer full): a new #GeocodeNominatim. Use g_object_unref() when done.
  *
@@ -1558,7 +1556,7 @@ geocode_nominatim_class_init (GeocodeNominatimClass *klass)
 	 * GeocodeNominatim:base-url:
 	 *
 	 * The base URL of the Nominatim service, for example
-	 * `https://nominatim.example.org`.
+	 * <https://nominatim.example.org>.
 	 *
 	 * Since: 3.23.1
 	 */
@@ -1594,7 +1592,7 @@ geocode_nominatim_class_init (GeocodeNominatimClass *klass)
 	 *
 	 * User-Agent string to send with HTTP(S) requests, or %NULL to use the
 	 * default user agent, which is derived from the geocode-glib version
-	 * and #GApplication:id, for example: `geocode-glib/3.20 (MyAppId)`.
+	 * and [property@Gio.Application:application_id], for example: `geocode-glib/3.20 (MyAppId)`.
 	 *
 	 * As per the
 	 * [Nominatim usage policy](http://wiki.openstreetmap.org/wiki/Nominatim_usage_policy),

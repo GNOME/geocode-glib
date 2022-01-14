@@ -28,12 +28,10 @@
 #include <geocode-glib/geocode-glib-private.h>
 
 /**
- * SECTION:geocode-place
- * @short_description: Geocode place object
- * @include: geocode-glib/geocode-glib.h
+ * GeocodePlace:
  *
  * The #GeocodePlace instance represents a place on earth. While
- * #GeocodeLocation represents a point on the planet, #GeocodePlace represents
+ * [class@Location] represents a point on the planet, #GeocodePlace represents
  * places, e.g street, town, village, county, country or points of interest
  * (POI) etc.
  **/
@@ -526,7 +524,7 @@ geocode_place_class_init (GeocodePlaceClass *klass)
         /**
          * GeocodePlace:icon:
          *
-         * #GIcon representing the @GeocodePlace.
+         * [iface@Gio.Icon] representing the @GeocodePlace.
          */
         pspec = g_param_spec_object ("icon",
                                      "Icon",
@@ -651,10 +649,11 @@ bbox_equal0 (GeocodeBoundingBox *a,
  * @a: a place
  * @b: another place
  *
- * Compare two #GeocodePlace instances for equality. This compares all fields
- * and only returns %TRUE if the instances are exactly equal. For example, if
- * both places have the same #GeocodePlace:location, but place @b has its
- * #GeocodePlace:continent property set and place @a does not, %FALSE will be
+ * Compare two #GeocodePlace instances for equality. 
+ * 
+ * This compares all fields and only returns %TRUE if the instances are exactly equal. 
+ * For example, if both places have the same [property@Place:location], but place @b has its
+ * [property@Place:continent] property set and place @a does not, %FALSE will be
  * returned.
  *
  * Both instances must be non-%NULL.
@@ -1229,7 +1228,7 @@ get_icon_name (GeocodePlace *place)
  * geocode_place_get_icon:
  * @place: A place
  *
- * Gets the #GIcon representing the @place.
+ * Gets the [iface@Gio.Icon] representing the @place.
  *
  * Returns: (transfer none): The #GIcon representing the @place.
  **/

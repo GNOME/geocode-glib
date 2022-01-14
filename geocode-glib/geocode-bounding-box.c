@@ -23,9 +23,7 @@
 #include <geocode-glib/geocode-bounding-box.h>
 
 /**
- * SECTION:geocode-bounding-box
- * @short_description: Geocode BoundingBox object
- * @include: geocode-glib/geocode-bounding-box.h
+ * GeocodeBoundingBox:
  *
  * The #GeocodeBoundingBox represents a geographical area on earth, bounded
  * by top, bottom, left and right coordinates.
