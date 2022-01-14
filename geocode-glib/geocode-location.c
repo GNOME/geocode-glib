@@ -228,15 +228,15 @@ geocode_location_constructed (GObject *object)
 {
         GeocodeLocation *location = GEOCODE_LOCATION (object);
         GeocodeLocationPrivate *priv;
-        GTimeVal tv;
+        guint64 secs;
 
         priv = geocode_location_get_instance_private (location);
 
         if (priv->timestamp != 0)
                 return;
 
-        g_get_current_time (&tv);
-        geocode_location_set_timestamp (location, tv.tv_sec);
+        secs = g_get_real_time () / G_USEC_PER_SEC;
+        geocode_location_set_timestamp (location, secs);
 }
 
 static void
