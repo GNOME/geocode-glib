@@ -98,10 +98,10 @@ pkgconf.generate(libraries: libgcglib,
                    'soupapiversion=' + soup_api_version,
                  ])
 
-gir = find_program('g-ir-scanner', required: false)
 enable_gir = get_option('enable-introspection')
 
-if gir.found() and enable_gir
+if enable_gir
+  find_program('g-ir-scanner')
   gir_args = [
     '--quiet',
 	'--c-include=geocode-glib/geocode-glib.h'
