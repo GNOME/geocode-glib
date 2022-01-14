@@ -6,7 +6,6 @@ variables:
       glibc-langpack-en
       glib2-devel
       json-glib-devel
-      gtk-doc
       meson
       git
       gcc
@@ -71,3 +70,29 @@ build-fedora-soup3:
     # To build the old version
     - dnf install -y $SOUP2_DEPS
     - check-abi --new-parameters="-Dsoup2=false" ${LAST_ABI_BREAK} $(git rev-parse HEAD)
+
+reference:
+  image: fedora:latest
+  variables:
+    SOUP2_ENABLED: 'true'
+  before_script:
+    - dnf install -y $COMMON_DEPS $SOUP2_DEPS gi-docgen gobject-introspection-devel
+  script:
+    - mkdir -p docs_build/
+    - meson --buildtype=release --prefix=${PWD}/docs_build -Denable-gtk-doc=true _build
+    - ninja -C _build install
+    - mkdir -p _reference/
+    - mv docs_build/share/doc/geocode-glib-1/ _reference/
+  artifacts:
+    paths:
+      - _reference
+
+pages:
+  needs: ['reference']
+  script:
+    - mv _reference public/
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
