@@ -107,7 +107,7 @@ if gir.found() and enable_gir
 	'--c-include=geocode-glib/geocode-glib.h'
   ]
 
-  gnome.generate_gir(libgcglib,
+  geocode_gir = gnome.generate_gir(libgcglib,
                      sources: public_sources + headers,
                      namespace: 'GeocodeGlib',
                      nsversion: gclib_api_version,
