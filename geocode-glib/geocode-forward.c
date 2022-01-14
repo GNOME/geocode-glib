@@ -228,7 +228,7 @@ ensure_backend (GeocodeForward *object)
  *
  * See also: <ulink url="http://xmpp.org/extensions/xep-0080.html">XEP-0080 specification</ulink>.
  *
- * Returns: a new #GeocodeForward. Use g_object_unref() when done.
+ * Returns: a new #GeocodeForward. Use [method@GObject.Object.unref] when done.
  **/
 GeocodeForward *
 geocode_forward_new_for_params (GHashTable *params)
@@ -266,7 +266,7 @@ geocode_forward_new_for_params (GHashTable *params)
  * Creates a new #GeocodeForward to perform forward geocoding with. The
  * string is in free-form format.
  *
- * Returns: a new #GeocodeForward. Use g_object_unref() when done.
+ * Returns: a new #GeocodeForward. Use [method@GObject.Object.unref] when done.
  **/
 GeocodeForward *
 geocode_forward_new_for_string (const char *location)
@@ -346,11 +346,13 @@ geocode_forward_search_async (GeocodeForward      *forward,
  * @res: a #GAsyncResult.
  * @error: a #GError.
  *
- * Finishes a forward geocoding operation. See [method@Forward.search_async].
+ * Finishes a forward geocoding operation. 
+ * 
+ * See [method@Forward.search_async].
  *
  * Returns: (element-type GeocodePlace) (transfer full): A list of
  * places or %NULL in case of errors. Free the returned instances with
- * g_object_unref() and the list with g_list_free() when done.
+ * [method@GObject.Object.unref] and the list with [func@GLib.List.free] when done.
  **/
 GList *
 geocode_forward_search_finish (GeocodeForward       *forward,
@@ -378,7 +380,7 @@ geocode_forward_search_finish (GeocodeForward       *forward,
  *
  * Returns: (element-type GeocodePlace) (transfer full): A list of
  * places or %NULL in case of errors. Free the returned instances with
- * g_object_unref() and the list with g_list_free() when done.
+ * [method@GObject.Object.unref] and the list with [func@GLib.List.free] when done.
  **/
 GList *
 geocode_forward_search (GeocodeForward      *forward,

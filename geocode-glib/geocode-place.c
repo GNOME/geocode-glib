@@ -30,8 +30,9 @@
 /**
  * GeocodePlace:
  *
- * The #GeocodePlace instance represents a place on earth. While
- * [class@Location] represents a point on the planet, #GeocodePlace represents
+ * Represents a place on earth. 
+ * 
+ * While [class@Location] represents a point on the planet, #GeocodePlace represents
  * places, e.g street, town, village, county, country or points of interest
  * (POI) etc.
  **/
@@ -592,7 +593,7 @@ geocode_place_init (GeocodePlace *place)
  *
  * Creates a new #GeocodePlace object.
  *
- * Returns: a new #GeocodePlace object. Use g_object_unref() when done.
+ * Returns: a new #GeocodePlace object. Use [method@GObject.Object.unref] when done.
  **/
 GeocodePlace *
 geocode_place_new (const char      *name,
@@ -612,7 +613,7 @@ geocode_place_new (const char      *name,
  *
  * Creates a new #GeocodePlace object.
  *
- * Returns: a new #GeocodePlace object. Use g_object_unref() when done.
+ * Returns: a new #GeocodePlace object. Use [method@GObject.Object.unref] when done.
  **/
 GeocodePlace *
 geocode_place_new_with_location (const char      *name,
@@ -1266,7 +1267,7 @@ geocode_place_get_bounding_box (GeocodePlace *place)
  * @place: A place
  * @bbox: A #GeocodeBoundingBox for the place
  *
- * Sets the #GeocodeBoundingBox for the place @place.
+ * Sets the [class@BoundingBox] for the place @place.
  *
  **/
 void

@@ -675,7 +675,7 @@ geocode_location_init (GeocodeLocation *location)
  *
  * Creates a new #GeocodeLocation object.
  *
- * Returns: a new #GeocodeLocation object. Use g_object_unref() when done.
+ * Returns: a new #GeocodeLocation object. Use [method@GObject.Object.unref] when done.
  **/
 GeocodeLocation *
 geocode_location_new (gdouble latitude,
@@ -698,7 +698,7 @@ geocode_location_new (gdouble latitude,
  *
  * Creates a new #GeocodeLocation object.
  *
- * Returns: a new #GeocodeLocation object. Use g_object_unref() when done.
+ * Returns: a new #GeocodeLocation object. Use [method@GObject.Object.unref] when done.
  **/
 GeocodeLocation *
 geocode_location_new_with_description (gdouble     latitude,

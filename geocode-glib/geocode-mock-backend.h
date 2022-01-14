@@ -65,8 +65,10 @@ void geocode_mock_backend_clear              (GeocodeMockBackend *self);
  *     was returned
  *
  * The details of a forward or reverse query which was performed on a
- * [class@MockBackend] by application code. This includes the input (@params,
- * @is_forward), and the output which was returned (@results or @error).
+ * [class@MockBackend] by application code. 
+ * 
+ * This includes the input (@params, @is_forward), and the output which 
+ * was returned (@results or @error).
  *
  * Empty result sets are represented by the %GEOCODE_ERROR_NO_MATCHES error
  * (for forward queries) or the %GEOCODE_ERROR_NOT_SUPPORTED error (for reverse

@@ -25,8 +25,7 @@
 /**
  * GeocodeBoundingBox:
  *
- * The #GeocodeBoundingBox represents a geographical area on earth, bounded
- * by top, bottom, left and right coordinates.
+ * Represents a geographical area on earth, bounded by top, bottom, left and right coordinates.
  **/
 
 struct _GeocodeBoundingBoxPrivate {
@@ -256,7 +255,7 @@ geocode_bounding_box_init (GeocodeBoundingBox *bbox)
  *
  * Creates a new #GeocodeBoundingBox object.
  *
- * Returns: a new #GeocodeBoundingBox object. Use g_object_unref() when done.
+ * Returns: a new #GeocodeBoundingBox object. Use [method@GObject.Object.unref] when done.
  **/
 GeocodeBoundingBox *
 geocode_bounding_box_new (gdouble top,

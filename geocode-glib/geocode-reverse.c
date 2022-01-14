@@ -81,9 +81,10 @@ geocode_reverse_init (GeocodeReverse *object)
  * @location: a #GeocodeLocation object
  *
  * Creates a new #GeocodeReverse to perform reverse geocoding with.
+ * 
  * Use [method@Reverse.resolve_async] to perform the resolution.
  *
- * Returns: a new #GeocodeReverse. Use g_object_unref() when done.
+ * Returns: a new #GeocodeReverse. Use [method@GObject.Object.unref] when done.
  **/
 GeocodeReverse *
 geocode_reverse_new_for_location (GeocodeLocation *location)
@@ -213,10 +214,12 @@ geocode_reverse_resolve_async (GeocodeReverse     *object,
  * @res: a #GAsyncResult.
  * @error: a #GError.
  *
- * Finishes a reverse geocoding operation. See [method@Reverse.resolve_async].
+ * Finishes a reverse geocoding operation. 
+ * 
+ * See [method@Reverse.resolve_async].
  *
  * Returns: (transfer full): A #GeocodePlace instance, or %NULL in case of
- * errors. Free the returned instance with #g_object_unref() when done.
+ * errors. Free the returned instance with [method@GObject.Object.unref] when done.
  **/
 GeocodePlace *
 geocode_reverse_resolve_finish (GeocodeReverse *object,
@@ -236,7 +239,8 @@ geocode_reverse_resolve_finish (GeocodeReverse *object,
  * @error: a #GError
  *
  * Gets the result of a reverse geocoding query using the current backend 
- * (see [method@Reverse.set_backend]). 
+ * 
+ * See [method@Reverse.set_backend] to modify the used backend. 
  * 
  * By default the GNOME Nominatim server is used. See [iface@Backend] for more
  * information.
@@ -246,7 +250,7 @@ geocode_reverse_resolve_finish (GeocodeReverse *object,
  * middle of the ocean.
  *
  * Returns: (transfer full): A #GeocodePlace instance, or %NULL in case of
- * errors. Free the returned instance with #g_object_unref() when done.
+ * errors. Free the returned instance with [method@GObject.Object.unref] when done.
  **/
 GeocodePlace *
 geocode_reverse_resolve (GeocodeReverse *object,

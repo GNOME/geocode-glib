@@ -44,7 +44,7 @@
  * the best choice about which geocoding backend to use.
  *
  * Custom backends can be implemented by subclassing #GeocodeBackend and
- * implementing the synchronous `forward_search` and `reverse_resolve` methods.
+ * implementing the synchronous [vfunc@Backend.forward_search] and [vfunc@Backend.reverse_resolve] methods.
  * The asynchronous versions may be implemented as well; the default
  * implementations run the synchronous version in a thread.
  *
@@ -75,8 +75,9 @@ G_DEFINE_INTERFACE (GeocodeBackend, geocode_backend, G_TYPE_OBJECT)
  * @callback: a #GAsyncReadyCallback to call when the request is satisfied
  * @user_data: the data to pass to the @callback function
  *
- * Asynchronously performs a forward geocoding query using the @backend. Use
- * [method@Backend.forward_search] to do the same thing synchronously.
+ * Asynchronously performs a forward geocoding query using the @backend. 
+ * 
+ * Use [method@Backend.forward_search] to do the same thing synchronously.
  *
  * The @params hash table is in the format used by Telepathy, and documented
  * in the [Telepathy specification](http://telepathy.freedesktop.org/spec/Connection_Interface_Location.html#Mapping:Location).
@@ -112,12 +113,13 @@ geocode_backend_forward_search_async (GeocodeBackend      *backend,
  * @result: a #GAsyncResult.
  * @error: a #GError.
  *
- * Finishes a forward geocoding operation. See
- * [method@Backend.forward_search_async].
+ * Finishes a forward geocoding operation. 
+ * 
+ * See [method@Backend.forward_search_async].
  *
  * Returns: (element-type GeocodePlace) (transfer full): A list of
  * places or %NULL in case of errors. Free the returned instances with
- * g_object_unref() and the list with g_list_free() when done.
+ * [method@GObject.Object.unref] and the list with [func@GLib.List.free] when done.
  *
  * Since: 3.23.1
  */
@@ -155,7 +157,7 @@ geocode_backend_forward_search_finish (GeocodeBackend  *backend,
  *
  * Returns: (element-type GeocodePlace) (transfer full): A list of
  * places or %NULL in case of errors. Free the returned instances with
- * g_object_unref() and the list with g_list_free() when done.
+ * [method@GObject.Object.unref] and the list with [func@GLib.List.free] when done.
  *
  * Since: 3.23.1
  */
@@ -229,12 +231,14 @@ geocode_backend_reverse_resolve_async (GeocodeBackend      *backend,
  * @result: a #GAsyncResult.
  * @error: a #GError.
  *
- * Finishes a reverse geocoding operation. See [method@Backend.reverse_resolve_async].
+ * Finishes a reverse geocoding operation. 
+ * 
+ * See [method@Backend.reverse_resolve_async].
  *
  * Returns: (transfer full) (element-type GeocodePlace): A list of
  *    #GeocodePlace instances, or %NULL in case of errors. The list is ordered
  *    by relevance, with most relevant results first. Free the returned
- *    instances with g_object_unref() and the list with g_list_free() when done.
+ *    instances with [method@GObject.Object.unref] and the list with [func@GLib.List.free] when done.
  *
  * Since: 3.23.1
  **/
@@ -275,7 +279,7 @@ geocode_backend_reverse_resolve_finish (GeocodeBackend  *backend,
  * Returns: (transfer full) (element-type GeocodePlace): A list of
  *    #GeocodePlace instances, or %NULL in case of errors. The list is ordered
  *    by relevance, with most relevant results first. Free the returned
- *    instances with g_object_unref() and the list with g_list_free() when done.
+ *    instances with [method@GObject.Object.unref] and the list with [func@GLib.List.free] when done.
  *
  * Since: 3.23.1
  */
