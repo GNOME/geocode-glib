@@ -26,19 +26,19 @@ configure_file(output: 'config.h', configuration : conf)
 
 gnome = import('gnome')
 
-add_global_arguments('-Wall', language: 'c')
+add_project_arguments('-Wall', language: 'c')
 cc = meson.get_compiler('c')
 if cc.get_id() == 'gcc'
-    add_global_arguments('-Wchar-subscripts',
-                         '-Wmissing-declarations',
-                         '-Wmissing-prototypes',
-                         '-Wnested-externs',
-                         '-Wpointer-arith',
-                         '-Wcast-align',
-                         '-Wsign-compare',
-                         '-Wredundant-decls',
-                         '-fno-strict-aliasing',
-                         language: 'c')
+    add_project_arguments('-Wchar-subscripts',
+                          '-Wmissing-declarations',
+                          '-Wmissing-prototypes',
+                          '-Wnested-externs',
+                          '-Wpointer-arith',
+                          '-Wcast-align',
+                          '-Wsign-compare',
+                          '-Wredundant-decls',
+                          '-fno-strict-aliasing',
+                          language: 'c')
 endif
 
 subdir('geocode-glib')
