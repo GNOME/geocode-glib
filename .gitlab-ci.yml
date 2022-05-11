@@ -38,9 +38,7 @@ build-fedora-soup2:
     SOUP2_ENABLED: 'true'
   before_script:
     # Undo delangification present in the Fedora Docker images
-    - rm -f /etc/rpm/macros.image-language-conf
-    - dnf reinstall -y glib2 glibc
-    - dnf install -y $COMMON_DEPS $SOUP2_DEPS
+    - .ci/undo-delangification.sh $COMMON_DEPS $SOUP2_DEPS
   script:
     - meson _build
     - ninja -C _build install
@@ -54,9 +52,7 @@ build-fedora-soup3:
     SOUP2_ENABLED: 'false'
   before_script:
     # Undo delangification present in the Fedora Docker images
-    - rm -f /etc/rpm/macros.image-language-conf
-    - dnf reinstall -y glib2 glibc
-    - dnf install -y $COMMON_DEPS $SOUP3_DEPS
+    - .ci/undo-delangification.sh $COMMON_DEPS $SOUP3_DEPS
     # Tasks specific to soup3 (glib 2.70, libsoup 3)
     - git clone https://gitlab.gnome.org/GNOME/glib.git && pushd glib
     - git checkout 2.69.3
