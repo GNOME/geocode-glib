@@ -509,7 +509,7 @@ geocode_forward_set_bounded (GeocodeForward *forward,
 	/* Note: This key name is not defined in the Telepathy specification or
 	 * in XEP-0080; it is custom, but standard within Geocode. */
 	bounded_value = g_new0 (GValue, 1);
-	g_value_init (bounded_value, G_TYPE_STRING);
+	g_value_init (bounded_value, G_TYPE_BOOLEAN);
 	g_value_set_boolean (bounded_value, bounded);
 	g_hash_table_insert (priv->ht, g_strdup ("bounded"),
 	                     bounded_value);
