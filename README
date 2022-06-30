@@ -9,6 +9,12 @@ Requirements
 
 geocode-glib requires json-glib, gio and libsoup to compile and run.
 
+While geocode-glib can be compiled against libsoup version 2.x or version 3.x, as
+those versions can't cohabit in the same binary, you will need to choose which
+one your application will support, especially if geocode-glib isn't a direct
+dependency. Version 1.0 of the geocode-glib API only supports libsoup 2.x,
+version 2.0 (and later) of the API will only support libsoup 3.x.
+
 Applications and libraries using geocode-glib
 ---------------------------------------------
 
