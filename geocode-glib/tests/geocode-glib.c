@@ -406,6 +406,42 @@ test_xep (void)
 }
 
 static void
+test_pi (void)
+{
+	g_autoptr (GHashTable) params = NULL;
+	GeocodeForward *object;
+	GError *error = NULL;
+	GList *res;
+	GeocodePlace *place;
+
+	/* The query parameters the mock server expects to receive. */
+	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
+	add_attr_string (params, "q", "Jack Cole Building, St Andrews");
+	add_attr_string (params, "limit", "1");
+	add_attr_string (params, "bounded", "1");
+
+	object = create_forward_for_string ("Jack Cole Building, St Andrews",
+	                                    params, "pi.json");
+	geocode_forward_set_bounded (object, TRUE);
+
+	geocode_forward_set_answer_count (object, 1);
+	res = geocode_forward_search (object, &error);
+	if (res == NULL) {
+		g_warning ("Failed at geocoding: %s", error->message);
+		g_error_free (error);
+	}
+	g_assert (res != NULL);
+
+	g_object_unref (object);
+
+	g_assert_cmpint (g_list_length (res), ==, 1);
+	place = res->data;
+	g_assert_cmpstr (geocode_place_get_street_address (place), ==, "North Haugh π");
+	g_object_unref (place);
+	g_list_free (res);
+}
+
+static void
 test_pub (void)
 {
 	g_autoptr (GHashTable) params = NULL;
@@ -928,6 +964,7 @@ int main (int argc, char **argv)
 		g_test_add_func ("/geocode/reverse", test_rev);
 		g_test_add_func ("/geocode/reverse_fail", test_rev_fail);
 		g_test_add_func ("/geocode/pub", test_pub);
+		g_test_add_func ("/geocode/pi", test_pi);
 		g_test_add_func ("/geocode/xep-0080", test_xep);
 		g_test_add_func ("/geocode/locale_name", test_locale_name);
 		g_test_add_func ("/geocode/locale_format", test_locale_format);
