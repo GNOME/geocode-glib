@@ -20,6 +20,7 @@ variables:
       libnghttp2-devel
       sqlite-devel
       libpsl-devel
+      libsoup3-devel
 
 .build:
   image: fedora:latest
@@ -54,15 +55,5 @@ build-fedora-soup3:
   before_script:
     # Undo delangification present in the Fedora Docker images
     - .ci/undo-delangification.sh $COMMON_DEPS $SOUP3_DEPS
-    # Tasks specific to soup3 (glib 2.70, libsoup 3)
-    - git clone https://gitlab.gnome.org/GNOME/glib.git && pushd glib
-    - git checkout 2.69.3
-    - meson _build --prefix=/usr
-    - ninja -C _build install
-    - popd
-    - git clone --depth=1 https://gitlab.gnome.org/GNOME/libsoup.git && pushd libsoup
-    - meson _build --prefix=/usr -Dtls_check=false
-    - ninja -C _build install
-    - popd
     - curl https://gitlab.freedesktop.org/hadess/check-abi/-/raw/main/contrib/check-abi-fedora.sh | bash
     - check-abi --parameters="-Dsoup2=false" ${LAST_ABI_BREAK_SOUP3} $(git rev-parse HEAD)
