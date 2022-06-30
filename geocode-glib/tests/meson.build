@@ -1,4 +1,4 @@
-install_dir = get_option('libexecdir') + '/installed-tests/geocode-glib'
+install_dir = get_option('libexecdir') + '/installed-tests/' + library_name
 
 e = executable('geo-uri',
                'geo-uri.c',
