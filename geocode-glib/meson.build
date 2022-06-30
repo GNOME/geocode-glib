@@ -66,7 +66,11 @@ current = major_version + minor_version + 1
 interface_age = micro_version
 darwin_versions = [current, '@0@.@1@'.format(current, interface_age)]
 
-libgcglib = shared_library('geocode-glib',
+library_name = 'geocode-glib'
+if not get_option('soup2')
+  library_name += '-2'
+endif
+libgcglib = shared_library(library_name,
                            sources,
                            dependencies: deps,
                            include_directories: include,
