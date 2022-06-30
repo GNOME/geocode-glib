@@ -1,4 +1,4 @@
-install_dir = get_option('prefix') / get_option('libexecdir') / 'installed-tests' / library_name
+install_dir = get_option('prefix') / get_option('datadir') / 'installed-tests' / library_name
 
 e = executable('geo-uri',
                'geo-uri.c',
