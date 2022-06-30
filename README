@@ -9,11 +9,18 @@ Requirements
 
 geocode-glib requires json-glib, gio and libsoup to compile and run.
 
-Applications using geocode-glib
--------------------------------
+Applications and libraries using geocode-glib
+---------------------------------------------
 
 - Empathy
 - Evolution
+- Clocks
+- Maps
+- Photos
+- gramps
+- libgweather
+- gnome-initial-setup
+- gnome-settings-daemon
 
 Links
 -----
