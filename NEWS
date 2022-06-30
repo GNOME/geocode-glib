@@ -1,3 +1,12 @@
+3.26.3
+------
+
+This release adds support for libsoup 3.x. To use the libsoup 3.x build,
+applications will need to be adapted to look for the "-2.0" version of the API.
+This allows both native and interpreted applications to select which version
+of libsoup they want geocode-glib to use as the backend, and for both versions
+to be installed in distributions.
+
 3.26.2
 ------
 
