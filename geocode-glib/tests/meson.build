@@ -6,6 +6,7 @@ e = executable('geo-uri',
                install: get_option('enable-installed-tests'),
                install_dir: install_dir)
 test('Geo URI', e)
+tests = ['geo-uri']
 
 e = executable('geocode-glib',
                'geocode-nominatim-test.h',
@@ -16,6 +17,7 @@ e = executable('geocode-glib',
                install_dir: install_dir)
 env = ['G_TEST_SRCDIR=' + meson.current_source_dir()]
 test('API test', e, env: env)
+tests += ['geocode-glib']
 
 e = executable('mock-backend',
                'mock-backend.c',
@@ -23,8 +25,22 @@ e = executable('mock-backend',
                install: get_option('enable-installed-tests'),
                install_dir: install_dir)
 test('Test mock backend', e)
+tests += ['mock-backend']
 
 if get_option('enable-installed-tests')
+  foreach test_name: tests
+    conf_data = configuration_data()
+    conf_data.set('PATH', install_dir)
+    conf_data.set('NAME', test_name)
+    test_file = configure_file(
+      configuration: conf_data,
+      input: 'test-template.test.in',
+      output: test_name + '.test',
+    )
+
+    install_data(test_file,
+                 install_dir: install_dir)
+  endforeach
   install_data('locale_format.json',
                'locale_name.json',
                'nominatim-area.json',

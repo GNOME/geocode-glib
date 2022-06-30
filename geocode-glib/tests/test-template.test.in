@@ -1,0 +1,5 @@
+[Test]
+Description=@NAME@
+Exec=@PATH@/@NAME@
+Type=session
+Output=TAP
