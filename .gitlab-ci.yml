@@ -28,11 +28,13 @@ variables:
     - meson _build -Dsoup2=${SOUP2_ENABLED}
     - ninja -C _build install
     - ninja -C _build test
+    - ninja -C _build dist
   artifacts:
     name: "geocode-glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
-    when: on_failure
+    when: always
     paths:
       - "**/meson-logs/*"
+      - _build/meson-dist/*
 
 build-fedora-soup2:
   extends: .build
