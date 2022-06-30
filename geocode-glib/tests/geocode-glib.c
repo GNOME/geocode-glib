@@ -419,10 +419,11 @@ test_pub (void)
 	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
 	add_attr_string (params, "q", "9, old palace road, guildford, surrey");
 	add_attr_string (params, "limit", "1");
-	add_attr_string (params, "bounded", "0");
+	add_attr_string (params, "bounded", "1");
 
 	object = create_forward_for_string ("9, old palace road, guildford, surrey",
 	                                    params, "pub.json");
+	geocode_forward_set_bounded (object, TRUE);
 
 	geocode_forward_set_answer_count (object, 1);
 	res = geocode_forward_search (object, &error);
