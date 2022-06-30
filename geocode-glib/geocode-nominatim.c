@@ -96,6 +96,7 @@ static struct {
 	/* Custom keys which are passed through: */
 	{ "location", "location" },
 	{ "limit", "limit" },
+	{ "bounded", "bounded" },
 };
 
 static const char *
@@ -132,7 +133,6 @@ geocode_forward_fill_params (GHashTable *params)
 		gboolean found;
 		const char *gc_attr;
 		char *str = NULL;
-		GValue string_value = G_VALUE_INIT;
 
 		gc_attr = tp_attr_to_gc_attr (key, &found);
 		if (found == FALSE) {
@@ -142,10 +142,16 @@ geocode_forward_fill_params (GHashTable *params)
 		if (gc_attr == NULL)
 			continue;
 
-		g_value_init (&string_value, G_TYPE_STRING);
-		g_assert (g_value_transform (value, &string_value));
-		str = g_value_dup_string (&string_value);
-		g_value_unset (&string_value);
+		if (G_VALUE_HOLDS_BOOLEAN (value)) {
+			str = g_strdup (g_value_get_boolean (value) ? "1" : "0");;
+		} else {
+			GValue string_value = G_VALUE_INIT;
+
+			g_value_init (&string_value, G_TYPE_STRING);
+			g_assert (g_value_transform (value, &string_value));
+			str = g_value_dup_string (&string_value);
+			g_value_unset (&string_value);
+		}
 
 		if (str == NULL)
 			continue;
