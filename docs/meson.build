@@ -27,7 +27,7 @@ glib_prefix = dependency('glib-2.0').get_pkgconfig_variable('prefix')
 glib_docpath = join_paths(glib_prefix, 'share', 'gtk-doc', 'html')
 docpath = join_paths(datadir, 'gtk-doc', 'html')
 
-gnome.gtkdoc('geocode-glib',
+gnome.gtkdoc(library_name,
              main_xml: 'geocode-glib-docs.xml',
              src_dir: [
                join_paths(meson.source_root(), 'geocode-glib'),
