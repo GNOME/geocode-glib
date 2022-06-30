@@ -132,6 +132,4 @@ geocode_glib_dep = declare_dependency(link_with: libgcglib,
                                       dependencies: deps,
                                       sources: generated_sources)
 
-if get_option('enable-installed-tests')
-    subdir('tests')
-endif
+subdir('tests')
