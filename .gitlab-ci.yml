@@ -1,5 +1,6 @@
 variables:
     LAST_ABI_BREAK: 5cd4856c207e169aa535a9e32f3361b61af639b2
+    LAST_ABI_BREAK_SOUP3: 4fff073bfde0de7d05fd08016da56ceec8d59ea7
     COMMON_DEPS:
       glibc-langpack-fr
       glibc-langpack-cs
@@ -64,6 +65,4 @@ build-fedora-soup3:
     - ninja -C _build install
     - popd
     - curl https://gitlab.freedesktop.org/hadess/check-abi/-/raw/main/contrib/check-abi-fedora.sh | bash
-    # To build the old version
-    - dnf install -y $SOUP2_DEPS
-    - check-abi --new-parameters="-Dsoup2=false" ${LAST_ABI_BREAK} $(git rev-parse HEAD)
+    - check-abi --parameters="-Dsoup2=false" ${LAST_ABI_BREAK_SOUP3} $(git rev-parse HEAD)
