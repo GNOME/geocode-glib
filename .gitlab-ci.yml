@@ -41,10 +41,6 @@ build-fedora-soup2:
   before_script:
     # Undo delangification present in the Fedora Docker images
     - .ci/undo-delangification.sh $COMMON_DEPS $SOUP2_DEPS
-  script:
-    - meson _build
-    - ninja -C _build install
-    - ninja -C _build test
     - curl https://gitlab.freedesktop.org/hadess/check-abi/-/raw/main/contrib/check-abi-fedora.sh | bash
     - check-abi --new-parameters="-Dsoup2=true" ${LAST_ABI_BREAK} $(git rev-parse HEAD)
 
