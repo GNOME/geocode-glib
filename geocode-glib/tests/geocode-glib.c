@@ -491,6 +491,10 @@ test_search (void)
 	GError *error = NULL;
 	GList *results;
 	char *old_locale;
+	GList *l;
+	gboolean got_france, got_texas;
+	got_france = FALSE;
+	got_texas = FALSE;
 
 	old_locale = g_strdup (setlocale(LC_MESSAGES, NULL));
 	setlocale (LC_MESSAGES, "en_GB.UTF-8");
@@ -513,16 +517,9 @@ test_search (void)
 	g_object_unref (forward);
 
 	g_assert_cmpint (g_list_length (results), ==, 10);
+	g_clear_pointer (&params, g_hash_table_destroy);
 
 	/* We need to find Paris in France and in Texas */
-        /* FIXME: Uncomment following and move variable declarations to top of
-         *        this function when this bug is resolved:
-         *        https://trac.openstreetmap.org/ticket/5111
-         */
-	/*GLis *l;
-        gboolean got_france, got_texas;
-	got_france = FALSE;
-	got_texas = FALSE;
 	for (l = results; l != NULL; l = l->next) {
 		GeocodeLocation *loc;
 		GeocodePlace *place = l->data;
@@ -530,10 +527,15 @@ test_search (void)
 		loc = geocode_place_get_location (place);
 		g_assert (loc != NULL);
 
+		g_message ("1. %s", geocode_place_get_state (place));
+		g_message ("2. %s", geocode_place_get_name (place));
+		g_message ("3. %s", geocode_place_get_country (place));
+		g_message ("4. %s", geocode_location_get_description (loc));
+
 		if (g_strcmp0 (geocode_place_get_state (place), "Ile-de-France") == 0 &&
-		    g_strcmp0 (geocode_place_get_name (place), "Paris") == 0 &&
+		    g_strcmp0 (geocode_place_get_name (place), "Paris, France") == 0 &&
                     g_strcmp0 (geocode_place_get_country (place), "France") == 0 &&
-		    g_strcmp0 (geocode_location_get_description (loc), "Paris") == 0)
+		    g_strcmp0 (geocode_location_get_description (loc), "Paris, France") == 0)
 			got_france = TRUE;
 		else if (g_strcmp0 (geocode_place_get_state (place), "Texas") == 0 &&
 			 g_strcmp0 (geocode_place_get_country (place), "United States of America") == 0 &&
@@ -550,12 +552,10 @@ test_search (void)
 	g_list_free (results);
 
 	g_assert (got_france);
-	g_assert (got_texas);*/
+	g_assert (got_texas);
 
 	setlocale (LC_MESSAGES, old_locale);
 	g_free (old_locale);
-
-	g_list_free_full (results, (GDestroyNotify) g_object_unref);
 }
 
 static void
