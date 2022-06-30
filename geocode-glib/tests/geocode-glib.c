@@ -695,6 +695,8 @@ test_locale_name (void)
 	GeocodeLocation *loc;
 	char *old_locale;
 	g_autoptr (GHashTable) params = NULL;
+	GList *l;
+	gboolean found = FALSE;
 
 	old_locale = g_strdup (setlocale(LC_MESSAGES, NULL));
 
@@ -731,16 +733,17 @@ test_locale_name (void)
 	print_place (place);
 
 	g_list_free_full (res, (GDestroyNotify) g_object_unref);
+	g_clear_pointer (&params, g_hash_table_destroy);
 
 	/* Check Bonneville's region in French */
-        /* FIXME: Uncomment following and move variable declarations to top of
-         *        this function when this bug is resolved:
-         *        https://trac.openstreetmap.org/ticket/5111
-         */
-	/*GList *l;
-        gboolean found = FALSE;
 	setlocale (LC_MESSAGES, "fr_FR.UTF-8");
-	object = geocode_forward_new_for_string ("bonneville");
+	/* The query parameters the mock server expects to receive. */
+	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
+	add_attr_string (params, "q", "bonneville");
+	add_attr_string (params, "limit", "10");
+	add_attr_string (params, "bounded", "0");
+	object = create_forward_for_string ("bonneville", params,
+					    "locale_name2.json");
 	res = geocode_forward_search (object, &error);
 	if (res == NULL) {
 		g_warning ("Failed at geocoding: %s", error->message);
@@ -755,18 +758,18 @@ test_locale_name (void)
 		loc = geocode_place_get_location (place);
 		g_assert (loc != NULL);
 
-		if (g_strcmp0 (geocode_place_get_name (place), "Bonneville, Rhône-Alpes, France") == 0 &&
-		    g_strcmp0 (geocode_place_get_state (place), "Rhône-Alpes") == 0 &&
+		if (g_strcmp0 (geocode_place_get_name (place), "Bonneville, Haute-Savoie, Auvergne-Rhône-Alpes, France") == 0 &&
+		    g_strcmp0 (geocode_place_get_state (place), "Auvergne-Rhône-Alpes") == 0 &&
 		    g_strcmp0 (geocode_place_get_country (place), "France") == 0 &&
 		    g_strcmp0 (geocode_location_get_description (loc),
-                               "Bonneville, Rhône-Alpes, France") == 0) {
+                               "Bonneville, Haute-Savoie, Auvergne-Rhône-Alpes, France") == 0) {
 		        found = TRUE;
                         break;
                 }
 	}
 
 	g_list_free_full (res, (GDestroyNotify) g_object_unref);
-	g_assert (found);*/
+	g_assert (found);
 
 	/* And reset the locale */
 	setlocale (LC_MESSAGES, old_locale);

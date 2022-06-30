@@ -43,6 +43,7 @@ if get_option('enable-installed-tests')
   endforeach
   install_data('locale_format.json',
                'locale_name.json',
+               'locale_name2.json',
                'nominatim-area.json',
                'nominatim-data-type-change.json',
                'nominatim-no-results.json',
