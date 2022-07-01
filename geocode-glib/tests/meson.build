@@ -52,6 +52,7 @@ if get_option('enable-installed-tests')
                'osm_type0.json',
                'osm_type1.json',
                'osm_type2.json',
+               'pi.json',
                'pub.json',
                'rev.json',
                'rev_fail.json',
