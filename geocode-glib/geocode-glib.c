@@ -27,7 +27,9 @@
 #include <locale.h>
 #include <gio/gio.h>
 #include <libsoup/soup.h>
+#ifndef G_OS_WIN32
 #include <langinfo.h>
+#endif
 #include <geocode-glib/geocode-glib-private.h>
 
 /**
@@ -228,7 +230,11 @@ geocode_object_get_lang_for_locale (const char *locale)
 char *
 _geocode_object_get_lang (void)
 {
+#ifdef G_OS_WIN32
+	return geocode_object_get_lang_for_locale (setlocale (LC_ALL, NULL));
+#else
 	return geocode_object_get_lang_for_locale (setlocale (LC_MESSAGES, NULL));
+#endif
 }
 
 #if defined(__GLIBC__) && !defined(__UCLIBC__)
