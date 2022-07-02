@@ -25,7 +25,7 @@ variables:
 .build:
   image: fedora:latest
   script:
-    - meson _build -Dsoup2=${SOUP2_ENABLED}
+    - meson _build -Dsoup2=${SOUP2_ENABLED} -Dprefix=/usr
     - ninja -C _build install
     - ninja -C _build test
     - ninja -C _build dist
