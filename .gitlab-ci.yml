@@ -30,7 +30,7 @@ variables:
     - ninja -C _build install
     - ninja -C _build test
     - ninja -C _build dist
-    - gnome-desktop-testing-runner geocode-glib
+    - LANG=en_US.UTF-8 gnome-desktop-testing-runner geocode-glib
   artifacts:
     name: "geocode-glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
