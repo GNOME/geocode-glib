@@ -14,6 +14,7 @@ variables:
       gcc-c++
       glibc-devel
       libabigail
+      gnome-desktop-testing
     SOUP2_DEPS:
       libsoup-devel
     SOUP3_DEPS:
@@ -29,6 +30,7 @@ variables:
     - ninja -C _build install
     - ninja -C _build test
     - ninja -C _build dist
+    - gnome-desktop-testing-runner geocode-glib
   artifacts:
     name: "geocode-glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
