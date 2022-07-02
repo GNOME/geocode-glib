@@ -410,9 +410,13 @@ test_pi (void)
 {
 	g_autoptr (GHashTable) params = NULL;
 	GeocodeForward *object;
+	g_autofree char *old_locale = NULL;
 	GError *error = NULL;
 	GList *res;
 	GeocodePlace *place;
+
+	old_locale = g_strdup (setlocale(LC_ALL, NULL));
+	setlocale (LC_ALL, "en_GB.UTF-8");
 
 	/* The query parameters the mock server expects to receive. */
 	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
@@ -439,6 +443,8 @@ test_pi (void)
 	g_assert_cmpstr (geocode_place_get_street_address (place), ==, "North Haugh π");
 	g_object_unref (place);
 	g_list_free (res);
+
+	setlocale (LC_ALL, old_locale);
 }
 
 static void
