@@ -416,7 +416,7 @@ test_pi (void)
 	GeocodePlace *place;
 
 	old_locale = g_strdup (setlocale(LC_ALL, NULL));
-	setlocale (LC_ALL, "en_GB.UTF-8");
+	g_assert_nonnull (setlocale (LC_ALL, "en_GB.UTF-8"));
 
 	/* The query parameters the mock server expects to receive. */
 	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
@@ -503,7 +503,7 @@ test_search (void)
 	got_texas = FALSE;
 
 	old_locale = g_strdup (setlocale(LC_MESSAGES, NULL));
-	setlocale (LC_MESSAGES, "en_GB.UTF-8");
+	g_assert_nonnull (setlocale (LC_MESSAGES, "en_GB.UTF-8"));
 
 	/* The query parameters the mock server expects to receive. */
 	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
@@ -698,7 +698,7 @@ test_locale_format (void)
 	old_locale = g_strdup (setlocale(LC_ADDRESS, NULL));
 
 	/* Set to a locale that has number after street */
-	setlocale (LC_ADDRESS, "sv_SE.utf8");
+	g_assert_nonnull (setlocale (LC_ADDRESS, "sv_SE.utf8"));
 
 	/* The query parameters the mock server expects to receive. */
 	params = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, NULL);
@@ -749,7 +749,7 @@ test_locale_name (void)
 	add_attr_string (params, "bounded", "0");
 
 	/* Check Moscow's name in Czech */
-	setlocale (LC_MESSAGES, "cs_CZ.UTF-8");
+	g_assert_nonnull (setlocale (LC_MESSAGES, "cs_CZ.UTF-8"));
 
 	object = create_forward_for_string ("moscow", params,
 	                                    "locale_name.json");
