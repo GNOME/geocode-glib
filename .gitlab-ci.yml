@@ -5,6 +5,7 @@ variables:
       glibc-langpack-fr
       glibc-langpack-cs
       glibc-langpack-en
+      glibc-langpack-sv
       glib2-devel
       json-glib-devel
       gtk-doc
