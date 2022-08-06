@@ -910,7 +910,7 @@ on_query_data_loaded (GObject      *object,
 	} else {
 		gsize size = 0;
 		gconstpointer data = g_bytes_get_data (body, &size);
-		gchar *contents = g_strndup (data, size);
+		gchar *contents = g_utf8_make_valid (data, size);
 
 		_geocode_glib_cache_save (query, contents);
 		g_task_return_pointer (task, contents, g_free);
@@ -933,7 +933,7 @@ on_query_data_loaded (SoupSession *session,
 		                         "%s",
 		                         query->reason_phrase ? query->reason_phrase : "Query failed");
 	else {
-		contents = g_strndup (query->response_body->data, query->response_body->length);
+		contents = g_utf8_make_valid (query->response_body->data, query->response_body->length);
 		_geocode_glib_cache_save (query, contents);
 		g_task_return_pointer (task, contents, g_free);
 	}
@@ -1074,7 +1074,7 @@ geocode_nominatim_query (GeocodeNominatim  *self,
 		} else {
 			gsize size = 0;
 			gconstpointer data = g_bytes_get_data (body, &size);
-			contents = g_strndup (data, size);
+			contents = g_utf8_make_valid (data, size);
 
 			_geocode_glib_cache_save (soup_query, contents);
 		}
@@ -1084,7 +1084,7 @@ geocode_nominatim_query (GeocodeNominatim  *self,
 			                     soup_query->reason_phrase ? soup_query->reason_phrase : "Query failed");
 			contents = NULL;
 		} else {
-			contents = g_strndup (soup_query->response_body->data, soup_query->response_body->length);
+			contents = g_utf8_make_valid (soup_query->response_body->data, soup_query->response_body->length);
 			_geocode_glib_cache_save (soup_query, contents);
 		}
 #endif
