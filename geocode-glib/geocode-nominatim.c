@@ -890,9 +890,8 @@ on_query_data_loaded (GObject      *object,
 	SoupSession *session = SOUP_SESSION (object);
 	SoupMessage *query = soup_session_get_async_result_message (session, result);
 	GError *error = NULL;
-	GBytes *body = soup_session_send_and_read_finish (session, result, &error);
+	g_autoptr(GBytes) body = soup_session_send_and_read_finish (session, result, &error);
 	GTask *task = user_data;
-	char *contents;
 
 	if (!body) {
 		g_task_return_new_error (task,
@@ -903,14 +902,16 @@ on_query_data_loaded (GObject      *object,
 		g_clear_error (&error);
 	} else if (soup_message_get_status (query) != SOUP_STATUS_OK) {
 		const char *reason_phrase = soup_message_get_reason_phrase (query);
-		g_bytes_unref (body);
 		g_task_return_new_error (task,
 		                         G_IO_ERROR,
 		                         G_IO_ERROR_FAILED,
 		                         "%s",
 		                         reason_phrase ? reason_phrase : "Query failed");
 	} else {
-		contents = g_bytes_unref_to_data (body, NULL);
+		gsize size = 0;
+		gconstpointer data = g_bytes_get_data (body, &size);
+		gchar *contents = g_strndup (data, size);
+
 		_geocode_glib_cache_save (query, contents);
 		g_task_return_pointer (task, contents, g_free);
 	}
@@ -1059,7 +1060,7 @@ geocode_nominatim_query (GeocodeNominatim  *self,
 	if (_geocode_glib_cache_load (soup_query, &contents) == FALSE) {
 #if SOUP_CHECK_VERSION (2, 99, 2)
 		GError *serror = NULL;
-		GBytes *body = soup_session_send_and_read (soup_session, soup_query, NULL, &serror);
+		g_autoptr(GBytes) body = soup_session_send_and_read (soup_session, soup_query, NULL, &serror);
 		if (!body) {
 			g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
 			                     serror->message);
@@ -1067,12 +1068,14 @@ geocode_nominatim_query (GeocodeNominatim  *self,
 			contents = NULL;
 		} else if (soup_message_get_status (soup_query) != SOUP_STATUS_OK) {
 			const char *reason_phrase = soup_message_get_reason_phrase (soup_query);
-			g_bytes_unref (body);
 			g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
 			                     reason_phrase ? reason_phrase : "Query failed");
 			contents = NULL;
 		} else {
-			contents = g_bytes_unref_to_data (body, NULL);
+			gsize size = 0;
+			gconstpointer data = g_bytes_get_data (body, &size);
+			contents = g_strndup (data, size);
+
 			_geocode_glib_cache_save (soup_query, contents);
 		}
 #else
