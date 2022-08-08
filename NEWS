@@ -1,3 +1,9 @@
+3.26.4
+------
+
+This release includes a fix to a test data file not being installed, and a
+bug fix for a bug in the libsoup3 port.
+
 3.26.3
 ------
 
