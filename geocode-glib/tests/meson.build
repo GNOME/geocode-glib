@@ -1,10 +1,11 @@
 install_dir = get_option('prefix') / get_option('datadir') / 'installed-tests' / library_name
+install_bindir = get_option('prefix') / get_option('libexecdir') / library_name
 
 e = executable('geo-uri',
                'geo-uri.c',
                dependencies: geocode_glib_dep,
                install: get_option('enable-installed-tests'),
-               install_dir: install_dir)
+               install_dir: install_bindir)
 test('Geo URI', e)
 tests = ['geo-uri']
 
@@ -14,7 +15,7 @@ e = executable('geocode-glib',
                'geocode-glib.c',
                dependencies: geocode_glib_dep,
                install: get_option('enable-installed-tests'),
-               install_dir: install_dir)
+               install_dir: install_bindir)
 env = ['G_TEST_SRCDIR=' + meson.current_source_dir()]
 test('API test', e, env: env)
 tests += ['geocode-glib']
@@ -23,7 +24,7 @@ e = executable('mock-backend',
                'mock-backend.c',
                dependencies: geocode_glib_dep,
                install: get_option('enable-installed-tests'),
-               install_dir: install_dir)
+               install_dir: install_bindir)
 test('Test mock backend', e)
 tests += ['mock-backend']
 
@@ -31,6 +32,7 @@ if get_option('enable-installed-tests')
   foreach test_name: tests
     conf_data = configuration_data()
     conf_data.set('PATH', install_dir)
+    conf_data.set('BINPATH', install_bindir)
     conf_data.set('NAME', test_name)
     test_file = configure_file(
       configuration: conf_data,
