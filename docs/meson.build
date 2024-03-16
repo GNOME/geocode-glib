@@ -1,6 +1,6 @@
 ent_conf = configuration_data()
 ent_conf.set('PACKAGE', 'Geocode-Glib')
-ent_conf.set('PACKAGE_BUGREPORT', 'https://bugzilla.gnome.org/enter_bug.cgi?product=geocode-glib')
+ent_conf.set('PACKAGE_BUGREPORT', 'https://gitlab.gnome.org/GNOME/geocode-glib/-/issues/')
 ent_conf.set('PACKAGE_NAME', 'Geocode-Glib')
 ent_conf.set('PACKAGE_STRING', meson.project_name())
 ent_conf.set('PACKAGE_TARNAME', '@0@-@1@'.format(meson.project_name(), meson.project_version()))
