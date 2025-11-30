@@ -1,3 +1,8 @@
+include:
+  - component: "gitlab.gnome.org/GNOME/citemplates/release-service@master"
+    inputs:
+      dist-job-name: "build-fedora-soup3"
+
 variables:
     LAST_ABI_BREAK: 5cd4856c207e169aa535a9e32f3361b61af639b2
     LAST_ABI_BREAK_SOUP3: 4fff073bfde0de7d05fd08016da56ceec8d59ea7
@@ -25,19 +30,21 @@ variables:
       libsoup3-devel
 
 .build:
+  stage: "build"
   image: fedora:latest
   script:
     - meson _build -Dsoup2=${SOUP2_ENABLED} -Dprefix=/usr
     - ninja -C _build install
     - ninja -C _build test
     - ninja -C _build dist
+    - cp -r "_build/meson-dist/" "${CI_PROJECT_DIR}/public-dist/"
     - gnome-desktop-testing-runner geocode-glib
   artifacts:
     name: "geocode-glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
     paths:
       - "**/meson-logs/*"
-      - _build/meson-dist/*
+      - "public-dist"
 
 build-fedora-soup2:
   extends: .build
