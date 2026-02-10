@@ -8,5 +8,5 @@ option('enable-gtk-doc',
        type: 'boolean', value: true,
        description: 'Whether to generate the API reference for Geocode-GLib')
 option('soup2',
-       type: 'boolean', value: true,
-       description: 'Whether to build with libsoup2')
+       type: 'boolean', value: false,
+       description: 'Deprecated, this option has no effect now and will be removed in the future')

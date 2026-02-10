@@ -33,11 +33,7 @@ public_sources = [ 'geocode-location.c',
 
 sources = public_sources + [ 'geocode-glib-private.h' ]
 
-if get_option('soup2')
-  soup_dep = dependency('libsoup-2.4', version: '>= 2.42')
-else
-  soup_dep = dependency('libsoup-3.0', version: '>= 2.99.2')
-endif
+soup_dep = dependency('libsoup-3.0', version: '>= 2.99.2')
 
 deps = [ dependency('gio-2.0', version: '>= 2.34'),
          dependency('json-glib-1.0', version: '>= 0.99.2'),
@@ -66,10 +62,7 @@ current = major_version + minor_version + 1
 interface_age = micro_version
 darwin_versions = [current, '@0@.@1@'.format(current, interface_age)]
 
-library_name = 'geocode-glib'
-if not get_option('soup2')
-  library_name += '-2'
-endif
+library_name = 'geocode-glib-2'
 libgcglib = shared_library(library_name,
                            sources,
                            dependencies: deps,
@@ -83,11 +76,7 @@ libgcglib = shared_library(library_name,
 
 install_headers(headers, subdir: header_subdir)
 
-if get_option('soup2')
-  soup_api_version = '2.4'
-else
-  soup_api_version = '3.0'
-endif
+soup_api_version = '3.0'
 
 pkgconf = import('pkgconfig')
 pkgconf.generate(libraries: libgcglib,
@@ -122,7 +111,7 @@ if gir.found() and enable_gir
                      includes: [ 'GObject-2.0',
                                  'Gio-2.0',
                                  'Json-1.0',
-                                 get_option('soup2') ? 'Soup-2.4' : 'Soup-3.0' ],
+                                 'Soup-3.0' ],
                      install: true,
                      extra_args: gir_args)
 endif

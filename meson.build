@@ -6,12 +6,7 @@ ver_arr = gclib_version.split('.')
 gclib_major_version = ver_arr[0]
 gclib_minor_version = ver_arr[1]
 gclib_micro_version = ver_arr[2]
-
-if get_option('soup2')
-  gclib_api_version='1.0'
-else
-  gclib_api_version='2.0'
-endif
+gclib_api_version='2.0'
 
 conf = configuration_data()
 conf.set_quoted('VERSION', gclib_version)
