@@ -7,10 +7,7 @@ build-fedora:
   stage: "build"
   image: fedora:latest
   variables:
-      # On the next API break, also drop the soup2 from meson_options.txt
-      # It's only kept for compatibility with the check-abi script that
-      # builds the older version still
-      LAST_ABI_BREAK: 4fff073bfde0de7d05fd08016da56ceec8d59ea7
+      LAST_ABI_BREAK: "cd7170d053aa2bb9ba9fe0c4214a482333f344f8"
       DEPS:
         glibc-langpack-fr
         glibc-langpack-cs
@@ -34,7 +31,7 @@ build-fedora:
     # Undo delangification present in the Fedora Docker images
     - .ci/undo-delangification.sh $DEPS
     - curl https://gitlab.freedesktop.org/hadess/check-abi/-/raw/main/contrib/check-abi-fedora.sh | bash
-    - check-abi --parameters="-Dsoup2=false" ${LAST_ABI_BREAK} $(git rev-parse HEAD)
+    - check-abi ${LAST_ABI_BREAK} $(git rev-parse HEAD)
   script:
     - meson _build -Dprefix=/usr
     - ninja -C _build install
